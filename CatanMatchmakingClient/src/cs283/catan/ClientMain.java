@@ -14,7 +14,7 @@ import javax.swing.UIManager.*;
  * @author John
  *
  */
-public class Client {
+public class ClientMain {
 
     /**
      * Server IP address

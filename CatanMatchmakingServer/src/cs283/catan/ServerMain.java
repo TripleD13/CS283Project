@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author John
  *
  */
-public class Server {
+public class ServerMain {
 
     private static class ServerConnectionHandler implements Runnable {
         
