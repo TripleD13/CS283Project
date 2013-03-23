@@ -26,6 +26,11 @@ public class ClientMain {
      */
     private static final int PORT = 8888;
     
+    /**
+     * Maximum username length
+     */
+    private static final int MAX_USERNAME_LENGTH = 16;
+    
     
     /**
      * TCP socket
@@ -56,7 +61,9 @@ public class ClientMain {
             
             // Create the login attempt dialog
             String username = JOptionPane.showInputDialog("Please enter your " +
-                                                          "user name");
+                                                          "user name (" + 
+                                                          "maximum of 16 " + 
+                                                          "characters)");
             
             if (username == null) {
                 System.exit(0);
@@ -66,11 +73,19 @@ public class ClientMain {
             username = username.trim();
             
             if (!username.equals("")) {
-                String message = attemptLogon(username);
-                if (message.equals("Successfully logged on!")) {
-                    logonSuccessful = true;
+                if (username.length() <= MAX_USERNAME_LENGTH) {
+                    String message = attemptLogon(username);
+                    if (message.equals("Successfully logged on!")) {
+                        logonSuccessful = true;
+                    } else {
+                        JOptionPane.showMessageDialog(null, message);
+                    }
                 } else {
-                    JOptionPane.showMessageDialog(null, message);
+                    JOptionPane.showMessageDialog(null, 
+                                                  "Username '" + username +
+                                                  "' exceeds the 16 character" +
+                                                  " limit. Please enter a" +
+                                                  " valid username!");
                 }
             } else {
                 JOptionPane.showMessageDialog(null, "Please enter a name");
