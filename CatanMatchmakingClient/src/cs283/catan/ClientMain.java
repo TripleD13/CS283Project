@@ -184,6 +184,45 @@ public class ClientMain {
             
             printLobby();
             
+            
+            String input;
+            Scanner scanner = new Scanner(System.in);
+            
+            do {
+                input = scanner.nextLine();
+                
+                if (input.equals("New Game")) {
+                    
+                    System.out.print("Please enter the name of the game: ");
+                    String gameName = scanner.nextLine();
+                    sendCreateGameMsg(gameName);
+                    
+                } else if (input.equals("Join Game")) {
+                    
+                    System.out.print("Please enter the name of the game: ");
+                    String gameName = scanner.nextLine();
+                    sendAddUserToGameMsg(gameName);
+                    
+                } else if (input.equals("Exit Game")) {
+                    
+                    System.out.print("Please enter the name of the game: ");
+                    String gameName = scanner.nextLine();
+                    sendRemoveUserFromGameMsg(gameName);
+                    
+                } else if (input.equals("Query")) { // TEMPORARY CODE
+                    // FOR DEBUGGING PURPOSES
+                    objOutputStream.writeObject(new String("Query"));
+                    objOutputStream.flush();
+                    
+                    lobbyGames = 
+                            (Map<String, String[]>) objInputStream.readObject();
+                   
+                    printLobby();
+                    
+                }
+                
+            } while (!input.toLowerCase().equals("quit"));
+            
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println(e.getMessage());
@@ -238,7 +277,43 @@ public class ClientMain {
         objOutputStream.flush();
         
         // Wait for the server response
+        String response = (String) objInputStream.readObject();
+        System.out.println(response);
+    }
+    
+    /**
+     * Sends a message to the server requesting to remove the current user from
+     * the game with gameName.
+     * @param gameName
+     */
+    private static void sendRemoveUserFromGameMsg(String gameName)
+                                                 throws Exception {
+        // Send the request to the server
+        String msg = "Remove User from Game\n" + gameName + "\n" + username;
         
+        objOutputStream.writeObject(msg);
+        objOutputStream.flush();
+        
+        // Wait for server response
+        String response = (String) objInputStream.readObject();
+        System.out.println(response);
+    }
+    
+    /**
+     * Sends a message to the server requesting to create the game with gameName
+     * and user username.
+     * @param gameName
+     */
+    private static void sendCreateGameMsg(String gameName) throws Exception {
+        // Send the request to the server
+        String msg = "Create Game\n" + gameName + "\n" + username;
+        
+        objOutputStream.writeObject(msg);
+        objOutputStream.flush();
+        
+        // Wait for server response
+        String response = (String) objInputStream.readObject();
+        System.out.println(response);
     }
     
 }

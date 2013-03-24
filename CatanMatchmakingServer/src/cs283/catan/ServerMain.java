@@ -18,6 +18,12 @@ public class ServerMain {
 
     private static class ServerConnectionHandler implements Runnable {
         
+        private enum UserMode {
+            Initialization,
+            LobbyMode,
+            GameMode,
+        }
+        
         /**
          * Client socket object
          */
@@ -51,12 +57,18 @@ public class ServerMain {
         private String inProgressGameName;
         
         /**
+         * Indicates the mode the user is currently in
+         */
+        private UserMode currentMode;
+        
+        /**
          * 
          * @param socket
          */
         public ServerConnectionHandler(Socket socket) {
             this.clientSocket = socket;
             this.username = this.lobbyGameName = this.inProgressGameName = null;
+            this.currentMode = UserMode.Initialization;
         }
         
         /**
@@ -138,26 +150,70 @@ public class ServerMain {
          * @throws Exception
          */
         private void handleLobby() throws Exception {
+            currentMode = UserMode.LobbyMode;
+            
             // Initially, server sends the client the current state of the
             // lobby
             synchronized (lobbyGames) {
                 objOutputStream.writeObject(lobbyGames);
                 objOutputStream.flush();
             }
-            
-            clientSocket.setSoTimeout(100);
-            
-            // Listen for client commands. Also, check if the lobby has been
-            // modified. If so, rebroadcast the lobby state to the client.
-            try {
-                if (objInputStream.available() <= 0) {
-                    System.out.println("Timeout");
-                    Thread.sleep(1000);
+  
+            // Listen for client commands while the client is in the lobby. 
+            // Also, check if the lobby has been modified. If so, rebroadcast
+            // the lobby state to the client.
+            while (clientSocket.isConnected()) {
+                String msg = (String) objInputStream.readObject();
+                System.out.println(msg);
+
+                String split[] = msg.split("\n");
+                
+                boolean isSuccessful = false;
+                
+                // Perform the appropriate actions in response to the message
+                if (split[0].equals("Create Game")) {
+                    
+                    if (lobbyGameName == null) {
+                        isSuccessful = addGame(split[1], split[2]);
+                        
+                        if (isSuccessful) {
+                            lobbyGameName = split[1];
+                        }
+                    }
+                    
+                } else if (split[0].equals("Join Game")) {
+                    
+                    if (lobbyGameName == null) {
+                        isSuccessful = addPlayerToGame(split[1], split[2]);
+                        if (isSuccessful) {
+                            lobbyGameName = split[1];
+                        }
+                    }
+                    
+                } else if (split[0].equals("Remove User from Game")) {
+                    
+                    isSuccessful = removePlayerFromGame(split[1], split[2]);
+                    if (isSuccessful) {
+                        lobbyGameName = null;
+                    }
+                } else if (split[0].equals("Query")) { // DEBUGGING CODE
+                    // TEMPORARY CODE FOR DEBUGGING
+                    synchronized (lobbyGames) {
+                        objOutputStream.reset();
+                        objOutputStream.writeObject(lobbyGames);
+                        objOutputStream.flush();
+                    }
+                    
+                    continue;
                 }
-            } catch (SocketTimeoutException e) {
-                System.out.println("Timeout");
+                
+                String response = isSuccessful ? "Success" : "Failure";
+                
+                objOutputStream.writeObject(response);
+                objOutputStream.flush();
             }
-           
+            
+            System.out.println("Leaving lobby");
         }
         
     }
@@ -245,13 +301,13 @@ public class ServerMain {
     
     /**
      * Adds a player named username to a game in the lobby with the name
-     * gameName
-     * @param username
+     * gameName.
      * @param gameName
+     * @param username
      * @return true if the player was added to the game, false if the player
-     *         could not be added to the game
+     *         could not be added to the game.
      */
-    private static boolean addPlayerToGame(String username, String gameName) {
+    private static boolean addPlayerToGame(String gameName, String username) {
         boolean isPlayerAdded = false;
         
         // Make sure the game exists
@@ -275,6 +331,56 @@ public class ServerMain {
         }
         
         return isPlayerAdded;
+    }
+    
+    /**
+     * Removes a player named username from a game in the lobby with the name
+     * gameName.
+     * @param gameName
+     * @param username
+     * @return true if the player was removed from the game, false if the player
+     *         was not removed or was not part of the game.
+     */
+    private static boolean removePlayerFromGame(String gameName, 
+                                                String username) {
+        boolean isPlayerRemoved = false;
+        
+        String playerArray[] = lobbyGames.get(gameName);
+        
+        if (playerArray != null) {
+            // Remove username from the player array, shifting
+            // everyone in the array down one place
+            
+            for (int i = 0; i < playerArray.length - 1; i++) {
+                if (!isPlayerRemoved) {
+                    if (playerArray[i].equals(username)) {
+                        
+                        playerArray[i] = playerArray[i + 1];
+                        isPlayerRemoved = true;
+                        
+                    }
+                } else {
+                    // Shift elements to the left now that username
+                    // has been deleted
+                    playerArray[i] = playerArray[i + 1];
+                }
+            }
+            
+            // If the player has been deleted, everything has been
+            // shifted left one spot so the last position in the array
+            // can be set to null. Also, if the player has not been
+            // deleted but the last position holds the player (this
+            // *should* always be the case), set the last position in
+            // the array to null.
+            if (isPlayerRemoved ||
+                playerArray[playerArray.length - 1].equals(username)) {
+                
+                playerArray[playerArray.length - 1] = null;
+            }
+        }
+        
+        return isPlayerRemoved;
+
     }
     
     /**
@@ -326,40 +432,7 @@ public class ServerMain {
         // that game.
         if (lobbyGame != null) {
             synchronized (lobbyGames) {
-                String playerArray[] = lobbyGames.get(lobbyGame);
-                
-                if (playerArray != null) {
-                    // Remove username from the player array, shifting
-                    // everyone in the array down one place
-                    boolean isPlayerDeleted = false;
-                    
-                    for (int i = 0; i < playerArray.length - 1; i++) {
-                        if (!isPlayerDeleted) {
-                            if (playerArray[i].equals(username)) {
-                                
-                                playerArray[i] = playerArray[i + 1];
-                                isPlayerDeleted = true;
-                                
-                            }
-                        } else {
-                            // Shift elements to the left now that username
-                            // has been deleted
-                            playerArray[i] = playerArray[i + 1];
-                        }
-                    }
-                    
-                    // If the player has been deleted, everything has been
-                    // shifted left one spot so the last position in the array
-                    // can be set to null. Also, if the player has not been
-                    // deleted but the last position holds the player (this
-                    // *should* always be the case), set the last position in
-                    // the array to null.
-                    if (isPlayerDeleted ||
-                        playerArray[playerArray.length - 1].equals(username)) {
-                        
-                        playerArray[playerArray.length - 1] = null;
-                    }
-                }
+                removePlayerFromGame(lobbyGame, username);
             }
         }
         
@@ -373,7 +446,7 @@ public class ServerMain {
             userList.remove(username);
         }
         
-        
+        System.out.println("Successfully logged off user " + username + "!");
     }
     
     
