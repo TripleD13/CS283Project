@@ -6,8 +6,7 @@ package cs283.catan;
 
 import java.io.*;
 import java.net.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import javax.swing.*;
 import javax.swing.UIManager.*;
@@ -33,11 +32,26 @@ public class ClientMain {
      */
     private static final int MAX_USERNAME_LENGTH = 16;
     
+    /**
+     * Current username of the user logged in
+     */
+    private static String username;
+    
     
     /**
      * TCP socket
      */
     private static Socket clientSocket;
+    
+    /**
+     * Object input stream used to receive data from the socket
+     */
+    private static ObjectInputStream objInputStream;
+    
+    /**
+     * Object output stream used to send data on the socket
+     */
+    private static ObjectOutputStream objOutputStream;
     
     
     /**
@@ -71,7 +85,7 @@ public class ClientMain {
         while (!logonSuccessful) {
             
             // Create the login attempt dialog
-            String username = JOptionPane.showInputDialog("Please enter your " +
+            username = JOptionPane.showInputDialog("Please enter your " +
                                                           "user name (" + 
                                                           "maximum of 16 " + 
                                                           "characters)");
@@ -103,8 +117,11 @@ public class ClientMain {
             }
         }
         
-        // Enter lobby mode
-        lobbyMode();
+        // Check to make sure the user is logged on
+        if (logonSuccessful) {
+            // Enter lobby mode
+            lobbyMode();
+        }
 
         // Close the connection to the server
         clientSocket.close();
@@ -119,7 +136,7 @@ public class ClientMain {
         
         
         // Attempt to connect to the server
-        String message;
+        String message = null;
         
         try {
             InetAddress serverIP = InetAddress.getByName(SERVER_IP);
@@ -132,19 +149,20 @@ public class ClientMain {
             clientSocket = new Socket(serverIP, PORT);
             
             // Send the username to the server
-            DataOutputStream outputStream = new DataOutputStream(
-                                                clientSocket.getOutputStream());
+            objOutputStream = 
+                         new ObjectOutputStream(clientSocket.getOutputStream());
             
-            outputStream.writeBytes(username + "\n");
-            outputStream.flush();
+            objOutputStream.writeObject(username);
+            objOutputStream.flush();
             
             // Read the message from the server
-            BufferedReader inputStream = new BufferedReader(
-                          new InputStreamReader(clientSocket.getInputStream()));
+            objInputStream =
+                           new ObjectInputStream(clientSocket.getInputStream());
             
-            message = inputStream.readLine();
+            message = (String) objInputStream.readObject();
             
         } catch (Exception e) {
+            e.printStackTrace();
             return "Unable to connect to game server: " + e.getMessage();
         }
        
@@ -162,17 +180,65 @@ public class ClientMain {
     private static void lobbyMode() {
         try {
             // Receive the initial lobby data from the server
-            ObjectInput objInputStream = 
-                           new ObjectInputStream(clientSocket.getInputStream());
-            
             lobbyGames = (Map<String, String[]>) objInputStream.readObject();
             
-            System.out.println(lobbyGames.keySet().toString());
-            System.out.println(lobbyGames.values().toString());
+            printLobby();
+            
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println(e.getMessage());
         }
+    }
+    
+    
+    /**
+     * Print out the current state of the lobby
+     */
+    private static void printLobby() {
+        System.out.println("==============Lobby Games===============");
+        
+        // Iterate through each game in the lobby and print it out
+        for (Map.Entry<String, String[]> entry : lobbyGames.entrySet()) {
+            System.out.println("Game: '" + entry.getKey() + "'");
+            
+            // Print out the players in the game
+            for (int i = 0; i < entry.getValue().length; i++) {
+                System.out.print("Player " + (i + 1)  + ": ");
+                if (entry.getValue()[i] != null) {
+                    System.out.print("'" + entry.getValue()[i] + "'");
+                } else {
+                    System.out.print("N/A");
+                }
+                
+                if (i != entry.getValue().length - 1) {
+                    System.out.print("    ");
+                }
+                
+                if (i % 2 == 1) {
+                    System.out.println();
+                }
+            }
+            
+            System.out.println("\n");
+        }
+        
+        System.out.println("========================================");
+    }
+    
+    /**
+     * Sends a message to the server requesting to add the current user
+     * to the game with gameName.
+     * @param gameName
+     */
+    private static void sendAddUserToGameMsg(String gameName) throws Exception {
+        // Send the request to the server
+        String msg = "Join Game\n" + gameName + "\n" + username;
+        
+        objOutputStream.writeObject(msg);
+        objOutputStream.flush();
+        
+        // Wait for the server response
+        
     }
     
 }

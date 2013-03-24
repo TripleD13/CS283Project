@@ -24,6 +24,16 @@ public class ServerMain {
         private Socket clientSocket;
         
         /**
+         * Object input stream for the socket
+         */
+        private ObjectInputStream objInputStream;
+        
+        /**
+         * Object output stream for the socket
+         */
+        private ObjectOutputStream objOutputStream;
+        
+        /**
          * Value of the username
          */
         private String username;
@@ -59,10 +69,10 @@ public class ServerMain {
             
             try {
                 // Read the username
-                BufferedReader inputReader = new BufferedReader(
-                          new InputStreamReader(clientSocket.getInputStream()));
+                objInputStream = 
+                           new ObjectInputStream(clientSocket.getInputStream());
                 
-                username = inputReader.readLine();
+                username = (String) objInputStream.readObject();
                 
                 // Limit the username to 16 characters
                 if (username.length() > MAX_USERNAME_LENGTH) {
@@ -71,25 +81,24 @@ public class ServerMain {
                 
 
                 // Attempt a logon of username
-                
-                DataOutputStream outputStream = new DataOutputStream(
-                        clientSocket.getOutputStream());
+                objOutputStream = 
+                         new ObjectOutputStream(clientSocket.getOutputStream());
                
                 // Check whether the username is valid
                 synchronized (userList) {
                     if (userList.contains(username)) {
-                        outputStream.writeBytes(LOGIN_FAILURE_MSG);
+                        objOutputStream.writeObject(LOGIN_FAILURE_MSG);
                     } else {
                         userList.add(username);
                         System.out.println("'" + username + "' logged on!"); 
                         
-                        outputStream.writeBytes(LOGIN_SUCCESS_MSG);
+                        objOutputStream.writeObject(LOGIN_SUCCESS_MSG);
                         
                         isLogonSuccessful = true;
                     }
                 }
                 
-                outputStream.flush();
+                objOutputStream.flush();
                 
                 // Make sure logon was successful
                 if (isLogonSuccessful) {
@@ -108,6 +117,7 @@ public class ServerMain {
                 clientSocket.close();
                 
             } catch (Exception e) {
+                e.printStackTrace();
                 System.out.println(e.getMessage());
             }
             
@@ -128,9 +138,6 @@ public class ServerMain {
          * @throws Exception
          */
         private void handleLobby() throws Exception {
-            ObjectOutput objOutputStream = 
-                         new ObjectOutputStream(clientSocket.getOutputStream());
-            
             // Initially, server sends the client the current state of the
             // lobby
             synchronized (lobbyGames) {
@@ -142,12 +149,15 @@ public class ServerMain {
             
             // Listen for client commands. Also, check if the lobby has been
             // modified. If so, rebroadcast the lobby state to the client.
-            //try {
-              //  clientSocket
-           // }// catch (SocketTimeoutException e) {
-                
-            //}
-            
+            try {
+                if (objInputStream.available() <= 0) {
+                    System.out.println("Timeout");
+                    Thread.sleep(1000);
+                }
+            } catch (SocketTimeoutException e) {
+                System.out.println("Timeout");
+            }
+           
         }
         
     }
@@ -172,17 +182,17 @@ public class ServerMain {
      */
     private static final String CONN_LIMIT_MSG = "Server handling too " +
                                                  "many users. Please " +
-                                                 "try again later.\n";
+                                                 "try again later.";
     
     /**
      * Message: login success
      */
-    private static final String LOGIN_SUCCESS_MSG = "Successfully logged on!\n";
+    private static final String LOGIN_SUCCESS_MSG = "Successfully logged on!";
     
     /**
      * Message: username in use
      */
-    private static final String LOGIN_FAILURE_MSG = "Username in use!\n";
+    private static final String LOGIN_FAILURE_MSG = "Username in use!";
     
     
     /**
@@ -380,6 +390,10 @@ public class ServerMain {
         
         String n[] = {"t1", "t2", "t3", "t4"};
         lobbyGames.put("Game 1", n);
+        String n2[] = {"Austin", "Daniel", "John", "Kevin"};
+        lobbyGames.put("Ultimate Showdown", n2);
+        String n3[] = {"p1", null, null, null};
+        lobbyGames.put("Open Game",  n3);
         
         // Accept connections and start new threads for each connection
         while (true) {
@@ -393,9 +407,10 @@ public class ServerMain {
                 
             } else {
                 // Notify the client that it cannot be served at this moment
-                DataOutputStream outputStream = new DataOutputStream(
+                ObjectOutputStream outputStream = new ObjectOutputStream(
                                                  childSocket.getOutputStream());
-                outputStream.writeBytes(CONN_LIMIT_MSG);
+                outputStream.writeObject(CONN_LIMIT_MSG);
+                outputStream.flush();
                 
                 childSocket.close();
             }
