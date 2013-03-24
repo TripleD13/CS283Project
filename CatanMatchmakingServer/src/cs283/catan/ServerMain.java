@@ -21,12 +21,24 @@ public class ServerMain {
         /**
          * Client socket object
          */
-        Socket clientSocket;
+        private Socket clientSocket;
         
         /**
          * Value of the username
          */
-        String username;
+        private String username;
+        
+        /**
+         * Name of the lobby game the user is currently in. Set to null
+         * if the user is not in a lobby game.
+         */
+        private String lobbyGameName;
+        
+        /**
+         * Name of the in-progress game the user is currently in. Set to null
+         * if the user is not in a lobby game.
+         */
+        private String inProgressGameName;
         
         /**
          * 
@@ -34,6 +46,7 @@ public class ServerMain {
          */
         public ServerConnectionHandler(Socket socket) {
             this.clientSocket = socket;
+            this.username = this.lobbyGameName = this.inProgressGameName = null;
         }
         
         /**
@@ -41,6 +54,9 @@ public class ServerMain {
          */
         @Override
         public void run() {
+            
+            boolean isLogonSuccessful = false;
+            
             try {
                 // Read the username
                 BufferedReader inputReader = new BufferedReader(
@@ -58,8 +74,6 @@ public class ServerMain {
                 
                 DataOutputStream outputStream = new DataOutputStream(
                         clientSocket.getOutputStream());
-
-                boolean isLogonSuccessful = false;
                
                 // Check whether the username is valid
                 synchronized (userList) {
@@ -75,43 +89,67 @@ public class ServerMain {
                     }
                 }
                 
-                // Logon was not successful. End the thread
-                if (!isLogonSuccessful) {
+                outputStream.flush();
+                
+                // Make sure logon was successful
+                if (isLogonSuccessful) {
+                    
+                    // Handle lobby and game stuff
+                    
+
+                    handleLobby();
+
+                    
+                } else {
                     System.out.println("Logon attempt by '" + username +
                                        "' failed!");
-                    
-                    clientSocket.close();
-                    
-                    return;
-                }
-                
-               
-                
-                
-                // Handle lobby and game stuff
-                // handleSession
-                Thread.sleep(10000);          
-
-                
-                
-                // Returned from handleSession, so know that the user is done
-                
-                
-                // Remove the user from the list of users
-                synchronized (userList) {
-                    // TODO: put in a cleanup method that removes user from
-                    // games and lobby if necessary - modify lobby and/or kill
-                    // a game
-                    userList.remove(username);
                 }
                 
                 clientSocket.close();
+                
             } catch (Exception e) {
                 System.out.println(e.getMessage());
             }
             
+            
+            // Log the user off the system if the user is logged on
+            // This code needs to be outside of the try/catch block 
+            // so that the user will always be logged off the system, 
+            // even when an exception is thrown
+            if (isLogonSuccessful) {
+                logoffUser(username, lobbyGameName, inProgressGameName);
+            }
+            
             numberConnections.getAndDecrement();
         }
+        
+        /**
+         * Manages all of the user interaction with the lobby.
+         * @throws Exception
+         */
+        private void handleLobby() throws Exception {
+            ObjectOutput objOutputStream = 
+                         new ObjectOutputStream(clientSocket.getOutputStream());
+            
+            // Initially, server sends the client the current state of the
+            // lobby
+            synchronized (lobbyGames) {
+                objOutputStream.writeObject(lobbyGames);
+                objOutputStream.flush();
+            }
+            
+            clientSocket.setSoTimeout(100);
+            
+            // Listen for client commands. Also, check if the lobby has been
+            // modified. If so, rebroadcast the lobby state to the client.
+            //try {
+              //  clientSocket
+           // }// catch (SocketTimeoutException e) {
+                
+            //}
+            
+        }
+        
     }
     
     /**
@@ -265,6 +303,69 @@ public class ServerMain {
         return isGameFull;
     }
     
+    /**
+     * Logs the user with name username off the system. If the user was in a
+     * game currently in the lobby, remove the user from that game. If the user 
+     * was in an in-progress game, end that game.
+     * @param username
+     * @param lobbyGame
+     */
+    private static void logoffUser(String username, String lobbyGame,
+                                   String inProgressGame) {
+        // Check if the user is in a lobby game. If so, remove the user from
+        // that game.
+        if (lobbyGame != null) {
+            synchronized (lobbyGames) {
+                String playerArray[] = lobbyGames.get(lobbyGame);
+                
+                if (playerArray != null) {
+                    // Remove username from the player array, shifting
+                    // everyone in the array down one place
+                    boolean isPlayerDeleted = false;
+                    
+                    for (int i = 0; i < playerArray.length - 1; i++) {
+                        if (!isPlayerDeleted) {
+                            if (playerArray[i].equals(username)) {
+                                
+                                playerArray[i] = playerArray[i + 1];
+                                isPlayerDeleted = true;
+                                
+                            }
+                        } else {
+                            // Shift elements to the left now that username
+                            // has been deleted
+                            playerArray[i] = playerArray[i + 1];
+                        }
+                    }
+                    
+                    // If the player has been deleted, everything has been
+                    // shifted left one spot so the last position in the array
+                    // can be set to null. Also, if the player has not been
+                    // deleted but the last position holds the player (this
+                    // *should* always be the case), set the last position in
+                    // the array to null.
+                    if (isPlayerDeleted ||
+                        playerArray[playerArray.length - 1].equals(username)) {
+                        
+                        playerArray[playerArray.length - 1] = null;
+                    }
+                }
+            }
+        }
+        
+        // Check if the user is in an in progress game. If so, end the game.
+        if (inProgressGame != null) {
+            // TODO
+        }
+        
+        // Remove the user from the list of users
+        synchronized (userList) {
+            userList.remove(username);
+        }
+        
+        
+    }
+    
     
     /**
      * @param args
@@ -276,6 +377,9 @@ public class ServerMain {
         // Open the server socket
         int listenBacklog = 5;
         ServerSocket parentSocket = new ServerSocket(PORT, listenBacklog);
+        
+        String n[] = {"t1", "t2", "t3", "t4"};
+        lobbyGames.put("Game 1", n);
         
         // Accept connections and start new threads for each connection
         while (true) {

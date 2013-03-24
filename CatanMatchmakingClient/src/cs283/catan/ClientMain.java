@@ -6,6 +6,8 @@ package cs283.catan;
 
 import java.io.*;
 import java.net.*;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.*;
 import javax.swing.UIManager.*;
@@ -36,6 +38,15 @@ public class ClientMain {
      * TCP socket
      */
     private static Socket clientSocket;
+    
+    
+    /**
+     * Map that will store the games currently in the lobby. The key is the
+     * String name of the game, and the value is the String array of players 
+     * in the game (should be size 4).
+     */
+    private static Map<String, String[]> lobbyGames = 
+                                                new HashMap<String, String[]>();
     
     
     /**
@@ -91,6 +102,9 @@ public class ClientMain {
                 JOptionPane.showMessageDialog(null, "Please enter a name");
             }
         }
+        
+        // Enter lobby mode
+        lobbyMode();
 
         // Close the connection to the server
         clientSocket.close();
@@ -139,6 +153,26 @@ public class ClientMain {
         }
         
         return message;
+    }
+    
+    /**
+     * Manage the lobby mode.
+     */
+    @SuppressWarnings("unchecked")
+    private static void lobbyMode() {
+        try {
+            // Receive the initial lobby data from the server
+            ObjectInput objInputStream = 
+                           new ObjectInputStream(clientSocket.getInputStream());
+            
+            lobbyGames = (Map<String, String[]>) objInputStream.readObject();
+            
+            System.out.println(lobbyGames.keySet().toString());
+            System.out.println(lobbyGames.values().toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+        }
     }
     
 }
