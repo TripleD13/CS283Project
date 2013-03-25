@@ -85,7 +85,13 @@ public class ClientMain {
         while (!logonSuccessful) {
             
             // Create the login attempt dialog
-            username = JOptionPane.showInputDialog("Please enter your " +
+            JFrame frame = new JFrame("Login");
+            frame.setUndecorated(true);
+            frame.setVisible(true);
+            frame.setAlwaysOnTop(true);
+            frame.setLocationRelativeTo(null);
+            
+            username = JOptionPane.showInputDialog(frame, "Please enter your " +
                                                           "user name (" + 
                                                           "maximum of 16 " + 
                                                           "characters)");
@@ -103,18 +109,20 @@ public class ClientMain {
                     if (message.equals("Successfully logged on!")) {
                         logonSuccessful = true;
                     } else {
-                        JOptionPane.showMessageDialog(null, message);
+                        JOptionPane.showMessageDialog(frame, message);
                     }
                 } else {
-                    JOptionPane.showMessageDialog(null, 
+                    JOptionPane.showMessageDialog(frame, 
                                                   "Username '" + username +
                                                   "' exceeds the 16 character" +
                                                   " limit. Please enter a" +
                                                   " valid username!");
                 }
             } else {
-                JOptionPane.showMessageDialog(null, "Please enter a name");
+                JOptionPane.showMessageDialog(frame, "Please enter a name");
             }
+            
+            frame.dispose();
         }
         
         // Check to make sure the user is logged on
@@ -191,26 +199,26 @@ public class ClientMain {
             do {
                 input = scanner.nextLine();
                 
-                if (input.equals("New Game")) {
+                if (input.toLowerCase().equals("new game")) {
                     
                     System.out.print("Please enter the name of the game: ");
                     String gameName = scanner.nextLine();
                     sendCreateGameMsg(gameName);
                     
-                } else if (input.equals("Join Game")) {
+                } else if (input.toLowerCase().equals("join game")) {
                     
                     System.out.print("Please enter the name of the game: ");
                     String gameName = scanner.nextLine();
                     sendAddUserToGameMsg(gameName);
                     
-                } else if (input.equals("Exit Game")) {
+                } else if (input.toLowerCase().equals("exit game")) {
                     
                     System.out.print("Please enter the name of the game: ");
                     String gameName = scanner.nextLine();
                     sendRemoveUserFromGameMsg(gameName);
                     
-                } else if (input.equals("Query")) { // TEMPORARY CODE
-                    // FOR DEBUGGING PURPOSES
+                } else if (input.toLowerCase().equals("query")) {
+                    // TEMPORARY CODE FOR DEBUGGING PURPOSES
                     objOutputStream.writeObject(new String("Query"));
                     objOutputStream.flush();
                     
@@ -234,7 +242,7 @@ public class ClientMain {
      * Print out the current state of the lobby
      */
     private static void printLobby() {
-        System.out.println("==============Lobby Games===============");
+        System.out.println("==============Lobby Games===============\n");
         
         // Iterate through each game in the lobby and print it out
         for (Map.Entry<String, String[]> entry : lobbyGames.entrySet()) {

@@ -162,49 +162,58 @@ public class ServerMain {
             // Listen for client commands while the client is in the lobby. 
             // Also, check if the lobby has been modified. If so, rebroadcast
             // the lobby state to the client.
-            while (clientSocket.isConnected()) {
+            while (currentMode == UserMode.LobbyMode) {
                 String msg = (String) objInputStream.readObject();
                 System.out.println(msg);
 
                 String split[] = msg.split("\n");
                 
                 boolean isSuccessful = false;
-                
                 // Perform the appropriate actions in response to the message
-                if (split[0].equals("Create Game")) {
-                    
-                    if (lobbyGameName == null) {
-                        isSuccessful = addGame(split[1], split[2]);
+                synchronized (lobbyGames) {
+                    if (split[0].equals("Create Game")) {
                         
-                        if (isSuccessful) {
-                            lobbyGameName = split[1];
+                        if (lobbyGameName == null) {
+                            isSuccessful = addGame(split[1], split[2]);
+                            
+                            if (isSuccessful) {
+                                lobbyGameName = split[1];
+                            }
                         }
-                    }
-                    
-                } else if (split[0].equals("Join Game")) {
-                    
-                    if (lobbyGameName == null) {
-                        isSuccessful = addPlayerToGame(split[1], split[2]);
-                        if (isSuccessful) {
-                            lobbyGameName = split[1];
+                        
+                    } else if (split[0].equals("Join Game")) {
+                        
+                        if (lobbyGameName == null) {
+                            isSuccessful = addPlayerToGame(split[1], split[2]);
+                            if (isSuccessful) {
+                                lobbyGameName = split[1];
+                                
+                                // Check to see if the game is now full. If so,
+                                // start the game
+                                if (isGameFull(lobbyGameName)) {
+                                    startNewGame(lobbyGameName);
+                                    currentMode = UserMode.GameMode;
+                                    lobbyGameName = null;
+                                }
+                            }
                         }
+                        
+                    } else if (split[0].equals("Remove User from Game")) {
+                        
+                        isSuccessful = removePlayerFromGame(split[1], split[2]);
+                        if (isSuccessful) {
+                            lobbyGameName = null;
+                        }
+                    } else if (split[0].equals("Query")) { // DEBUGGING CODE
+                        // TEMPORARY CODE FOR DEBUGGING
+                        synchronized (lobbyGames) {
+                            objOutputStream.reset();
+                            objOutputStream.writeObject(lobbyGames);
+                            objOutputStream.flush();
+                        }
+                        
+                        continue;
                     }
-                    
-                } else if (split[0].equals("Remove User from Game")) {
-                    
-                    isSuccessful = removePlayerFromGame(split[1], split[2]);
-                    if (isSuccessful) {
-                        lobbyGameName = null;
-                    }
-                } else if (split[0].equals("Query")) { // DEBUGGING CODE
-                    // TEMPORARY CODE FOR DEBUGGING
-                    synchronized (lobbyGames) {
-                        objOutputStream.reset();
-                        objOutputStream.writeObject(lobbyGames);
-                        objOutputStream.flush();
-                    }
-                    
-                    continue;
                 }
                 
                 String response = isSuccessful ? "Success" : "Failure";
@@ -221,7 +230,7 @@ public class ServerMain {
     /**
      * Maximum number of simultaneous connections
      */
-    private static final int MAX_CONNECTIONS = 10;
+    private static final int MAX_CONNECTIONS = 16;
     
     /**
      * Server port that allows connections
@@ -417,6 +426,23 @@ public class ServerMain {
         }
         
         return isGameFull;
+    }
+    
+    /**
+     * Removes a game named gameName from the lobby and starts the game.
+     * @param gameName
+     */
+    private static void startNewGame(String gameName) {
+        // Remove the game from the lobby
+        String playerArray[] = lobbyGames.remove(gameName);
+        
+        System.out.print("Starting the game '" + gameName + "' with the " +
+                           "players ");
+        System.out.printf("%s, %s, %s, and %s.\n", playerArray[0], 
+                          playerArray[1], playerArray[2], playerArray[3]);
+        
+        // TODO: broadcast the new lobby to all of the players in the lobby and
+        //       actually start the new game
     }
     
     /**
