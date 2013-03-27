@@ -1,24 +1,35 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.Socket;
 
 
 
 
 public class ChatClient {
-	//ip address of server
-	//port of server
+	public ChatClient(Socket srvSocket)
+	{
+		serverSocket = srvSocket;
+	}
 	
-	public static void main(){
+	
+	
+	//send socket
+	Socket serverSocket;
+	static String identity = "Tester: " ;
+	
+	
+	//or can be sent in a main method.  Need to research how GUI interaction works.
+	public void send()
+	{
 		
-		//spin thread to receive messages
-		
+
 		
 		BufferedReader commandLineInput = new BufferedReader(new InputStreamReader(System.in));
 		while (true)
 		{
 			String message = "NULL";
-			String messageToSend = "NULL";
+			String messageToSend = identity;
 			//input message
 			try
 			{
@@ -34,40 +45,48 @@ public class ChatClient {
 			{
 				int firstIndex = message.indexOf('"');
 				int lastIndex = message.indexOf('"', firstIndex+1);
-				messageToSend = message.substring(firstIndex+1, lastIndex);
-				int spacesToAppend = 16-messageToSend.length();
+				messageToSend = messageToSend.concat("/*/");
+				messageToSend = messageToSend.concat(message.substring(firstIndex+1, lastIndex));
+				messageToSend = messageToSend.concat("*/*");
+				/*int spacesToAppend = 16-messageToSend.length();
 				char [] spaces = new char [spacesToAppend];
 				for (int i = 0; i <spacesToAppend; i++)
 				{
 					spaces[i] = ' ';
 				}
 				String stringSpace = new String(spaces);
-				messageToSend = messageToSend.concat(stringSpace);
+				messageToSend = messageToSend.concat(stringSpace);*/
 				messageToSend = messageToSend.concat(message.substring(lastIndex+1));
+				messageToSend = messageToSend.concat(" ***PRIVATE***");
 			}else
 			{
 			//if not targeted, packetize
-			messageToSend = "            ";	
+			//messageToSend = "            ";	
 			messageToSend = messageToSend.concat(message);
 			}
 			
+			String chatCommand = "chat*";
+			messageToSend = chatCommand.concat(messageToSend);
 			byte [] messageBytes = messageToSend.getBytes();
+			System.out.println(messageToSend);
 			
 			
 		}
 	}
 	
 	
-	public static void messageDisplayThread()
+	public static void messageDisplayThread(String messageReceived)
 	{
-		
+
 		while (true)
 		{
 		//receive message
 		
 		//depacketize message
+	//	messageReceived = new String(messageBytesReceived);
 		
 		//display message
+	//	System.out.println(messageReceived);
 		}
 	}
 	
