@@ -79,6 +79,8 @@ public class ServerMain {
             
             boolean isLogonSuccessful = false;
             
+            Thread lobbyPushThread = null;
+            
             try {
                 // Read the username
                 objInputStream = 
@@ -118,8 +120,20 @@ public class ServerMain {
                     // Handle lobby and game stuff
                     
 
+                    // Start thread that will push lobby changes to the user
+                    lobbyPushThread = new Thread() {
+                        public void run() {
+                            handleLobbyPush();
+                        }
+                    };
+                    
+                    lobbyPushThread.start();
+                    
                     handleLobby();
 
+                    // End the lobby push thread
+                    lobbyPushThread.interrupt();
+                    lobbyPushThread.join(1000);
                     
                 } else {
                     System.out.println("Logon attempt by '" + username +
@@ -131,6 +145,10 @@ public class ServerMain {
             } catch (Exception e) {
                 e.printStackTrace();
                 System.out.println(e.getMessage());
+                
+                if (lobbyPushThread != null && lobbyPushThread.isAlive()) {
+                    lobbyPushThread.interrupt();
+                }
             }
             
             
@@ -154,9 +172,11 @@ public class ServerMain {
             
             // Initially, server sends the client the current state of the
             // lobby
-            synchronized (lobbyGames) {
-                objOutputStream.writeObject(lobbyGames);
-                objOutputStream.flush();
+            synchronized (objOutputStream) {
+                synchronized (lobbyGames) {
+                    objOutputStream.writeObject(lobbyGames);
+                    objOutputStream.flush();
+                }
             }
   
             // Listen for client commands while the client is in the lobby. 
@@ -206,10 +226,13 @@ public class ServerMain {
                         }
                     } else if (split[0].equals("Query")) { // DEBUGGING CODE
                         // TEMPORARY CODE FOR DEBUGGING
-                        synchronized (lobbyGames) {
-                            objOutputStream.reset();
-                            objOutputStream.writeObject(lobbyGames);
-                            objOutputStream.flush();
+                        synchronized (objOutputStream) {
+                            synchronized (lobbyGames) {
+                                objOutputStream.reset();
+                                objOutputStream.writeObject("Lobby");
+                                objOutputStream.writeObject(lobbyGames);
+                                objOutputStream.flush();
+                            }
                         }
                         
                         continue;
@@ -218,11 +241,48 @@ public class ServerMain {
                 
                 String response = isSuccessful ? "Success" : "Failure";
                 
-                objOutputStream.writeObject(response);
-                objOutputStream.flush();
+                synchronized (objOutputStream) {
+                    objOutputStream.writeObject(response);
+                    objOutputStream.flush();
+                }
             }
             
             System.out.println("Leaving lobby");
+        }
+     
+        /**
+         * Waits for notification of a change to the lobby. When the lobby
+         * changes, send the update to the user.
+         */
+        private void handleLobbyPush() {
+            while (!Thread.interrupted()) {
+                try {
+                    // Wait for a notification that the lobby has been 
+                    // updated
+                    synchronized (lobbyChangeNotifier) {
+                        lobbyChangeNotifier.wait();
+                    }
+                    
+                    // Send the lobby data to the user
+                    synchronized (objOutputStream) {
+                        synchronized (lobbyGames) {
+                            objOutputStream.reset();
+                            objOutputStream.writeObject(new String("Lobby"));
+                            objOutputStream.writeObject(lobbyGames);
+                            objOutputStream.flush();
+                        }
+                    }
+                    
+                } catch (InterruptedException e) {
+                    // End the thread since it has been interrupted
+                    break;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+            System.out.println("Ending lobby push thread.");
+            
         }
         
     }
@@ -279,6 +339,12 @@ public class ServerMain {
     private static Map<String, String[]> lobbyGames = 
                                                 new HashMap<String, String[]>();
     
+    
+    /**
+     * Object that is used to notify user threads that the lobby has changed
+     */
+    private static Object lobbyChangeNotifier = new Object();
+    
 
     /**
      * Adds a new game to lobby with the name gameName and one player so far
@@ -303,6 +369,10 @@ public class ServerMain {
             lobbyGames.put(gameName, playerArray);
             
             isGameAdded = true;
+        } 
+        
+        if (isGameAdded) {
+            notifyLobbyChanged();
         }
         
         return isGameAdded;
@@ -339,6 +409,10 @@ public class ServerMain {
             }
         }
         
+        if (isPlayerAdded) {
+            notifyLobbyChanged();
+        }
+        
         return isPlayerAdded;
     }
     
@@ -353,6 +427,7 @@ public class ServerMain {
     private static boolean removePlayerFromGame(String gameName, 
                                                 String username) {
         boolean isPlayerRemoved = false;
+        boolean isGameEmpty = false;
         
         String playerArray[] = lobbyGames.get(gameName);
         
@@ -360,7 +435,8 @@ public class ServerMain {
             // Remove username from the player array, shifting
             // everyone in the array down one place
             
-            for (int i = 0; i < playerArray.length - 1; i++) {
+            for (int i = 0; i < playerArray.length - 1 && 
+                                playerArray[i] != null; i++) {
                 if (!isPlayerRemoved) {
                     if (playerArray[i].equals(username)) {
                         
@@ -381,11 +457,23 @@ public class ServerMain {
             // deleted but the last position holds the player (this
             // *should* always be the case), set the last position in
             // the array to null.
-            if (isPlayerRemoved ||
-                playerArray[playerArray.length - 1].equals(username)) {
+            if (isPlayerRemoved 
+                || (playerArray[playerArray.length - 1] != null
+                     && playerArray[playerArray.length - 1].equals(username))) {
                 
                 playerArray[playerArray.length - 1] = null;
+                
+                isPlayerRemoved = true;
             }
+            
+            // If the game is empty, delete the game
+            if (playerArray[0] == null) {
+                lobbyGames.remove(gameName);
+            }
+        }
+        
+        if (isPlayerRemoved) {
+            notifyLobbyChanged();
         }
         
         return isPlayerRemoved;
@@ -441,8 +529,18 @@ public class ServerMain {
         System.out.printf("%s, %s, %s, and %s.\n", playerArray[0], 
                           playerArray[1], playerArray[2], playerArray[3]);
         
-        // TODO: broadcast the new lobby to all of the players in the lobby and
-        //       actually start the new game
+        
+        notifyLobbyChanged();
+        // TODO: Actually start the new game
+    }
+    
+    /**
+     * Notifies all of the users that the lobby has changed
+     */
+    private static void notifyLobbyChanged() {
+        synchronized (lobbyChangeNotifier) {
+            lobbyChangeNotifier.notifyAll();
+        }
     }
     
     /**

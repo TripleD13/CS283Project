@@ -64,9 +64,16 @@ public class ClientMain {
     
     
     /**
+     * Handle to the receiver thread
+     */
+    private static Thread receiverThread = null;
+    
+    
+    /**
      * @param args
      */
     public static void main(String[] args) throws Exception {
+        
         // Nicer look and feel
         try {
             for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
@@ -82,7 +89,7 @@ public class ClientMain {
         // Logon loop
         boolean logonSuccessful = false;
         
-        while (!logonSuccessful) {
+        do {
             
             // Create the login attempt dialog
             JFrame frame = new JFrame("Login");
@@ -123,7 +130,7 @@ public class ClientMain {
             }
             
             frame.dispose();
-        }
+        } while (!logonSuccessful);
         
         // Check to make sure the user is logged on
         if (logonSuccessful) {
@@ -131,8 +138,20 @@ public class ClientMain {
             lobbyMode();
         }
 
+        // Terminate the receiver thread (calling interrupt() may be unnecessary
+        //                                since closing the socket should signal
+        //                                to the thread to exit)
+        if (receiverThread != null) {
+            receiverThread.interrupt();
+        }
+        
         // Close the connection to the server
         clientSocket.close();
+        
+        // Wait for the receiver thread to end
+        if (receiverThread != null) {
+            receiverThread.join(1000);
+        }
     }
 
     /**
@@ -186,6 +205,8 @@ public class ClientMain {
      */
     @SuppressWarnings("unchecked")
     private static void lobbyMode() {
+        Scanner scanner = new Scanner(System.in);
+        
         try {
             // Receive the initial lobby data from the server
             lobbyGames = (Map<String, String[]>) objInputStream.readObject();
@@ -193,8 +214,11 @@ public class ClientMain {
             printLobby();
             
             
+            // Start the receiver thread
+            receiverThread = new Thread(new ClientReceiver());
+            receiverThread.start();
+            
             String input;
-            Scanner scanner = new Scanner(System.in);
             
             do {
                 input = scanner.nextLine();
@@ -222,19 +246,15 @@ public class ClientMain {
                     objOutputStream.writeObject(new String("Query"));
                     objOutputStream.flush();
                     
-                    lobbyGames = 
-                            (Map<String, String[]>) objInputStream.readObject();
-                   
-                    printLobby();
-                    
                 }
                 
             } while (!input.toLowerCase().equals("quit"));
             
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println(e.getMessage());
         }
+        
+        scanner.close();
     }
     
     
@@ -283,10 +303,6 @@ public class ClientMain {
         
         objOutputStream.writeObject(msg);
         objOutputStream.flush();
-        
-        // Wait for the server response
-        String response = (String) objInputStream.readObject();
-        System.out.println(response);
     }
     
     /**
@@ -301,10 +317,6 @@ public class ClientMain {
         
         objOutputStream.writeObject(msg);
         objOutputStream.flush();
-        
-        // Wait for server response
-        String response = (String) objInputStream.readObject();
-        System.out.println(response);
     }
     
     /**
@@ -318,10 +330,52 @@ public class ClientMain {
         
         objOutputStream.writeObject(msg);
         objOutputStream.flush();
+    }
+    
+    /**
+     * Class that handles the receiving of network data in a separate thread
+     * @author John
+     *
+     */
+    @SuppressWarnings("unchecked")
+    private static class ClientReceiver implements Runnable {
         
-        // Wait for server response
-        String response = (String) objInputStream.readObject();
-        System.out.println(response);
+        /**
+         * Run the receiver thread
+         */
+        @Override
+        public void run() {
+            String message;
+            
+            while (!Thread.interrupted()) {
+                try {
+                    message = (String) objInputStream.readObject();
+                    
+                    if (message.equals("Lobby")) {
+                        lobbyGames = (Map<String, String[]>) 
+                                objInputStream.readObject();
+                   
+                        printLobby();
+                    } else {
+                        System.out.println("RESPONSE! " + message);
+                    }
+                } catch (InterruptedIOException e) {
+                    // The thread was interrupted, so exit the thread
+                    break;
+                } catch (EOFException e) {
+                    // The server must have closed its connection, so exit
+                    // the thread
+                    System.out.println("Receiver can no longer receive from " +
+                                       "server.");
+                    break;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            
+            System.out.println("Ending receiver thread");
+        }
+       
     }
     
 }
