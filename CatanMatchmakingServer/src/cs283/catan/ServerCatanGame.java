@@ -1,6 +1,6 @@
 //Kevin Zeillmann
 //CS283
-
+package cs283.catan;
 import java.util.Random;
 
 

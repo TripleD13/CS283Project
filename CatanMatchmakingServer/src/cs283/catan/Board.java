@@ -1,4 +1,4 @@
-
+package cs283.catan;
 public class Board
 {
 	public Robber robber;
