@@ -571,9 +571,11 @@ public class ServerMain {
                             if (addGame(split[1], split[2])) {
                                 lobbyGameName = split[1];
                                 isSuccessful = true;
-                            } else {
+                            }
+                            
+                            if (!isSuccessful) {
                                 failureMsg = "Failed to create game '" +
-                                             split[1] + "'";
+                                        split[1] + "'";
                             }
                         }
                         
@@ -591,11 +593,13 @@ public class ServerMain {
                                     currentMode = UserMode.GameMode;
                                     lobbyGameName = null;
                                 }
-                            } else {
-                                failureMsg = "Failed to add user '" +
-                                             split[2] + "' to game '" +
-                                             split[1] + "'";
                             }
+                        }
+                        
+                        if (!isSuccessful) {
+                            failureMsg = "Failed to add user '" +
+                                    split[2] + "' to game '" +
+                                    split[1] + "'";
                         }
                         
                     } else if (split[0].equals("Remove User from Game")) {
@@ -603,7 +607,9 @@ public class ServerMain {
                         if (removePlayerFromGame(split[1], split[2])) {
                             lobbyGameName = null;
                             isSuccessful = true;
-                        } else {
+                        } 
+                        
+                        if (!isSuccessful) {
                             failureMsg = "Failed to remove user '" +
                                          split[2] + "' from game '" +
                                          split[1] + "'";
