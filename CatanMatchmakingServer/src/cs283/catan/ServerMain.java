@@ -572,11 +572,11 @@ public class ServerMain {
                                 lobbyGameName = split[1];
                                 isSuccessful = true;
                             }
-                            
-                            if (!isSuccessful) {
-                                failureMsg = "Failed to create game '" +
-                                        split[1] + "'";
-                            }
+                        }
+                        
+                        if (!isSuccessful) {
+                            failureMsg = "Failed to create game '" +
+                                    split[1] + "'";
                         }
                         
                     } else if (split[0].equals("Join Game")) {
