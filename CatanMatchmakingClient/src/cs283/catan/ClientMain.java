@@ -84,30 +84,31 @@ public class ClientMain {
     public static void main(String[] args) throws Exception {
         
         // Set the IP and port based on the command line arguments
-        if (args.length == 2) {
-            // Parse the IP address and port number
-            try {
-                serverAddress = 
-                      new InetSocketAddress(args[0], Integer.parseInt(args[1]));      
-                
-                if (serverAddress.isUnresolved()) {
-                    System.out.println("Unresolved host: " + args[0]);
-                    System.exit(0);
-                }
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid port: " + args[1]);
-                System.exit(0);
-            } catch (IllegalArgumentException e) {
-                System.out.println("Port not in range: " + args[1]);
-                System.exit(0);
-            }
-        } else {
+        if (args.length != 2) {
             // Print the proper command line usage
             System.out.println("Usage:\n");
             System.out.println("java cs283.catan.ClientMain " + 
                                "<IP_Address> <Port>");
             System.exit(0);
         }
+       
+        // Parse the IP address and port number
+        try {
+            serverAddress = 
+                  new InetSocketAddress(args[0], Integer.parseInt(args[1]));      
+            
+            if (serverAddress.isUnresolved()) {
+                System.out.println("Unresolved host: " + args[0]);
+                System.exit(0);
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid port: " + args[1]);
+            System.exit(0);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Port not in range: " + args[1]);
+            System.exit(0);
+        }
+    
         
         // Use a nicer look and feel for the GUI if available
         try {
@@ -385,12 +386,12 @@ public class ClientMain {
                    
                         printLobby();
                     } else {
-                        System.out.println("RESPONSE! " + message);
+                        System.out.println("Server response: " + message);
                     }
                 } catch (InterruptedIOException e) {
                     // The thread was interrupted, so exit the thread
                     break;
-                } catch (EOFException e) {
+                } catch (IOException e) {
                     // The server must have closed its connection, so exit
                     // the thread
                     System.out.println("Receiver can no longer receive from " +

@@ -15,288 +15,11 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  */
 public class ServerMain {
-
-    private static class ServerConnectionHandler implements Runnable {
-        
-        private enum UserMode {
-            Initialization,
-            LobbyMode,
-            GameMode,
-        }
-        
-        /**
-         * Client socket object
-         */
-        private Socket clientSocket;
-        
-        /**
-         * Object input stream for the socket
-         */
-        private ObjectInputStream objInputStream;
-        
-        /**
-         * Object output stream for the socket
-         */
-        private ObjectOutputStream objOutputStream;
-        
-        /**
-         * Value of the username
-         */
-        private String username;
-        
-        /**
-         * Name of the lobby game the user is currently in. Set to null
-         * if the user is not in a lobby game.
-         */
-        private String lobbyGameName;
-        
-        /**
-         * Name of the in-progress game the user is currently in. Set to null
-         * if the user is not in a lobby game.
-         */
-        private String inProgressGameName;
-        
-        /**
-         * Indicates the mode the user is currently in
-         */
-        private UserMode currentMode;
-        
-        /**
-         * 
-         * @param socket
-         */
-        public ServerConnectionHandler(Socket socket) {
-            this.clientSocket = socket;
-            this.username = this.lobbyGameName = this.inProgressGameName = null;
-            this.currentMode = UserMode.Initialization;
-        }
-        
-        /**
-         * Main entry point of the connection handler
-         */
-        @Override
-        public void run() {
-            
-            boolean isLogonSuccessful = false;
-            
-            Thread lobbyPushThread = null;
-            
-            try {
-                // Read the username
-                objInputStream = 
-                           new ObjectInputStream(clientSocket.getInputStream());
-                
-                username = (String) objInputStream.readObject();
-                
-                // Limit the username to 16 characters
-                if (username.length() > MAX_USERNAME_LENGTH) {
-                    username = username.substring(0,  MAX_USERNAME_LENGTH);
-                }
-                
-
-                // Attempt a logon of username
-                objOutputStream = 
-                         new ObjectOutputStream(clientSocket.getOutputStream());
-               
-                // Check whether the username is valid
-                synchronized (userList) {
-                    if (userList.contains(username)) {
-                        objOutputStream.writeObject(LOGIN_FAILURE_MSG);
-                    } else {
-                        userList.add(username);
-                        System.out.println("'" + username + "' logged on!"); 
-                        
-                        objOutputStream.writeObject(LOGIN_SUCCESS_MSG);
-                        
-                        isLogonSuccessful = true;
-                    }
-                }
-                
-                objOutputStream.flush();
-                
-                // Make sure logon was successful
-                if (isLogonSuccessful) {
-                    
-                    // Handle lobby and game stuff
-                    
-
-                    // Start thread that will push lobby changes to the user
-                    lobbyPushThread = new Thread() {
-                        public void run() {
-                            handleLobbyPush();
-                        }
-                    };
-                    
-                    lobbyPushThread.start();
-                    
-                    handleLobby();
-
-                    // End the lobby push thread
-                    lobbyPushThread.interrupt();
-                    lobbyPushThread.join(1000);
-                    
-                } else {
-                    System.out.println("Logon attempt by '" + username +
-                                       "' failed!");
-                }
-                
-                clientSocket.close();
-                
-            } catch (Exception e) {
-                e.printStackTrace();
-                System.out.println(e.getMessage());
-                
-                if (lobbyPushThread != null && lobbyPushThread.isAlive()) {
-                    lobbyPushThread.interrupt();
-                }
-            }
-            
-            
-            // Log the user off the system if the user is logged on
-            // This code needs to be outside of the try/catch block 
-            // so that the user will always be logged off the system, 
-            // even when an exception is thrown
-            if (isLogonSuccessful) {
-                logoffUser(username, lobbyGameName, inProgressGameName);
-            }
-            
-            numberConnections.getAndDecrement();
-        }
-        
-        /**
-         * Manages all of the user interaction with the lobby.
-         * @throws Exception
-         */
-        private void handleLobby() throws Exception {
-            currentMode = UserMode.LobbyMode;
-            
-            // Initially, server sends the client the current state of the
-            // lobby
-            synchronized (objOutputStream) {
-                synchronized (lobbyGames) {
-                    objOutputStream.writeObject("Lobby");
-                    objOutputStream.writeObject(lobbyGames);
-                    objOutputStream.flush();
-                }
-            }
-  
-            // Listen for client commands while the client is in the lobby. 
-            // Also, check if the lobby has been modified. If so, rebroadcast
-            // the lobby state to the client.
-            while (currentMode == UserMode.LobbyMode) {
-                String msg = (String) objInputStream.readObject();
-                System.out.println(msg);
-
-                String split[] = msg.split("\n");
-                
-                boolean isSuccessful = false;
-                // Perform the appropriate actions in response to the message
-                synchronized (lobbyGames) {
-                    if (split[0].equals("Create Game")) {
-                        
-                        if (lobbyGameName == null) {
-                            isSuccessful = addGame(split[1], split[2]);
-                            
-                            if (isSuccessful) {
-                                lobbyGameName = split[1];
-                            }
-                        }
-                        
-                    } else if (split[0].equals("Join Game")) {
-                        
-                        if (lobbyGameName == null) {
-                            isSuccessful = addPlayerToGame(split[1], split[2]);
-                            if (isSuccessful) {
-                                lobbyGameName = split[1];
-                                
-                                // Check to see if the game is now full. If so,
-                                // start the game
-                                if (isGameFull(lobbyGameName)) {
-                                    startNewGame(lobbyGameName);
-                                    currentMode = UserMode.GameMode;
-                                    lobbyGameName = null;
-                                }
-                            }
-                        }
-                        
-                    } else if (split[0].equals("Remove User from Game")) {
-                        
-                        isSuccessful = removePlayerFromGame(split[1], split[2]);
-                        if (isSuccessful) {
-                            lobbyGameName = null;
-                        }
-                    } else if (split[0].equals("Query")) { // DEBUGGING CODE
-                        // TEMPORARY CODE FOR DEBUGGING
-                        synchronized (objOutputStream) {
-                            synchronized (lobbyGames) {
-                                objOutputStream.reset();
-                                objOutputStream.writeObject("Lobby");
-                                objOutputStream.writeObject(lobbyGames);
-                                objOutputStream.flush();
-                            }
-                        }
-                        
-                        continue;
-                    }
-                }
-                
-                String response = isSuccessful ? "Success" : "Failure";
-                
-                synchronized (objOutputStream) {
-                    objOutputStream.writeObject(response);
-                    objOutputStream.flush();
-                }
-            }
-            
-            System.out.println("Leaving lobby");
-        }
-     
-        /**
-         * Waits for notification of a change to the lobby. When the lobby
-         * changes, send the update to the user.
-         */
-        private void handleLobbyPush() {
-            while (!Thread.interrupted()) {
-                try {
-                    // Wait for a notification that the lobby has been 
-                    // updated
-                    synchronized (lobbyChangeNotifier) {
-                        lobbyChangeNotifier.wait();
-                    }
-                    
-                    // Send the lobby data to the user
-                    synchronized (objOutputStream) {
-                        synchronized (lobbyGames) {
-                            objOutputStream.reset();
-                            objOutputStream.writeObject(new String("Lobby"));
-                            objOutputStream.writeObject(lobbyGames);
-                            objOutputStream.flush();
-                        }
-                    }
-                    
-                } catch (InterruptedException e) {
-                    // End the thread since it has been interrupted
-                    break;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-
-            System.out.println("Ending lobby push thread.");
-            
-        }
-        
-    }
-    
+      
     /**
      * Maximum number of simultaneous connections
      */
     private static final int MAX_CONNECTIONS = 16;
-    
-    /**
-     * Server port that allows connections
-     */
-    private static final int PORT = 8888;
     
     /**
      * Maximum username length
@@ -328,7 +51,7 @@ public class ServerMain {
     private static AtomicInteger numberConnections = new AtomicInteger(0);
     
     /**
-     * Set that will store the usernames currently in progress.
+     * Set that will store the usernames currently in use
      */
     private static Set<String> userList = new HashSet<String>();
     
@@ -345,11 +68,84 @@ public class ServerMain {
      * Object that is used to notify user threads that the lobby has changed
      */
     private static Object lobbyChangeNotifier = new Object();
-    
 
+    
+    /**
+     * @param args
+     * @throws Exception
+     */
+    @SuppressWarnings("resource")
+    public static void main(String[] args) {
+        // Read the port from the command line arguments
+        if (args.length != 1) {
+            System.out.println("Usage:\n");
+            System.out.println("java cs283.catan.ServerMain <Port>");
+            System.exit(0);
+        }
+        
+        // Open the server socket
+        ServerSocket parentSocket = null;
+        
+        try {
+            int listenBacklog = 10;
+            // Create the socket. Address 0.0.0.0 indicates that the socket
+            // will accept connections on any of the interfaces of the server
+            parentSocket = 
+                      new ServerSocket(Integer.parseInt(args[0]), listenBacklog,
+                                       InetAddress.getByName("0.0.0.0"));
+        } catch (IOException e) {
+            System.out.println("Unable to open server socket: " +
+                               e.getMessage());
+            System.exit(0);
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid port: " + args[0]);
+            System.exit(0);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Port not in range: " + args[0]);
+            System.exit(0);
+        }
+        
+        System.out.println("Server starting...");
+        
+        String n[] = {"t1", "t2", "t3", "t4"};
+        lobbyGames.put("Game 1", n);
+        String n2[] = {"Austin", "Daniel", "John", "Kevin"};
+        lobbyGames.put("Ultimate Showdown", n2);
+        String n3[] = {"p1", null, null, null};
+        lobbyGames.put("Open Game",  n3);
+        
+        // Accept connections and start new threads for each connection
+        while (true) {
+            try {
+                Socket childSocket = parentSocket.accept();
+                
+                // Check whether the maximum number of connections is being used
+                if (numberConnections.get() < MAX_CONNECTIONS) {
+                    numberConnections.getAndIncrement();
+                    
+                    (new Thread(new ServerConnectionHandler(childSocket))).start();
+                    
+                } else {
+                    // Notify the client that it cannot be served at this moment
+                    ObjectOutputStream outputStream = new ObjectOutputStream(
+                                                     childSocket.getOutputStream());
+                    outputStream.writeObject(CONN_LIMIT_MSG);
+                    outputStream.flush();
+                    
+                    childSocket.close();
+                }
+            } catch (IOException e) {
+                System.out.println("Error accepting new connection: " +
+                                   e.getMessage());
+            }
+        }
+    }
+
+    
     /**
      * Adds a new game to lobby with the name gameName and one player so far
-     * with the name username. 
+     * with the name username. Note: responsibility of caller to synchronize
+     * access to lobbyGames.
      * @param gameName
      * @param username
      * @return true if the game was added, false if the game could not be added.
@@ -381,7 +177,8 @@ public class ServerMain {
     
     /**
      * Adds a player named username to a game in the lobby with the name
-     * gameName.
+     * gameName. Note: responsibility of caller to synchronize access to
+     * lobbyGames.
      * @param gameName
      * @param username
      * @return true if the player was added to the game, false if the player
@@ -419,7 +216,8 @@ public class ServerMain {
     
     /**
      * Removes a player named username from a game in the lobby with the name
-     * gameName.
+     * gameName. Note: responsibility of sender to synchronize access to
+     * lobbyGames.
      * @param gameName
      * @param username
      * @return true if the player was removed from the game, false if the player
@@ -435,35 +233,26 @@ public class ServerMain {
             // Remove username from the player array, shifting
             // everyone in the array down one place
             
-            for (int i = 0; i < playerArray.length - 1 && 
+            for (int i = 0; i < playerArray.length && 
                                 playerArray[i] != null; i++) {
+                
+                // If this element is not the last element, the next element
+                // is at position i + 1. Otherwise, the next element is null
+                String nextPlayer = i < playerArray.length - 1 
+                              ? playerArray[i + 1] : null;
+                              
                 if (!isPlayerRemoved) {
                     if (playerArray[i].equals(username)) {
                         
-                        playerArray[i] = playerArray[i + 1];
+                        playerArray[i] = nextPlayer;
                         isPlayerRemoved = true;
                         
                     }
                 } else {
                     // Shift elements to the left now that username
                     // has been deleted
-                    playerArray[i] = playerArray[i + 1];
+                    playerArray[i] = nextPlayer;
                 }
-            }
-            
-            // If the player has been deleted, everything has been
-            // shifted left one spot so the last position in the array
-            // can be set to null. Also, if the player has not been
-            // deleted but the last position holds the player (this
-            // *should* always be the case), set the last position in
-            // the array to null.
-            if (isPlayerRemoved 
-                || (playerArray[playerArray.length - 1] != null
-                     && playerArray[playerArray.length - 1].equals(username))) {
-                
-                playerArray[playerArray.length - 1] = null;
-                
-                isPlayerRemoved = true;
             }
             
             // If the game is empty, delete the game
@@ -482,7 +271,8 @@ public class ServerMain {
     
     /**
      * Determines whether or not a game with name gameName is completely full 
-     * of players.
+     * of players. Note: responsibility of sender to synchronize access to
+     * lobbyGames.
      * @param gameName
      * @return true if the game is full, false if the game does not exist or
      *         is not full.
@@ -517,7 +307,8 @@ public class ServerMain {
     }
     
     /**
-     * Removes a game named gameName from the lobby and starts the game.
+     * Removes a game named gameName from the lobby and starts the game. Note:
+     * responsibility of sender to synchronize access to lobbyGames.
      * @param gameName
      */
     private static void startNewGame(String gameName) {
@@ -570,48 +361,311 @@ public class ServerMain {
             userList.remove(username);
         }
         
-        System.out.println("Successfully logged off user " + username + "!");
+        System.out.println("Successfully logged off user '" + username + "'!");
     }
     
-    
+     
     /**
-     * @param args
-     * @throws Exception
+     * Connection handler class that manages one user.
+     * @author John
+     *
      */
-    public static void main(String[] args) throws Exception {
-        System.out.println("Server starting...");
-
-        // Open the server socket
-        int listenBacklog = 5;
-        ServerSocket parentSocket = new ServerSocket(PORT, listenBacklog);
+    private static class ServerConnectionHandler implements Runnable {
         
-        String n[] = {"t1", "t2", "t3", "t4"};
-        lobbyGames.put("Game 1", n);
-        String n2[] = {"Austin", "Daniel", "John", "Kevin"};
-        lobbyGames.put("Ultimate Showdown", n2);
-        String n3[] = {"p1", null, null, null};
-        lobbyGames.put("Open Game",  n3);
-        
-        // Accept connections and start new threads for each connection
-        while (true) {
-            Socket childSocket = parentSocket.accept();
-            
-            // Check whether the maximum number of connections is being used
-            if (numberConnections.get() < MAX_CONNECTIONS) {
-                numberConnections.getAndIncrement();
-                
-                (new Thread(new ServerConnectionHandler(childSocket))).start();
-                
-            } else {
-                // Notify the client that it cannot be served at this moment
-                ObjectOutputStream outputStream = new ObjectOutputStream(
-                                                 childSocket.getOutputStream());
-                outputStream.writeObject(CONN_LIMIT_MSG);
-                outputStream.flush();
-                
-                childSocket.close();
-            }
+        /**
+         * Enum that represents the possible modes the user could be in
+         *
+         */
+        private enum UserMode {
+            Initialization,
+            LobbyMode,
+            GameMode,
         }
-    }
+        
+        /**
+         * Client socket object
+         */
+        private Socket clientSocket;
+        
+        /**
+         * Object input stream for the socket
+         */
+        private ObjectInputStream objInputStream;
+        
+        /**
+         * Object output stream for the socket
+         */
+        private ObjectOutputStream objOutputStream;
+        
+        /**
+         * Value of the username
+         */
+        private String username;
+        
+        /**
+         * Name of the lobby game the user is currently in. Set to null
+         * if the user is not in a lobby game.
+         */
+        private String lobbyGameName;
+        
+        /**
+         * Name of the in-progress game the user is currently in. Set to null
+         * if the user is not in an in-progress game.
+         */
+        private String inProgressGameName;
+        
+        /**
+         * Indicates the mode the user is currently in
+         */
+        private UserMode currentMode;
+        
+        /**
+         * 
+         * @param socket
+         */
+        public ServerConnectionHandler(Socket socket) {
+            this.clientSocket = socket;
+            this.username = this.lobbyGameName = this.inProgressGameName = null;
+            this.currentMode = UserMode.Initialization;
+        }
+        
+        /**
+         * Main entry point of the connection handler
+         */
+        @Override
+        public void run() {
+            
+            boolean isLogonSuccessful = false;
+            
+            Thread lobbyPushThread = null;
+            
+            try {
+                
+                // Create the input and output streams
+                objInputStream = 
+                        new ObjectInputStream(clientSocket.getInputStream());
+                
+                objOutputStream = 
+                        new ObjectOutputStream(clientSocket.getOutputStream());
+                
+                
+                // Read the username sent from the client
+                
+                username = (String) objInputStream.readObject();
+                
+                // Limit the username to 16 characters
+                if (username.length() > MAX_USERNAME_LENGTH) {
+                    username = username.substring(0,  MAX_USERNAME_LENGTH);
+                }
+                
 
+                // Attempt a logon of username. First check ensure that the
+                // username is available
+                synchronized (userList) {
+                    if (!userList.contains(username)) {
+                        userList.add(username);
+                        
+                        isLogonSuccessful = true;
+                    }
+                }
+                
+                // Make sure logon was successful
+                if (isLogonSuccessful) {
+                    
+                    System.out.println("'" + username + "' logged on!"); 
+                    
+                    objOutputStream.writeObject(LOGIN_SUCCESS_MSG);
+                    objOutputStream.flush();
+                    
+                    // Handle lobby and game stuff
+                    
+
+                    // Start thread that will push lobby changes to the user
+                    lobbyPushThread = new Thread() {
+                        public void run() {
+                            handleLobbyPush();
+                        }
+                    };
+                    
+                    lobbyPushThread.start();
+                    
+                    handleLobby();
+
+                    // End the lobby push thread
+                    lobbyPushThread.interrupt();
+                    lobbyPushThread.join(1000);
+                    
+                } else {
+                    System.out.println("Logon attempt by '" + username +
+                                       "' failed!");
+                    
+                    objOutputStream.writeObject(LOGIN_FAILURE_MSG);
+                    objOutputStream.flush();
+                }  
+                
+            } catch (Exception e) {
+                System.out.println("Connection problem with '" + username + 
+                                   "': " + e.getMessage());
+                
+                if (lobbyPushThread != null && lobbyPushThread.isAlive()) {
+                    lobbyPushThread.interrupt();
+                }
+            }
+            
+            
+            // Attempt to close the socket
+            try {
+                clientSocket.close();
+            } catch (Exception e) {
+                // Just ignore error
+            }
+            
+            
+            // Log the user off the system if the user is logged on
+            // This code needs to be outside of the try/catch block 
+            // so that the user will always be logged off the system, 
+            // even when an exception is thrown
+            if (isLogonSuccessful) {
+                logoffUser(username, lobbyGameName, inProgressGameName);
+            }
+            
+            // Decrease the number of connections
+            numberConnections.getAndDecrement();
+        }
+        
+        /**
+         * Manages all of the user interaction with the lobby.
+         * @throws Exception
+         */
+        private void handleLobby() throws Exception {
+            currentMode = UserMode.LobbyMode;
+            
+            // Initially, server sends the client the current state of the
+            // lobby
+            synchronized (objOutputStream) {
+                synchronized (lobbyGames) {
+                    objOutputStream.writeObject("Lobby");
+                    objOutputStream.writeObject(lobbyGames);
+                    objOutputStream.flush();
+                }
+            }
+  
+            // Listen for client commands while the client is in the lobby.
+            while (currentMode == UserMode.LobbyMode) {
+                // Receive command from the client
+                String msg = (String) objInputStream.readObject();
+                System.out.println("=========RECEIVED MESSAGE=========");
+                System.out.println(msg);
+                System.out.println("==================================");
+
+                String split[] = msg.split("\n");
+                
+                boolean isSuccessful = false;
+                String failureMsg = null;
+                
+                // Perform the appropriate actions in response to the message
+                synchronized (lobbyGames) {
+                    if (split[0].equals("Create Game")) {
+                        
+                        if (lobbyGameName == null) {
+                            if (addGame(split[1], split[2])) {
+                                lobbyGameName = split[1];
+                                isSuccessful = true;
+                            } else {
+                                failureMsg = "Failed to create game '" +
+                                             split[1] + "'";
+                            }
+                        }
+                        
+                    } else if (split[0].equals("Join Game")) {
+                        
+                        if (lobbyGameName == null) {
+                            if (addPlayerToGame(split[1], split[2])) {
+                                lobbyGameName = split[1];
+                                isSuccessful = true;
+                                
+                                // Check to see if the game is now full. If so,
+                                // start the game
+                                if (isGameFull(lobbyGameName)) {
+                                    startNewGame(lobbyGameName);
+                                    currentMode = UserMode.GameMode;
+                                    lobbyGameName = null;
+                                }
+                            } else {
+                                failureMsg = "Failed to add user '" +
+                                             split[2] + "' to game '" +
+                                             split[1] + "'";
+                            }
+                        }
+                        
+                    } else if (split[0].equals("Remove User from Game")) {
+                        
+                        if (removePlayerFromGame(split[1], split[2])) {
+                            lobbyGameName = null;
+                            isSuccessful = true;
+                        } else {
+                            failureMsg = "Failed to remove user '" +
+                                         split[2] + "' from game '" +
+                                         split[1] + "'";
+                        }
+                    } else if (split[0].equals("Query")) { // DEBUGGING CODE
+                        // TEMPORARY CODE FOR DEBUGGING
+                        synchronized (objOutputStream) {
+                            objOutputStream.reset();
+                            objOutputStream.writeObject("Lobby");
+                            objOutputStream.writeObject(lobbyGames);
+                            objOutputStream.flush();
+                        }
+                        
+                        continue;
+                    }
+                }
+                
+                String response = isSuccessful ? "Success" : failureMsg;
+                
+                synchronized (objOutputStream) {
+                    objOutputStream.writeObject(response);
+                    objOutputStream.flush();
+                }
+            }
+            
+            System.out.println("'" + username + "' leaving lobby");
+        }
+     
+        /**
+         * Waits for notification of a change to the lobby. When the lobby
+         * changes, send the update to the user.
+         */
+        private void handleLobbyPush() {
+            while (!Thread.interrupted()) {
+                try {
+                    // Wait for a notification that the lobby has been 
+                    // updated
+                    synchronized (lobbyChangeNotifier) {
+                        lobbyChangeNotifier.wait();
+                    }
+                    
+                    // Send the lobby data to the user
+                    synchronized (objOutputStream) {
+                        synchronized (lobbyGames) {
+                            objOutputStream.reset();
+                            objOutputStream.writeObject(new String("Lobby"));
+                            objOutputStream.writeObject(lobbyGames);
+                            objOutputStream.flush();
+                        }
+                    }
+                    
+                } catch (InterruptedException e) {
+                    // End the thread since it has been interrupted
+                    break;
+                } catch (Exception e) {
+                    // Just continue loop
+                }
+            }
+
+            System.out.println("Ending lobby push thread.");
+            
+        }
+        
+    }
 }
