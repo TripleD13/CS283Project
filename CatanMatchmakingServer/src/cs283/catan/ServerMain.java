@@ -111,14 +111,11 @@ public class ServerMain {
             System.exit(0);
         }
         
-        System.out.println("Server starting...");
+        System.out.println("Server starting...\n");
         
-        String n[] = {"t1", "t2", "t3", "t4"};
-        lobbyGames.put("Game 1", n);
-        String n2[] = {"Austin", "Daniel", "John", "Kevin"};
-        lobbyGames.put("Ultimate Showdown", n2);
-        String n3[] = {"p1", null, null, null};
-        lobbyGames.put("Open Game",  n3);
+        // Code for testing purposes. These players are not actually playing.
+        String sampleNames[] = {"Austin", "Daniel", "Kevin", null};
+        lobbyGames.put("Ultimate Showdown", sampleNames);
         
         // Accept connections and start new threads for each connection
         while (true) {
@@ -326,7 +323,7 @@ public class ServerMain {
         
         System.out.print("Starting the game '" + gameName + "' with the " +
                            "players ");
-        System.out.printf("%s, %s, %s, and %s.\n", playerArray[0], 
+        System.out.printf("'%s', '%s', '%s', and '%s'.\n", playerArray[0], 
                           playerArray[1], playerArray[2], playerArray[3]);
         
         
@@ -563,9 +560,9 @@ public class ServerMain {
             while (currentMode == UserMode.LobbyMode) {
                 // Receive command from the client
                 String msg = (String) objInputStream.readObject();
-                System.out.println("=========RECEIVED MESSAGE=========");
+                System.out.println("\n=========RECEIVED MESSAGE=========");
                 System.out.println(msg);
-                System.out.println("==================================");
+                System.out.println("==================================\n");
 
                 String split[] = msg.split("\n");
                 
