@@ -16,16 +16,26 @@ import javax.swing.UIManager.*;
  *
  */
 public class ClientMain {
-
-    /**
-     * Server IP address
-     */
-    private static final String SERVER_IP = "127.0.0.1";
     
     /**
-     * Server port
+     * Enumeration representing the types of lobby messages
+     *
      */
-    private static final int PORT = 8888;
+    private enum LobbyMessageType {
+        AddUserToGame,
+        RemoveUserFromGame,
+        CreateGame
+    }
+
+    /**
+     * Server socket address
+     */
+    private static InetSocketAddress serverAddress;
+    
+    /**
+     * Timeout in milliseconds when attempting to connect to the server
+     */
+    private static final int CONNECT_TIMEOUT = 5000;
     
     /**
      * Maximum username length
@@ -59,12 +69,11 @@ public class ClientMain {
      * String name of the game, and the value is the String array of players 
      * in the game (should be size 4).
      */
-    private static Map<String, String[]> lobbyGames = 
-                                                new HashMap<String, String[]>();
+    private static Map<String, String[]> lobbyGames;
     
     
     /**
-     * Handle to the receiver thread
+     * Receiver thread object
      */
     private static Thread receiverThread = null;
     
@@ -74,7 +83,33 @@ public class ClientMain {
      */
     public static void main(String[] args) throws Exception {
         
-        // Nicer look and feel
+        // Set the IP and port based on the command line arguments
+        if (args.length == 2) {
+            // Parse the IP address and port number
+            try {
+                serverAddress = 
+                      new InetSocketAddress(args[0], Integer.parseInt(args[1]));      
+                
+                if (serverAddress.isUnresolved()) {
+                    System.out.println("Unresolved host: " + args[0]);
+                    System.exit(0);
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid port: " + args[1]);
+                System.exit(0);
+            } catch (IllegalArgumentException e) {
+                System.out.println("Port not in range: " + args[1]);
+                System.exit(0);
+            }
+        } else {
+            // Print the proper command line usage
+            System.out.println("Usage:\n");
+            System.out.println("java cs283.catan.ClientMain " + 
+                               "<IP_Address> <Port>");
+            System.exit(0);
+        }
+        
+        // Use a nicer look and feel for the GUI if available
         try {
             for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
@@ -96,14 +131,14 @@ public class ClientMain {
             frame.setUndecorated(true);
             frame.setVisible(true);
             frame.setAlwaysOnTop(true);
-            frame.setLocationRelativeTo(null);
+            frame.setLocationRelativeTo(null); // Centers dialog on screen
             
             username = JOptionPane.showInputDialog(frame, "Please enter your " +
                                                           "user name (" + 
                                                           "maximum of 16 " + 
                                                           "characters)");
             
-            if (username == null) {
+            if (username == null) { // User canceled the login dialog, so exit
                 System.exit(0);
             }
             
@@ -134,7 +169,15 @@ public class ClientMain {
         
         // Check to make sure the user is logged on
         if (logonSuccessful) {
-            // Enter lobby mode
+            
+            // Start the receiver thread
+            receiverThread = new Thread(new ClientReceiver());
+            receiverThread.start();
+            
+            // TODO: Start the lobby GUI
+            
+            // Enter lobby mode (replace this line with something to start the
+            // GUI
             lobbyMode();
         }
 
@@ -166,14 +209,16 @@ public class ClientMain {
         String message = null;
         
         try {
-            InetAddress serverIP = InetAddress.getByName(SERVER_IP);
             
             // If socket previously opened, close it
             if (clientSocket != null) {
                 clientSocket.close();
             }
             
-            clientSocket = new Socket(serverIP, PORT);
+            clientSocket = new Socket();
+            
+            // Attempt to connect to the server
+            clientSocket.connect(serverAddress, CONNECT_TIMEOUT);
             
             // Send the username to the server
             objOutputStream = 
@@ -189,7 +234,6 @@ public class ClientMain {
             message = (String) objInputStream.readObject();
             
         } catch (Exception e) {
-            e.printStackTrace();
             return "Unable to connect to game server: " + e.getMessage();
         }
        
@@ -201,22 +245,12 @@ public class ClientMain {
     }
     
     /**
-     * Manage the lobby mode.
+     * Manage the lobby mode. TEMPORARY, WILL BE REPLACED BY GUI.
      */
-    @SuppressWarnings("unchecked")
     private static void lobbyMode() {
         Scanner scanner = new Scanner(System.in);
         
         try {
-            // Receive the initial lobby data from the server
-            lobbyGames = (Map<String, String[]>) objInputStream.readObject();
-            
-            printLobby();
-            
-            
-            // Start the receiver thread
-            receiverThread = new Thread(new ClientReceiver());
-            receiverThread.start();
             
             String input;
             
@@ -227,19 +261,19 @@ public class ClientMain {
                     
                     System.out.print("Please enter the name of the game: ");
                     String gameName = scanner.nextLine();
-                    sendCreateGameMsg(gameName);
+                    sendLobbyMsg(LobbyMessageType.CreateGame, gameName);
                     
                 } else if (input.toLowerCase().equals("join game")) {
                     
                     System.out.print("Please enter the name of the game: ");
                     String gameName = scanner.nextLine();
-                    sendAddUserToGameMsg(gameName);
+                    sendLobbyMsg(LobbyMessageType.AddUserToGame, gameName);
                     
                 } else if (input.toLowerCase().equals("exit game")) {
                     
                     System.out.print("Please enter the name of the game: ");
                     String gameName = scanner.nextLine();
-                    sendRemoveUserFromGameMsg(gameName);
+                    sendLobbyMsg(LobbyMessageType.RemoveUserFromGame, gameName);
                     
                 } else if (input.toLowerCase().equals("query")) {
                     // TEMPORARY CODE FOR DEBUGGING PURPOSES
@@ -259,7 +293,8 @@ public class ClientMain {
     
     
     /**
-     * Print out the current state of the lobby
+     * Print out the current state of the lobby. TEMPORARY, WILL BE REPLACED BY
+     * GUI.
      */
     private static void printLobby() {
         System.out.println("==============Lobby Games===============\n");
@@ -293,44 +328,37 @@ public class ClientMain {
     }
     
     /**
-     * Sends a message to the server requesting to add the current user
-     * to the game with gameName.
+     * Sends a lobby message to the server requesting to perform some action
+     * related to the game gameName.
+     * @param msgType
      * @param gameName
      */
-    private static void sendAddUserToGameMsg(String gameName) throws Exception {
-        // Send the request to the server
-        String msg = "Join Game\n" + gameName + "\n" + username;
+    
+    private static void sendLobbyMsg(LobbyMessageType msgType, String gameName) 
+                                     throws Exception {
         
-        objOutputStream.writeObject(msg);
-        objOutputStream.flush();
+        String msg = null;
+        
+        // Form the message depending on the message type
+        switch (msgType) {
+        case AddUserToGame:
+            msg = "Join Game\n" + gameName + "\n" + username;
+            break;
+        case RemoveUserFromGame:
+            msg = "Remove User from Game\n" + gameName + "\n" + username;
+            break;
+        case CreateGame:
+            msg = "Create Game\n" + gameName + "\n" + username;
+            break;
+        }
+        
+        // Only send a message if one was created
+        if (msg != null) {
+            objOutputStream.writeObject(msg);
+            objOutputStream.flush();
+        }
     }
     
-    /**
-     * Sends a message to the server requesting to remove the current user from
-     * the game with gameName.
-     * @param gameName
-     */
-    private static void sendRemoveUserFromGameMsg(String gameName)
-                                                 throws Exception {
-        // Send the request to the server
-        String msg = "Remove User from Game\n" + gameName + "\n" + username;
-        
-        objOutputStream.writeObject(msg);
-        objOutputStream.flush();
-    }
-    
-    /**
-     * Sends a message to the server requesting to create the game with gameName
-     * and user username.
-     * @param gameName
-     */
-    private static void sendCreateGameMsg(String gameName) throws Exception {
-        // Send the request to the server
-        String msg = "Create Game\n" + gameName + "\n" + username;
-        
-        objOutputStream.writeObject(msg);
-        objOutputStream.flush();
-    }
     
     /**
      * Class that handles the receiving of network data in a separate thread
@@ -367,6 +395,9 @@ public class ClientMain {
                     // the thread
                     System.out.println("Receiver can no longer receive from " +
                                        "server.");
+                    
+                    // TODO: Probably should make sure program exits at this
+                    //       point
                     break;
                 } catch (Exception e) {
                     e.printStackTrace();

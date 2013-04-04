@@ -174,6 +174,7 @@ public class ServerMain {
             // lobby
             synchronized (objOutputStream) {
                 synchronized (lobbyGames) {
+                    objOutputStream.writeObject("Lobby");
                     objOutputStream.writeObject(lobbyGames);
                     objOutputStream.flush();
                 }
@@ -427,7 +428,6 @@ public class ServerMain {
     private static boolean removePlayerFromGame(String gameName, 
                                                 String username) {
         boolean isPlayerRemoved = false;
-        boolean isGameEmpty = false;
         
         String playerArray[] = lobbyGames.get(gameName);
         
