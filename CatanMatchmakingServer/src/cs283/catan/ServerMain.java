@@ -63,6 +63,13 @@ public class ServerMain {
     private static Map<String, String[]> lobbyGames = 
                                                 new HashMap<String, String[]>();
     
+    /**
+     * Map that will store the games currently in progress. The key is the
+     * String name of the game, and the value is the game object.
+     */
+    private static Map<String, Object> inProgressGames = 
+                                                  new HashMap<String, Object>();
+    
     
     /**
      * Object that is used to notify user threads that the lobby has changed
@@ -78,8 +85,7 @@ public class ServerMain {
     public static void main(String[] args) {
         // Read the port from the command line arguments
         if (args.length != 1) {
-            System.out.println("Usage:\n");
-            System.out.println("java cs283.catan.ServerMain <Port>");
+            System.out.println("Usage: <Port>");
             System.exit(0);
         }
         
@@ -154,7 +160,9 @@ public class ServerMain {
         boolean isGameAdded = false;
         
         // Make sure the game does not already exist
-        if (!lobbyGames.containsKey(gameName)) {
+        if (!lobbyGames.containsKey(gameName) && 
+            !inProgressGames.containsKey(gameName)) {
+            
             // Create a String array to hold the 4 players
             String playerArray[] = new String[4];
             
@@ -312,8 +320,9 @@ public class ServerMain {
      * @param gameName
      */
     private static void startNewGame(String gameName) {
-        // Remove the game from the lobby
+        // Remove the game from the lobby and add to in progress games
         String playerArray[] = lobbyGames.remove(gameName);
+        inProgressGames.put(gameName, new Object());
         
         System.out.print("Starting the game '" + gameName + "' with the " +
                            "players ");
@@ -590,8 +599,6 @@ public class ServerMain {
                                 // start the game
                                 if (isGameFull(lobbyGameName)) {
                                     startNewGame(lobbyGameName);
-                                    currentMode = UserMode.GameMode;
-                                    lobbyGameName = null;
                                 }
                             }
                         }
@@ -612,6 +619,21 @@ public class ServerMain {
                         if (!isSuccessful) {
                             failureMsg = "Failed to remove user '" +
                                          split[2] + "' from game '" +
+                                         split[1] + "'";
+                        }
+                    } else if (split[0].equals("Begin Game")) {
+                        // Make sure game can start
+                        if (lobbyGameName != null &&
+                            inProgressGames.containsKey(lobbyGameName)) {
+                            
+                            currentMode = UserMode.GameMode;
+                            lobbyGameName = null;
+                            
+                            isSuccessful = true;
+                        }
+                        
+                        if (!isSuccessful) {
+                            failureMsg = "Failed to begin playing game '" +
                                          split[1] + "'";
                         }
                     } else if (split[0].equals("Query")) { // DEBUGGING CODE
@@ -652,12 +674,24 @@ public class ServerMain {
                     }
                     
                     // Send the lobby data to the user
-                    synchronized (objOutputStream) {
-                        synchronized (lobbyGames) {
+                    synchronized (lobbyGames) {
+                        synchronized (objOutputStream) {
                             objOutputStream.reset();
                             objOutputStream.writeObject(new String("Lobby"));
                             objOutputStream.writeObject(lobbyGames);
                             objOutputStream.flush();
+                            
+                            
+                            // Check if lobby game has been move to in progress
+                            // games
+                            if (lobbyGameName != null &&
+                                inProgressGames.containsKey(lobbyGameName)) {
+                                
+                                // Send message to the client indicating that
+                                // the game is starting
+                                objOutputStream.writeObject("Game starting");
+                                objOutputStream.flush();
+                            }
                         }
                     }
                     

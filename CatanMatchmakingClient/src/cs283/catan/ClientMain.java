@@ -86,9 +86,7 @@ public class ClientMain {
         // Set the IP and port based on the command line arguments
         if (args.length != 2) {
             // Print the proper command line usage
-            System.out.println("Usage:\n");
-            System.out.println("java cs283.catan.ClientMain " + 
-                               "<IP_Address> <Port>");
+            System.out.println("Usage: <IP_Address> <Port>");
             System.exit(0);
         }
        
@@ -355,8 +353,10 @@ public class ClientMain {
         
         // Only send a message if one was created
         if (msg != null) {
-            objOutputStream.writeObject(msg);
-            objOutputStream.flush();
+            synchronized (objOutputStream) {
+                objOutputStream.writeObject(msg);
+                objOutputStream.flush();
+            }
         }
     }
     
@@ -385,6 +385,18 @@ public class ClientMain {
                                 objInputStream.readObject();
                    
                         printLobby();
+                    } else if (message.equals("Game starting")) {
+                        
+                        // Game starting, confirm that client is ready to play
+                        // TODO: May want to move where this confirmation
+                        // message is sent to GUI thread
+                        synchronized (objOutputStream) {
+                            objOutputStream.writeObject("Begin Game");
+                            objOutputStream.flush();
+                        }
+                        
+                        break;
+                        
                     } else {
                         System.out.println("Server response: " + message);
                     }
