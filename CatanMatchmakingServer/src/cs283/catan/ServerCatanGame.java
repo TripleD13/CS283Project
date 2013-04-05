@@ -13,7 +13,7 @@ public class ServerCatanGame
 	//number of users playing the game
 	private int numUsers;
 	//array representing the users in the game
-	private User[] userArray; //keep users in sorted order
+	private Player[] userArray; //keep users in sorted order
 	
 	 
 	// array of development cards represents the deck
@@ -23,18 +23,100 @@ public class ServerCatanGame
 	private int diceRoll;
 	private Random rollGenerator;
 	
+	private Board myBoard;
+	
+	private boolean victory;
+	
 	//alternate constructor = we will use this to construct the game
 	public ServerCatanGame()
 	{
+		myBoard = new Board(); //TODO: this will construct the board and set it up
+		//this is done the same way every time - the board is not generated randomly
+		
+		//set up user array - using objects John gives us
+		
 		rollGenerator = new Random();
 		numUsers = 4;
 		turn = 0;
+		victory = false;
 	}
+	/**
+	 *  - performs all setup not done in constructor, involves putting board together
+	 */
+	public void gameSetup()
+	{
+		//stuff involving the board
+	}
+	
+	/**
+	 * mainGameLoop - we set up the game, play until victory
+	 * then clean up the game
+	 */
+	public void mainGameLoop()
+	{
+		gameSetup();
+		while(!victory)
+		{
+			playTurn();
+		}
+		
+		cleanup();
+	}
+	
+	/**
+	 * - performs all necessary cleanup to end the game - requires integration
+	 * with networking environment
+	 */
+	public void cleanup()
+	{
+		
+	}
+	
+	
+	public void playTurn()
+	{
+		//during a turn, three things happen - the server rolls the dice and 
+		//players get resource cards and perform trades
+		
+		deliverResCards();
+		trade(); //complete any trades
+		playDevCards();		
+		
+	}
+	
+	public void playDevCards()
+	{
+		System.out.println("Here's where we play development cards."); 
+	}
+	
+	public void trade()
+	{
+		System.out.println("Here's where we trade."); 
+		//INCLUDE MESSAGE ABOUT WHOSE TURN IT IS
+	}
+	
+	public void deliverResCards()
+	{
+		//we roll the dice
+		rollDice();
+		//now we iterate through players to see what they get
+		for(int i = 0; i < numUsers; ++i)
+		{
+			userArray[i].giveResCard(diceRoll);
+		}
+		// users now have updated dice rolls
+		
+		
+	}
+	
+	
+	
 	/**
 	 * getTurn
 	 * @return - the index of the userArray representing the user currently
 	 * on his/her turn
 	 */
+	
 	public int getTurn()
 	{
 		return turn;
