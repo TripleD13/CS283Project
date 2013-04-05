@@ -27,26 +27,43 @@ public class ServerCatanGame
 	
 	private boolean victory;
 	
+	private int turnNumber; //for debugging purposes
+	
 	//alternate constructor = we will use this to construct the game
 	public ServerCatanGame()
 	{
 		myBoard = new Board(); //TODO: this will construct the board and set it up
 		//this is done the same way every time - the board is not generated randomly
-		
-		//set up user array - using objects John gives us
-		
-		rollGenerator = new Random();
 		numUsers = 4;
 		turn = 0;
-		victory = false;
+		turnNumber = 0; // zero indexed
+		victory = false; // nobody has declared victory yet - it's the start of the game
+		//set up user array - using objects John gives us
+		userArray = new Player[numUsers];
+		
+		//this isn't C++, so we need to initialize the array with new objects
+		for(int i = 0; i < numUsers; ++i)
+		{
+			String playerString = "Player " + i;// for debugging
+			userArray[i] = new Player(playerString);
+		}
+		
+		// we also need a to generate dice rolls
+		rollGenerator = new Random();
+		
+		
 	}
 	/**
 	 *  - performs all setup not done in constructor, involves putting board together
+	 *  involves the board. ugh.
 	 */
 	public void gameSetup()
 	{
 		//stuff involving the board
 	}
+	
+	
+	
 	
 	/**
 	 * mainGameLoop - we set up the game, play until victory
@@ -57,26 +74,33 @@ public class ServerCatanGame
 		gameSetup();
 		while(!victory)
 		{
+			System.out.println("It's turn number: " + turnNumber + ".");
 			playTurn();
+			advanceTurn();
+			if(turnNumber == 100)
+				victory = true;
 		}
-		
+		System.out.println("Victory!");
 		cleanup();
 	}
 	
 	/**
 	 * - performs all necessary cleanup to end the game - requires integration
-	 * with networking environment
+	 * with networking environment - perhaps unnecessary due to Java's memory
+	 * managmeent
 	 */
 	public void cleanup()
 	{
 		
 	}
 	
-	
+	/**
+	 * playTurn () - three things happen - the server rolls the dice and 
+	 * players get resource cards and perform trades. They may also play
+	 * development cards
+	 */
 	public void playTurn()
 	{
-		//during a turn, three things happen - the server rolls the dice and 
-		//players get resource cards and perform trades
 		
 		deliverResCards();
 		trade(); //complete any trades
@@ -86,19 +110,26 @@ public class ServerCatanGame
 	
 	public void playDevCards()
 	{
-		System.out.println("Here's where we play development cards."); 
+		System.out.println("Here's where we play development cards."+
+				userArray[turn].getUsername() + " can play development cards."); 
 	}
 	
 	public void trade()
 	{
-		System.out.println("Here's where we trade."); 
-		//INCLUDE MESSAGE ABOUT WHOSE TURN IT IS
+		System.out.println("Here's where we trade. At this time, " 
+				+ userArray[turn].getUsername() + " can trade."); 
+		
 	}
 	
 	public void deliverResCards()
 	{
 		//we roll the dice
 		rollDice();
+		System.out.println("Our dice roll is " + getDiceRoll() + ".");
+		if(getDiceRoll()==7)
+		{
+			rolledSeven();
+		}
 		//now we iterate through players to see what they get
 		for(int i = 0; i < numUsers; ++i)
 		{
@@ -109,7 +140,21 @@ public class ServerCatanGame
 		
 	}
 	
+	public void rolledSeven()
+	{
+		moveRobber();
+		stealCard();
+	}
 	
+	private void moveRobber()
+	{
+		
+	}
+	
+	private void stealCard()
+	{
+		
+	}
 	
 	/**
 	 * getTurn
@@ -136,6 +181,7 @@ public class ServerCatanGame
 	public void advanceTurn()
 	{
 		turn = (turn+1)%numUsers;
+		turnNumber++;
 	}
 	
 	public DevelopmentCard drawDevelopmentCard()

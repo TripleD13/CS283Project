@@ -5,6 +5,17 @@ public class Player extends User
 	public DevelopmentCard[] devCards;
 	public int points;
 	
+	public String username;
+	
+	public Player(String username)
+	{
+		this.username = username;
+	}
+	
+	public String getUsername()
+	{
+		return this.username;
+	}
 	
 	public boolean hasSettlement(int x, int y)
 	{

@@ -25,6 +25,9 @@ public class CatanGameDriver
 		
 		System.out.println("DEBUG: DRAWING DEVELOPMENT CARDS");
 		System.out.println(testGame.drawDevelopmentCard().toString());
+		
+		testGame.mainGameLoop();
+		
 	}
 		
 }
