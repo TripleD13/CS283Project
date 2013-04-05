@@ -7,6 +7,7 @@ import java.net.Socket;
 
 
 public class ChatClient {
+	//when created, inherits the server socket
 	public ChatClient(Socket srvSocket)
 	{
 		serverSocket = srvSocket;
@@ -16,6 +17,7 @@ public class ChatClient {
 	
 	//send socket
 	Socket serverSocket;
+	//test identity, to be eliminated
 	static String identity = "Tester: " ;
 	
 	
@@ -28,8 +30,10 @@ public class ChatClient {
 		BufferedReader commandLineInput = new BufferedReader(new InputStreamReader(System.in));
 		while (true)
 		{
+
 			String message = "NULL";
 			String messageToSend = identity;
+			
 			//input message
 			try
 			{
@@ -58,6 +62,7 @@ public class ChatClient {
 				messageToSend = messageToSend.concat(stringSpace);*/
 				messageToSend = messageToSend.concat(message.substring(lastIndex+1));
 				messageToSend = messageToSend.concat(" ***PRIVATE***");
+
 			}else
 			{
 			//if not targeted, packetize
@@ -68,21 +73,31 @@ public class ChatClient {
 			String chatCommand = "chat*";
 			messageToSend = chatCommand.concat(messageToSend);
 			byte [] messageBytes = messageToSend.getBytes();
-			System.out.println(messageToSend);
 			
-			
+			//chat*Tester: "Fred" Test this ***PRIVATE***
 		}
 	}
 	
 	
-	public static void messageDisplayThread(String messageReceived)
+	public static void messageDisplayThread(String message)
 	{
 
 		while (true)
 		{
 		//receive message
-		
-		//depacketize message
+		String messageToDisplay = "";
+		//Tester: /*/Fred*/* I hate you!!! ***PRIVATE***
+		int firstIndex = message.indexOf("/*/");
+		if ( firstIndex != -1)
+		{
+			int lastIndex = message.indexOf("*/*");
+			String id = message.substring(0, firstIndex-1);
+			String messageMessage = message.substring(lastIndex+3);
+			messageToDisplay = id.concat(messageMessage);
+		}else
+		{
+			messageToDisplay = message;
+		}
 	//	messageReceived = new String(messageBytesReceived);
 		
 		//display message
