@@ -1,5 +1,5 @@
 package cs283.catan;
-public class Player extends User
+public class Player
 {
 	public ResourceCard[] resCards;
 	public DevelopmentCard[] devCards;
