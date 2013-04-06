@@ -585,6 +585,48 @@ public static void main(String args[]) {
 	}
 	
 	/**
+	 * Returns a list of the resource cards a player would earn if a certain 
+	 * number was rolled.
+	 * @param rollNumber
+	 * @param player
+	 * @return a list of the earned resource cards.
+	 */
+	public List<ResourceCard> getResourceCardsEarned(int rollNumber, 
+	                                                 Player player) {
+	    List<ResourceCard> cardsEarned = new LinkedList<ResourceCard>();
+	    
+	    // For each tile that has the roll number, look at all of its nodes
+	    // and see if the player has a settlement on any of them
+	    for (Tile tile : tileSet.values()) {
+	        if (tile.getRollNumber() == rollNumber) {
+	            for (Coordinate tileCoord : tile.getNormalizedCoordinates()) {
+	                
+	                Node tileNode = nodeSet.get(tileCoord);
+	                
+	                if (tileNode.hasSettlement()) {
+	                    Settlement settlement = tileNode.getSettlement();
+	                    
+	                    if (settlement.getOwner().getUsername() == 
+	                        player.getUsername()) {
+	                        
+	                        // If the settlement is a city, add 2 points,
+	                        // otherwise add 1 point
+	                        for (int i = 0; i < (settlement.isCity() ? 2 : 1);
+	                             i++) {
+	                            
+	                            cardsEarned.add(
+	                                      new ResourceCard(tile.getTileType()));
+	                        }
+	                    }
+	                }
+	            }
+	        }
+	    }
+	    
+	    return cardsEarned;
+	}
+	
+	/**
 	 * Class representing a tile on the board
 	 */
 	public class Tile {
@@ -607,7 +649,12 @@ public static void main(String args[]) {
 	    /**
 	     * Resource type of the tile
 	     */
-	    private final ResourceCard.CardType tileType;
+	    private final ResourceCard.CardType tileType;    
+	    
+	    /**
+	     * List of coordinates of nodes adjacent to the tile
+	     */
+	    private List<Coordinate> coordinates = new LinkedList<Coordinate>();
 	    
 	    
 	    /**
@@ -623,6 +670,13 @@ public static void main(String args[]) {
 	        this.y = y;
 	        this.rollNumber = rollNumber;
 	        this.tileType = tileType;
+	        
+	        // Build the list of normalized coordinates of nodes adjacent to 
+	        // the tile
+	        for (int i = 0; i < 6; i++) {
+	            Coordinate coord = new Coordinate(x, y, i);
+	            coordinates.add(coord.normalizeCoordinate());
+	        }
 	    }
 	    
 	    
@@ -666,6 +720,16 @@ public static void main(String args[]) {
 	     */
 	    public final boolean isDesert() {
 	        return tileType == ResourceCard.CardType.DESERT;
+	    }
+	    
+	    /**
+	     * Returns a list of normalized coordinates of nodes that are adjacent
+	     * to the tile. This list is precomputed in the constructor.
+	     * @return a list of normalized coordinates of nodes that are adjacent
+	     *         to the tile.
+	     */
+	    public final List<Coordinate> getNormalizedCoordinates() {
+	        return coordinates;
 	    }
 	}
 	

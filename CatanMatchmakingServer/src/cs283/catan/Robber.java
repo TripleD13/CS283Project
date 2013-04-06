@@ -21,6 +21,14 @@ public class Robber {
     
     
     /**
+     * Sets the location of the robber.
+     * @param location
+     */
+    public final void setLocation(Board.Coordinate location) {
+        this.location = location;
+    }
+    
+    /**
      * Retrieves the location of the robber.
      * @return the location of the robber.
      */

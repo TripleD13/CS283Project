@@ -32,8 +32,8 @@ public class ServerCatanGame
 	//alternate constructor = we will use this to construct the game
 	public ServerCatanGame()
 	{
-		myBoard = new Board(); //TODO: this will construct the board and set it up
-		//this is done the same way every time - the board is not generated randomly
+		myBoard = new Board();
+			
 		numUsers = 4;
 		turn = 0;
 		turnNumber = 0; // zero indexed
@@ -60,6 +60,16 @@ public class ServerCatanGame
 	public void gameSetup()
 	{
 		//stuff involving the board
+	       
+        // Initialize the board graph and tiles
+        if (!myBoard.loadBoardGraphFromFile("board.csv")) {
+            System.out.println("Unable to load board graph data!");
+        }
+        
+        // TODO: if we have time, we could make tile generation random
+        if (!myBoard.loadBoardTilesFromFile("tiles.csv")) {
+            System.out.println("Unable to load tiles from file!");
+        }
 	}
 	
 	
