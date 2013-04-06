@@ -78,6 +78,9 @@ public static void main(String args[]) {
         Coordinate coord2 = new Coordinate(x, y, z);
         
         System.out.printf("%s is adjacent to %s: ", coord, coord2);
+        System.out.printf("Normalized: %s %s\n", coord.normalizeCoordinate(), coord2.normalizeCoordinate());
+        
+        Node test = b.nodeSet.get(coord.normalizeCoordinate());
         System.out.println(b.nodeSet.get(coord.normalizeCoordinate()).isAdjacent(coord2.normalizeCoordinate()));
         
     }
@@ -93,7 +96,7 @@ public static void main(String args[]) {
         public final int z;
         
         /**
-         * Constructor
+         * Constructor taking coordinate values
          * @param x
          * @param y
          * @param z
@@ -102,6 +105,41 @@ public static void main(String args[]) {
             this.x = x;
             this.y = y;
             this.z = z;
+            
+            // Make sure that the z coordinate is in the range [0, 5]
+            if (z < 0 || z > 5) {
+                throw new IllegalArgumentException("Coordinate out of range!");
+            }
+        }
+        
+        /**
+         * Constructor taking a string representing the coordinate that has
+         * no spaces, e.g., (-1, 2, 1) would be represented as -121.
+         * @param coordinate
+         */
+        public Coordinate(String coordinate) {
+            // Extract the coordinate of the node from the node name
+            int start = 0;
+            int finish = 1;
+            
+            if (coordinate.charAt(start) == '-') {
+                finish++;
+            }
+            
+            x = Integer.parseInt(coordinate.substring(start, finish));
+            
+            start = finish;
+            finish = start + 1;
+            
+            if (coordinate.charAt(start) == '-') {
+                finish++;
+            }
+            
+            y = Integer.parseInt(coordinate.substring(start, finish));
+            
+            z = Integer.parseInt(coordinate.substring(finish, 
+                                                      coordinate.length()));
+            
             
             // Make sure that the z coordinate is in the range [0, 5]
             if (z < 0 || z > 5) {
@@ -155,6 +193,39 @@ public static void main(String args[]) {
         public String toString() {
             return String.format("(%d, %d, %d)", x, y, z);
         }
+        
+       
+        /**
+         * Compares this Coordinate object with another Coordinate object.
+         * @param other
+         * @return whether or not the objects are the same.
+         */
+        @Override
+        public boolean equals(Object other) {
+            boolean isEqual = false;
+            
+            if (other == this) {
+                isEqual = true;
+            } else if (other != null && other.getClass() == this.getClass()) {
+                Coordinate otherCoord = (Coordinate) other;
+                
+                isEqual = otherCoord.x == this.x && otherCoord.y == this.y &&
+                          otherCoord.z == this.z;
+            }
+
+            return isEqual;
+        }
+        
+        /**
+         * Computes the hashcode for this class.
+         * @return the computed hashcode.
+         */
+        @Override
+        public int hashCode() {
+            int code = x * 10000 + y * 100 + z * 100000;
+            
+            return code;
+        }
     }
     
     
@@ -207,40 +278,19 @@ public static void main(String args[]) {
 	                // Create the list of neighbors of the node if the node
 	                // has neighbors
 	                if (split.length > 1) {
-	                    String neighbors[] = new String[split.length - 1];
+	                    Coordinate neighbors[] = 
+	                                           new Coordinate[split.length - 1];
 	                    
 	                    for (int i = 1; i < split.length; i++) {
-	                        neighbors[i - 1] = split[i];
+	                        neighbors[i - 1] = new Coordinate(split[i]);
 	                    }
 	                    
 	                    newNode.setNeighbors(neighbors);
 	                }
 	                
 	                // Extract the coordinate of the node from the node name
-	                int x = 0; int y = 0; int z = 0;
-	                int start = 0;
-	                int finish = 1;
-	                
-	                if (split[0].charAt(start) == '-') {
-	                    finish++;
-	                }
-	                
-	                x = Integer.parseInt(split[0].substring(start, finish));
-	                
-	                start = finish;
-	                finish = start + 1;
-	                
-	                if (split[0].charAt(start) == '-') {
-	                    finish++;
-	                }
-	                
-	                y = Integer.parseInt(split[0].substring(start, finish));
-	                
-	                z = Integer.parseInt(split[0].substring(finish, 
-	                                                        split[0].length()));
-	                
-	                // Add the node to the set of nodes
-	                Coordinate coord = new Coordinate(x, y, z);
+	                // and add the node to the set of nodes
+	                Coordinate coord = new Coordinate(split[0]);
 	                nodeSet.put(coord.normalizeCoordinate(), newNode);
 	            }
 	            
@@ -266,14 +316,14 @@ public static void main(String args[]) {
 	    /**
 	     * List of all nodes adjacent to this node
 	     */
-	    private String neighbors[];
+	    private Coordinate neighbors[];
 	    
 	    
 	    /**
 	     * Sets the list of nodes adjacent to this node.
 	     * @param neighbors
 	     */
-	    public void setNeighbors(String neighbors[]) {
+	    public void setNeighbors(Coordinate neighbors[]) {
 	        this.neighbors = neighbors;
 	    }
 	    
@@ -281,7 +331,7 @@ public static void main(String args[]) {
 	     * Gets the list of nodes adjacent to this node.
 	     * @return the list of neighbors.
 	     */
-	    public final String[] getNeighbors() {
+	    public final Coordinate[] getNeighbors() {
 	        return neighbors;
 	    }
 	    
@@ -305,6 +355,8 @@ public static void main(String args[]) {
 	        
 	        return isAdj;
 	    }
+	    
 	}
+	
 	
 }
