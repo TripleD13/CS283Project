@@ -464,6 +464,23 @@ public static void main(String args[]) {
 	    return isRoadAdded;
 	}
 	
+	/**
+	 * Returns the name of the player who has the longest road. If no one
+	 * has the longest road, return null.
+	 * @return the name of the player with the longest road, or null if no
+	 *         one has the longest road.
+	 */
+	public String whoHasLongestRoad() {
+	    // TODO: add algorithm to determine longest road
+	    
+	    String longestRoadOwner = null;
+	    
+	    if (roadSet.containsKey("John")) {
+	        longestRoadOwner = "John";
+	    }
+	    
+	    return longestRoadOwner;
+	}
 	
 	/**
 	 * Class representing a tile on the board
