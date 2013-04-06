@@ -3,6 +3,6 @@ public class ResourceCard extends Card
 {
 	public enum CardType
 	{
-		LUMBER, WOOL, WHEAT, BRICK, ORE
+		LUMBER, WOOL, WHEAT, BRICK, ORE, DESERT
 	}
 }

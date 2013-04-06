@@ -17,10 +17,15 @@ public class Board {
     /**TEMPORARY METHOD!!!*/
 public static void main(String args[]) {
     Board b = new Board();
-    b.loadBoardFromFile("board.csv");
+    b.loadBoardGraphFromFile("board.csv");
+    b.loadBoardTilesFromFile("tiles.csv");
     
     for (Map.Entry<Coordinate, Node> x : b.nodeSet.entrySet()) {
         System.out.println(x.getKey());
+    }
+    
+    for (Map.Entry<Coordinate, Tile> x : b.tileSet.entrySet()) {
+        System.out.println("Tile: " + x.getKey() + "    roll: " + x.getValue().getRollNumber() + "\ttype: " + x.getValue().getTileType());
     }
     
     Scanner in = new Scanner(System.in);
@@ -244,14 +249,21 @@ public static void main(String args[]) {
      * Map of all of the nodes in the graph. The key is the coordinate of the
      * node and the value is the node.
      */
-    Map<Coordinate, Node> nodeSet = new HashMap<Coordinate, Node>();
+    private Map<Coordinate, Node> nodeSet = new HashMap<Coordinate, Node>();
     
     /**
      * Map of all road node sets in the graph. The key is the player name and
      * the value is the map of all nodes of the roads owned by the player.
      */
-    Map<String, Map<Coordinate, Node>> roadSet = 
+    private Map<String, Map<Coordinate, Node>> roadSet = 
                                    new HashMap<String, Map<Coordinate, Node>>();
+    
+    /**
+     * Map of all the tiles on the board. The key is the coordinate of the tile
+     * (Coordinate object, but the z coordinate is always 0) and the value is
+     * the Tile object representing the tile.
+     */
+    private Map<Coordinate, Tile> tileSet = new HashMap<Coordinate, Tile>();
     
     /**
      * Object representing the robber
@@ -268,12 +280,12 @@ public static void main(String args[]) {
 	
 	
 	/**
-	 * Initializes the board from a csv file that contains an adjacency list
-	 * representation of the graph
+	 * Initializes the board graph from a csv file that contains an adjacency
+	 * list representation of the graph
 	 * @param fileName
 	 * @return whether or not the board was successfully loaded.
 	 */
-	public boolean loadBoardFromFile(String fileName) {
+	public boolean loadBoardGraphFromFile(String fileName) {
 	    boolean isSuccessful = false;
 	    
 	    // Attempt to read the data from the file
@@ -322,6 +334,72 @@ public static void main(String args[]) {
 	            e.printStackTrace();
 	        }
 	    }
+	    
+	    return isSuccessful;
+	}
+	
+	/**
+	 * Initializes the board tiles from a csv file that contains the x and y
+	 * coordinates, the roll number, and the tile type for each tile.
+	 * @param fileName
+	 * @return whether or not the tiles were successfully loaded from the file.
+	 */
+	public boolean loadBoardTilesFromFile(String fileName) {
+	    boolean isSuccessful = false;
+	    
+	    // Attempt to read the data from the file
+        File tileFile = new File(fileName);
+        if (tileFile.exists()) {
+            try {
+                Scanner fileInput = new Scanner(new FileInputStream(tileFile));
+                fileInput.useDelimiter("\\s|,|;");
+                
+                // Read each line of the file. Each line represents a vertex
+                // and its adjacency list
+                while (fileInput.hasNext()) {
+                    
+                    // Obtain the tile information
+                    int x = fileInput.nextInt();
+                    int y = fileInput.nextInt();
+                    int rollNumber = fileInput.nextInt();
+                    String cardTypeString = fileInput.next();
+                    ResourceCard.CardType cardType;
+                    
+                    switch (cardTypeString.toLowerCase()) {
+                    case "lumber":
+                        cardType = ResourceCard.CardType.LUMBER;
+                        break;
+                    case "wool":
+                        cardType = ResourceCard.CardType.WOOL;
+                        break;
+                    case "wheat":
+                        cardType = ResourceCard.CardType.WHEAT;
+                        break;
+                    case "brick":
+                        cardType = ResourceCard.CardType.BRICK;
+                        break;
+                    case "ore":
+                        cardType = ResourceCard.CardType.ORE;
+                        break;
+                    case "desert":
+                        cardType = ResourceCard.CardType.DESERT;
+                    default:
+                        cardType = ResourceCard.CardType.DESERT;
+                    }
+                    
+                    tileSet.put(new Coordinate(x, y, 0),  
+                                new Tile(x, y, rollNumber, cardType));
+                }
+                
+                fileInput.close();
+                
+                
+                isSuccessful = true;
+                
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
 	    
 	    return isSuccessful;
 	}
@@ -465,6 +543,30 @@ public static void main(String args[]) {
 	}
 	
 	/**
+	 * Adds a tile to the board if it does not already exist.
+	 * @param x
+	 * @param y
+	 * @param rollNumber
+	 * @param tileType
+	 * @return whether or not the tile was added.
+	 */
+	public boolean addTile(int x, int y, int rollNumber,
+	                       ResourceCard.CardType tileType) {
+	    boolean isTileAdded = false;
+	    
+	    Coordinate tileCoordinate = new Coordinate(x, y, 0);
+	    
+	    if (!tileSet.containsKey(tileCoordinate)) {
+	        tileSet.put(tileCoordinate, new Tile(x, y, rollNumber, 
+	                                             tileType));
+	        
+	        isTileAdded = true;
+	    }
+	    
+	    return isTileAdded;
+	}
+	
+	/**
 	 * Returns the name of the player who has the longest road. If no one
 	 * has the longest road, return null.
 	 * @return the name of the player with the longest road, or null if no
@@ -507,40 +609,20 @@ public static void main(String args[]) {
 	     */
 	    private final ResourceCard.CardType tileType;
 	    
-	    /**
-	     * Whether or not the tile is a desert (in which case the resource type
-	     * of the tile is irrelevant)
-	     */
-	    private final boolean isDesert;
-	    
 	    
 	    /**
-	     * Constructor (assumes that the tile is not a desert)
+	     * Constructor
 	     * @param x
 	     * @param y
 	     * @param rollNumber
 	     * @param tileType
-	     */
-	    public Tile(int x, int y, int rollNumber, 
-	                ResourceCard.CardType tileType) {
-	        this(x, y, rollNumber, tileType, false);
-	    }
-	    
-	    /**
-	     * Full constructor
-	     * @param x
-	     * @param y
-	     * @param rollNumber
-	     * @param tileType
-	     * @param isDesert
 	     */
 	    public Tile(int x, int y, int rollNumber,
-	                ResourceCard.CardType tileType, boolean isDesert) {
+	                ResourceCard.CardType tileType) {
 	        this.x = x;
 	        this.y = y;
 	        this.rollNumber = rollNumber;
 	        this.tileType = tileType;
-	        this.isDesert = isDesert;
 	    }
 	    
 	    
@@ -583,7 +665,7 @@ public static void main(String args[]) {
 	     * @return whether or not the tile is a desert.
 	     */
 	    public final boolean isDesert() {
-	        return isDesert;
+	        return tileType == ResourceCard.CardType.DESERT;
 	    }
 	}
 	
