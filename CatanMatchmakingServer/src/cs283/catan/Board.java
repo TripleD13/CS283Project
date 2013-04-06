@@ -25,6 +25,16 @@ public static void main(String args[]) {
     
     Scanner in = new Scanner(System.in);
     
+    Player bob = new Player("Bob");
+    Player joe = new Player("Joe");
+    
+    System.out.println(b.addSettlement(new Coordinate(0,0,2), joe));
+    System.out.println(b.addSettlement(new Coordinate(0,0,4), bob));
+    
+    System.out.println(b.addRoad(new Coordinate(0,0,4), new Coordinate(0, 0, 3), bob));
+    System.out.println(b.addRoad(new Coordinate(0, 0, 3), new Coordinate(0, 0, 2), joe));
+    
+    
     while (true) {
      // Extract the coordinate of the node from the node name
         int x = 0; int y = 0; int z = 0;
@@ -231,21 +241,29 @@ public static void main(String args[]) {
     
     
     /**
-     * Set of all of the nodes in the graph
+     * Map of all of the nodes in the graph. The key is the coordinate of the
+     * node and the value is the node.
      */
     Map<Coordinate, Node> nodeSet = new HashMap<Coordinate, Node>();
     
     /**
+     * Map of all road node sets in the graph. The key is the player name and
+     * the value is the map of all nodes of the roads owned by the player.
+     */
+    Map<String, Map<Coordinate, Node>> roadSet = 
+                                   new HashMap<String, Map<Coordinate, Node>>();
+    
+    /**
      * Object representing the robber
      */
-	public Robber robber;
+	private Robber robber = new Robber();
 	
 	
 	/*
 	 * Constructor
 	 */
 	public Board() {
-	    
+	    // Nothing to do
 	}  
 	
 	
@@ -310,6 +328,144 @@ public static void main(String args[]) {
 	
 	
 	/**
+	 * Add the specified settlement to the board, assuming that there is not
+	 * already another settlement within a distance of 1.
+	 * @param location
+	 * @param owner
+	 * @return whether or not the settlement was successfully added.
+	 */
+	public boolean addSettlement(Coordinate location, Player owner) {
+	    boolean isSettlementAdded = false;
+	    
+	    location = location.normalizeCoordinate();
+	    Node locationNode = nodeSet.get(location);
+	    
+	    if (locationNode != null) {
+	        boolean safeToAdd = true;
+	        List<Coordinate> neighbors = locationNode.getNeighbors();
+	    
+	        // Make sure that there are no settlements directly adjacent to the
+	        // location
+            for (Coordinate neighborCoordinate : neighbors) {
+                Node neighbor = nodeSet.get(neighborCoordinate);
+
+                if (neighbor.hasSettlement()) {
+                    safeToAdd = false;
+                    break;
+                }
+            }
+            
+            // Add the settlement if there are not settlements directly adjacent
+            // to the location
+            if (safeToAdd) {
+                locationNode.setSettlement(new Settlement(location, owner));
+                isSettlementAdded = true;
+            }
+	    }
+	    
+	    return isSettlementAdded;
+	}
+	
+	/**
+	 * Add the specified road to the board, assuming that the road is not
+	 * already taken. The road must be of length 1, as well as adjacent to
+	 * another road or settlement owned by the player.
+	 * @param start
+	 * @param finish
+	 * @owner
+	 * @return whether or not the road was successfully added.
+	 */
+	public boolean addRoad(Coordinate start, Coordinate finish, Player owner) {
+	    boolean isRoadAdded = false;
+	    
+	    // Normalize the coordinates
+	    start = start.normalizeCoordinate();
+	    finish = finish.normalizeCoordinate();
+	    
+	    boolean canAddRoad = false;
+	    
+	    // Make sure the start and finish points of the road are adjacent
+	    Node nodeStartFromBoard = nodeSet.get(start);
+	    Node nodeFinishFromBoard = nodeSet.get(finish);
+	    
+	    canAddRoad = nodeStartFromBoard.isAdjacent(finish); 
+	    
+	    // Make sure road does not already exist
+	    for (Map<Coordinate, Node> roadNodeSet : roadSet.values()) {
+	        if (!canAddRoad) {
+	            break;
+	        }
+	        
+	        Node possibleRoadNode = roadNodeSet.get(start);
+	        
+	        if (possibleRoadNode != null) {
+	            if (possibleRoadNode.isAdjacent(finish)) {
+	                // Road already exists!
+	                canAddRoad = false;
+	            }
+	        }
+	    }
+	    
+        Map<Coordinate, Node> playerRoadNodeSet = 
+                                              roadSet.get(owner.getUsername());
+	    
+	    // Make sure either road is adjacent to a settlement owned by the player
+	    // or adjacent to a road owned by the player
+	    if (canAddRoad && !((nodeStartFromBoard.hasSettlement() && 
+	        (nodeStartFromBoard.getSettlement().getOwner() == owner)) ||
+	        (nodeFinishFromBoard.hasSettlement() &&
+	        (nodeFinishFromBoard.getSettlement().getOwner() == owner)))) {
+	        
+	        canAddRoad = false;
+	        
+	        // Because the road is not adjacent to any settlements owned by
+	        // the owner, it must be adjacent to another road owned by the user
+	        if (playerRoadNodeSet != null) {
+	            if (playerRoadNodeSet.get(start) != null ||
+	                playerRoadNodeSet.get(finish) != null) {
+	                
+	                canAddRoad = true;
+	            }
+	        }
+	        
+	    }
+	    
+	    
+	    if (canAddRoad) {
+	        // Add the road to the player's set of roads. Create a new set for
+	        // the player if the player currently has no roads.
+	        
+	        if (playerRoadNodeSet == null) {
+	            playerRoadNodeSet = new HashMap<Coordinate, Node>();
+	            
+	            roadSet.put(owner.getUsername(), playerRoadNodeSet);
+	        }
+	        
+	        // Add the nodes if they do not exist
+	        Node startNode = playerRoadNodeSet.get(start);
+	        if (startNode == null) {
+	            startNode = new Node();
+	            playerRoadNodeSet.put(start, startNode);
+	        }
+	        
+	        Node finishNode = playerRoadNodeSet.get(finish);
+	        if (finishNode == null) {
+	            finishNode = new Node();
+	            playerRoadNodeSet.put(finish, finishNode);
+	        }
+	        
+	        // Add the edge
+	        startNode.addNeighbor(finish);
+	        finishNode.addNeighbor(start);
+	        
+	        isRoadAdded = true;
+	    }
+	    
+	    return isRoadAdded;
+	}
+	
+	
+	/**
 	 * Class representing a tile on the board
 	 */
 	public class Tile {
@@ -317,28 +473,28 @@ public static void main(String args[]) {
 	    /**
 	     * X coordinate of the tile
 	     */
-	    private int x;
+	    private final int x;
 	    
 	    /**
 	     * Y coordinate of the tile
 	     */
-	    private int y;
+	    private final int y;
 	    
 	    /**
 	     * Roll number on the tile
 	     */
-	    private int rollNumber;
+	    private final int rollNumber;
 	    
 	    /**
 	     * Resource type of the tile
 	     */
-	    private ResourceCard.CardType tileType;
+	    private final ResourceCard.CardType tileType;
 	    
 	    /**
 	     * Whether or not the tile is a desert (in which case the resource type
 	     * of the tile is irrelevant)
 	     */
-	    private boolean isDesert;
+	    private final boolean isDesert;
 	    
 	    
 	    /**
@@ -366,6 +522,7 @@ public static void main(String args[]) {
 	        this.x = x;
 	        this.y = y;
 	        this.rollNumber = rollNumber;
+	        this.tileType = tileType;
 	        this.isDesert = isDesert;
 	    }
 	    
@@ -422,17 +579,17 @@ public static void main(String args[]) {
 	    /**
 	     * Coordinates of the settlement on the board
 	     */
-	    private Coordinate location;
+	    private final Coordinate location;
 	    
 	    /**
 	     * Owner of the settlement
 	     */
-	    private Player owner;
+	    private final Player owner;
 	    
 	    /**
 	     * Whether or not the settlement is a city
 	     */
-	    boolean isCity;
+	    private boolean isCity;
 	    
 	    
 	    /**
@@ -470,6 +627,14 @@ public static void main(String args[]) {
 	    public final boolean isCity() {
 	        return isCity;
 	    }
+	    
+	    
+	    /**
+	     * Upgrades the settlement to a city.
+	     */
+	    public void upgradeToCity() {
+	        isCity = true;
+	    }
 	}
 	
 	
@@ -481,7 +646,12 @@ public static void main(String args[]) {
 	    /**
 	     * List of all nodes adjacent to this node
 	     */
-	    private Coordinate neighbors[];
+	    private List<Coordinate> neighbors = new LinkedList<Coordinate>();
+	    
+	    /**
+	     * Settlement on this node, if any.
+	     */
+	    private Settlement settlement = null;
 	    
 	    
 	    /**
@@ -489,15 +659,40 @@ public static void main(String args[]) {
 	     * @param neighbors
 	     */
 	    public void setNeighbors(Coordinate neighbors[]) {
-	        this.neighbors = neighbors;
+	        for (Coordinate neighbor : neighbors) {
+	            this.neighbors.add(neighbor);
+	        }
 	    }
 	    
 	    /**
 	     * Gets the list of nodes adjacent to this node.
 	     * @return the list of neighbors.
 	     */
-	    public final Coordinate[] getNeighbors() {
+	    public final List<Coordinate> getNeighbors() {
 	        return neighbors;
+	    }
+	    
+	    /**
+	     * Adds a neighbor to the list of neighbors
+	     */
+	    public void addNeighbor(Coordinate neighbor) {
+	        neighbors.add(neighbor);
+	    }
+	    
+	    /**
+	     * Sets the settlement on this node.
+	     * @param settlement
+	     */
+	    public void setSettlement(Settlement settlement) {
+	        this.settlement = settlement;
+	    }
+	    
+	    /**
+	     * Gets the settlement on this node.
+	     * @return the settlement on this node, or null if one does not exist.
+	     */
+	    public Settlement getSettlement() {
+	        return settlement;
 	    }
 	    
 	    
@@ -509,16 +704,22 @@ public static void main(String args[]) {
 	    public boolean isAdjacent(Coordinate node) {
 	        boolean isAdj = false;
 	        
-	        if (neighbors != null) {
-	            for (int i = 0; i < neighbors.length; i++) {
-	                if (neighbors[i].equals(node)) {
-	                    isAdj = true;
-	                    break;
-	                }
-	            }   
-	        }
+            for (Coordinate neighbor : neighbors) {
+                if (neighbor.equals(node)) {
+                    isAdj = true;
+                    break;
+                }
+            }
 	        
 	        return isAdj;
+	    }
+	    
+	    /**
+	     * Returns whether or not this node has a settlement.
+	     * @return whether or not this node has a settlement.
+	     */
+	    public boolean hasSettlement() {
+	        return settlement != null;
 	    }
 	    
 	}
