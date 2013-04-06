@@ -8,7 +8,7 @@ public class Robber {
     /**
      * Coordinates of the robber on the board.
      */
-    private Board.Coordinate location;
+    private Coordinate location;
     
     
     /**
@@ -29,7 +29,7 @@ public class Robber {
     public final boolean setLocation(int x, int y) {
         boolean isRobberMoved = false;
         
-        Board.Coordinate newCoord = new Board.Coordinate(x, y, 0);
+        Coordinate newCoord = new Coordinate(x, y, 0);
         
         if (this.location == null || !this.location.equals(newCoord)) {
             this.location = newCoord;
@@ -43,7 +43,7 @@ public class Robber {
      * Retrieves the location of the robber.
      * @return the location of the robber.
      */
-    public final Board.Coordinate getLocation() {
+    public final Coordinate getLocation() {
         return location;
     }
 }
