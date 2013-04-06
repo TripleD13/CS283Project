@@ -84,7 +84,8 @@ public static void main(String args[]) {
         System.out.println(b.nodeSet.get(coord.normalizeCoordinate()).isAdjacent(coord2.normalizeCoordinate()));
         
     }
-}
+} /** Temporary Method!!!!*/
+
     /**
      * Class representing a board coordinate (x, y, z). A coordinate object
      * is immutable.
@@ -309,9 +310,173 @@ public static void main(String args[]) {
 	
 	
 	/**
+	 * Class representing a tile on the board
+	 */
+	public class Tile {
+	    	    
+	    /**
+	     * X coordinate of the tile
+	     */
+	    private int x;
+	    
+	    /**
+	     * Y coordinate of the tile
+	     */
+	    private int y;
+	    
+	    /**
+	     * Roll number on the tile
+	     */
+	    private int rollNumber;
+	    
+	    /**
+	     * Resource type of the tile
+	     */
+	    private ResourceCard.CardType tileType;
+	    
+	    /**
+	     * Whether or not the tile is a desert (in which case the resource type
+	     * of the tile is irrelevant)
+	     */
+	    private boolean isDesert;
+	    
+	    
+	    /**
+	     * Constructor (assumes that the tile is not a desert)
+	     * @param x
+	     * @param y
+	     * @param rollNumber
+	     * @param tileType
+	     */
+	    public Tile(int x, int y, int rollNumber, 
+	                ResourceCard.CardType tileType) {
+	        this(x, y, rollNumber, tileType, false);
+	    }
+	    
+	    /**
+	     * Full constructor
+	     * @param x
+	     * @param y
+	     * @param rollNumber
+	     * @param tileType
+	     * @param isDesert
+	     */
+	    public Tile(int x, int y, int rollNumber,
+	                ResourceCard.CardType tileType, boolean isDesert) {
+	        this.x = x;
+	        this.y = y;
+	        this.rollNumber = rollNumber;
+	        this.isDesert = isDesert;
+	    }
+	    
+	    
+	    /**
+	     * Retrieves the value of the x coordinate.
+	     * @return the value of the x coordinate.
+	     */
+	    public final int getX() {
+	        return x;
+	    }
+	    
+	    /**
+	     * Retrieves the value of the y coordinate.
+	     * @return the value of the y coordinate.
+	     */
+	    public final int getY() {
+	        return y;
+	    }
+	    
+	    /**
+	     * Retrieves the value of the roll number.
+	     * @return the value of the roll number.
+	     */
+	    public final int getRollNumber() {
+	        return rollNumber;
+	    }
+	    
+	    /**
+	     * Retrieves the tile type. Note that a value will be returned even
+	     * if the tile is a desert, so the user of this class should always
+	     * check to make sure the tile is not a desert.
+	     * @return the tile type.
+	     */
+	    public final ResourceCard.CardType getTileType() {
+	        return tileType;
+	    }
+	    
+	    /**
+	     * Determines whether or not the tile is a desert.
+	     * @return whether or not the tile is a desert.
+	     */
+	    public final boolean isDesert() {
+	        return isDesert;
+	    }
+	}
+	
+	
+	/**
+	 * Class representing a settlement or city
+	 */
+	public class Settlement {
+	    
+	    /**
+	     * Coordinates of the settlement on the board
+	     */
+	    private Coordinate location;
+	    
+	    /**
+	     * Owner of the settlement
+	     */
+	    private Player owner;
+	    
+	    /**
+	     * Whether or not the settlement is a city
+	     */
+	    boolean isCity;
+	    
+	    
+	    /**
+	     * Constructor
+	     * @param location
+	     * @param owner
+	     */
+	    public Settlement(Coordinate location, Player owner) {
+	        this.location = location;
+	        this.owner = owner;
+	        this.isCity = false;
+	    }
+	    
+	    
+	    /**
+	     * Retrieves the location of the settlement.
+	     * @return the location of the settlement.
+	     */
+	    public final Coordinate getLocation() {
+	        return location;
+	    }
+	    
+	    /**
+	     * Retrieves the owner of the settlement.
+	     * @return the owner of the settlement.
+	     */
+	    public final Player getOwner() {
+	        return owner;
+	    }
+	    
+	    /**
+	     * Retrieves whether or not the settlement is a city.
+	     * @return whether or not the settlement is a city.
+	     */
+	    public final boolean isCity() {
+	        return isCity;
+	    }
+	}
+	
+	
+	/**
 	 * Class representing a node on the board
 	 */
-	class Node {
+	private class Node {
 	    
 	    /**
 	     * List of all nodes adjacent to this node
