@@ -17,9 +17,10 @@ public class Board {
     /**TEMPORARY METHOD!!!*/
 public static void main(String args[]) {
     Board b = new Board();
-    b.loadBoardGraphFromFile("board.csv");
-    b.loadBoardTilesFromFile("tiles.csv");
     
+    b.loadBoardGraphFromResource("cs283/catan/resources/board.csv");
+    b.loadBoardTilesFromResource("cs283/catan/resources/tiles.csv");
+
     for (Map.Entry<Coordinate, Node> x : b.nodeSet.entrySet()) {
         System.out.println(x.getKey());
     }
@@ -35,10 +36,26 @@ public static void main(String args[]) {
     
     System.out.println(b.addSettlement(new Coordinate(0,0,2), joe));
     System.out.println(b.addSettlement(new Coordinate(0,0,4), bob));
+    System.out.println(b.addSettlement(new Coordinate(1,-1,5), joe));
+    System.out.println(b.addSettlement(new Coordinate(1,-1,1), joe));
+    
+    System.out.println(b.upgradeSettlement(new Coordinate(0, 0, 2), joe));
     
     System.out.println(b.addRoad(new Coordinate(0,0,4), new Coordinate(0, 0, 3), bob));
     System.out.println(b.addRoad(new Coordinate(0, 0, 3), new Coordinate(0, 0, 2), joe));
     
+    System.out.println(b.getResourceCardsEarned(5, joe));
+    System.out.println(b.getResourceCardsEarned(5, bob));
+    
+    System.out.println(b.moveRobber(0, 0));
+    
+    System.out.println(b.getResourceCardsEarned(5, joe));
+    System.out.println(b.getResourceCardsEarned(5, bob));
+    
+    System.out.println(b.moveRobber(0, 0));
+    System.out.println(b.moveRobber(0, 0));
+    System.out.println(b.moveRobber(1, -1));
+    System.out.println(b.moveRobber(2, 0));
     
     while (true) {
      // Extract the coordinate of the node from the node name
@@ -282,17 +299,20 @@ public static void main(String args[]) {
 	/**
 	 * Initializes the board graph from a csv file that contains an adjacency
 	 * list representation of the graph
-	 * @param fileName
+	 * @param resourceName
 	 * @return whether or not the board was successfully loaded.
 	 */
-	public boolean loadBoardGraphFromFile(String fileName) {
+	public boolean loadBoardGraphFromResource(String resourceName) {
 	    boolean isSuccessful = false;
 	    
 	    // Attempt to read the data from the file
-	    File graphFile = new File(fileName);
-	    if (graphFile.exists()) {
+	    InputStream resourceStream = Thread.currentThread().
+	                                 getContextClassLoader().
+	                                 getResourceAsStream(resourceName);
+	    
+	    if (resourceStream != null) {
 	        try {
-	            Scanner fileInput = new Scanner(new FileInputStream(graphFile));
+	            Scanner fileInput = new Scanner(resourceStream);
 	            
 	            // Read each line of the file. Each line represents a vertex
 	            // and its adjacency list
@@ -341,17 +361,20 @@ public static void main(String args[]) {
 	/**
 	 * Initializes the board tiles from a csv file that contains the x and y
 	 * coordinates, the roll number, and the tile type for each tile.
-	 * @param fileName
+	 * @param resourceName
 	 * @return whether or not the tiles were successfully loaded from the file.
 	 */
-	public boolean loadBoardTilesFromFile(String fileName) {
+	public boolean loadBoardTilesFromResource(String resourceName) {
 	    boolean isSuccessful = false;
 	    
 	    // Attempt to read the data from the file
-        File tileFile = new File(fileName);
-        if (tileFile.exists()) {
+	    InputStream resourceStream = Thread.currentThread().
+                                     getContextClassLoader().
+                                     getResourceAsStream(resourceName);
+
+        if (resourceStream != null) {
             try {
-                Scanner fileInput = new Scanner(new FileInputStream(tileFile));
+                Scanner fileInput = new Scanner(resourceStream);
                 fileInput.useDelimiter("\\s|,|;");
                 
                 // Read each line of the file. Each line represents a vertex
@@ -567,6 +590,67 @@ public static void main(String args[]) {
 	}
 	
 	/**
+	 * Upgrades a settlement to a city.
+	 * @param location
+	 * @param owner
+	 * @return whether or not the upgrade was successful. Returns true if the
+	 *         settlement is already a city.
+	 */
+	public boolean upgradeSettlement(Coordinate location, Player owner) {
+	    boolean isUpgraded = false;
+	    
+	    location = location.normalizeCoordinate();
+	    
+	    // Attempt to find the settlement and upgrade it
+	    Node locationNode = nodeSet.get(location);
+	    
+	    if (locationNode != null && locationNode.hasSettlement()) {
+	        Settlement settlement = locationNode.getSettlement();
+	        
+	        if (settlement.getOwner() == owner) {
+	            settlement.upgradeToCity();
+	            isUpgraded = true;
+	        }
+	    }
+	    
+	    return isUpgraded;
+	}
+	
+	/**
+	 * Attempts to move the robber. Returns set of players adjacent to the
+	 * robber.
+	 * @param x
+	 * @param y
+	 * @return a set of the players adjacent to the robber. If the robber could
+	 *         not be moved, either because the robber is already on the tile
+	 *         or the tile does not exist, the return value will be null.
+	 */
+	public Set<Player> moveRobber(int x, int y) {
+	    Set<Player> adjacentPlayers = null;
+	    
+	    Tile tile = tileSet.get(new Coordinate(x, y, 0));
+	    
+	    // Check if the tile exists and the robber is successfully moved
+	    if (tile != null) {
+	        if (robber.setLocation(x, y)) {
+	            adjacentPlayers = new HashSet<Player>();
+	            
+	            // Look for all players with settlements adjacent to robber
+	            for (Coordinate coordinate : tile.getNormalizedCoordinates()) {
+	                Settlement settlement = 
+	                                    nodeSet.get(coordinate).getSettlement();
+	                
+	                if (settlement != null) {
+	                    adjacentPlayers.add(settlement.getOwner());
+	                }
+	            }
+	        }
+	    }
+
+	    return adjacentPlayers;
+	}
+	
+	/**
 	 * Returns the name of the player who has the longest road. If no one
 	 * has the longest road, return null.
 	 * @return the name of the player with the longest road, or null if no
@@ -603,11 +687,12 @@ public static void main(String args[]) {
 	                
 	                Node tileNode = nodeSet.get(tileCoord);
 	                
-	                if (tileNode.hasSettlement()) {
+	                if (tileNode.hasSettlement() && 
+	                    !robber.getLocation().equals(tile.getLocation())) {
+	                    
 	                    Settlement settlement = tileNode.getSettlement();
 	                    
-	                    if (settlement.getOwner().getUsername() == 
-	                        player.getUsername()) {
+	                    if (settlement.getOwner() ==  player) {
 	                        
 	                        // If the settlement is a city, add 2 points,
 	                        // otherwise add 1 point
@@ -694,6 +779,15 @@ public static void main(String args[]) {
 	     */
 	    public final int getY() {
 	        return y;
+	    }
+	    
+	    /**
+	     * Retrieves the location of the tile as a Coordinate. The z value will
+	     * always be 0.
+	     * @return the location of the tile as a Coordinate.
+	     */
+	    public final Coordinate getLocation() {
+	        return new Coordinate(x, y, 0);
 	    }
 	    
 	    /**

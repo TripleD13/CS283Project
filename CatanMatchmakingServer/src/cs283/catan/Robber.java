@@ -16,16 +16,27 @@ public class Robber {
      */
     public Robber() {
         // Move the robber to a location of the board
-        this.location = new Board.Coordinate(-50, -50, 0);
+        setLocation(-50, -50);
     }
     
     
     /**
      * Sets the location of the robber.
-     * @param location
+     * @param x
+     * @param y
+     * @return whether or not the robber was actually moved.
      */
-    public final void setLocation(Board.Coordinate location) {
-        this.location = location;
+    public final boolean setLocation(int x, int y) {
+        boolean isRobberMoved = false;
+        
+        Board.Coordinate newCoord = new Board.Coordinate(x, y, 0);
+        
+        if (this.location == null || !this.location.equals(newCoord)) {
+            this.location = newCoord;
+            isRobberMoved = true;
+        }
+
+        return isRobberMoved;
     }
     
     /**

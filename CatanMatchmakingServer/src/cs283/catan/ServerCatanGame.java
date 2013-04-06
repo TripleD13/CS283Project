@@ -62,12 +62,16 @@ public class ServerCatanGame
 		//stuff involving the board
 	       
         // Initialize the board graph and tiles
-        if (!myBoard.loadBoardGraphFromFile("board.csv")) {
+        if (!myBoard.
+             loadBoardGraphFromResource("cs283/catan/resources/board.csv")) {
+            
             System.out.println("Unable to load board graph data!");
         }
         
         // TODO: if we have time, we could make tile generation random
-        if (!myBoard.loadBoardTilesFromFile("tiles.csv")) {
+        if (!myBoard.
+             loadBoardTilesFromResource("cs283/catan/resources/tiles.csv")) {
+            
             System.out.println("Unable to load tiles from file!");
         }
 	}

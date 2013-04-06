@@ -15,4 +15,9 @@ public class ResourceCard extends Card
 	public final CardType getCardType() {
 	    return cardType;
 	}
+	
+	@Override
+	public String toString() {
+	    return cardType.toString();
+	}
 }
