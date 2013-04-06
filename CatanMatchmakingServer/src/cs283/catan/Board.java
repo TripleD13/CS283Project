@@ -14,18 +14,73 @@ import java.util.*;
 
 
 public class Board {
+    /**TEMPORARY METHOD!!!*/
 public static void main(String args[]) {
     Board b = new Board();
     b.loadBoardFromFile("board.csv");
     
-    for (Map.Entry<String, Node> x : b.nodeSet.entrySet()) {
+    for (Map.Entry<Coordinate, Node> x : b.nodeSet.entrySet()) {
         System.out.println(x.getKey());
     }
     
     Scanner in = new Scanner(System.in);
     
-    while (true)
-        System.out.println(b.nodeSet.get(in.nextLine()).isAdjacent(in.nextLine()));
+    while (true) {
+     // Extract the coordinate of the node from the node name
+        int x = 0; int y = 0; int z = 0;
+        int start = 0;
+        int finish = 1;
+        String input = in.nextLine();
+        if (input.charAt(start) == '-') {
+            finish++;
+        }
+        
+        x = Integer.parseInt(input.substring(start, finish));
+        
+        start = finish;
+        finish = start + 1;
+        
+        if (input.charAt(start) == '-') {
+            finish++;
+        }
+        
+        y = Integer.parseInt(input.substring(start, finish));
+        
+        z = Integer.parseInt(input.substring(finish, 
+                                                input.length()));
+        
+        // Add the node to the set of nodes
+        Coordinate coord = new Coordinate(x, y, z);
+        
+        
+        start = 0;
+         finish = 1;
+        input = in.nextLine();
+        if (input.charAt(start) == '-') {
+            finish++;
+        }
+        
+        x = Integer.parseInt(input.substring(start, finish));
+        
+        start = finish;
+        finish = start + 1;
+        
+        if (input.charAt(start) == '-') {
+            finish++;
+        }
+        
+        y = Integer.parseInt(input.substring(start, finish));
+        
+        z = Integer.parseInt(input.substring(finish, 
+                                                input.length()));
+        
+        // Add the node to the set of nodes
+        Coordinate coord2 = new Coordinate(x, y, z);
+        
+        System.out.printf("%s is adjacent to %s: ", coord, coord2);
+        System.out.println(b.nodeSet.get(coord.normalizeCoordinate()).isAdjacent(coord2.normalizeCoordinate()));
+        
+    }
 }
     /**
      * Class representing a board coordinate (x, y, z). A coordinate object
@@ -106,7 +161,7 @@ public static void main(String args[]) {
     /**
      * Set of all of the nodes in the graph
      */
-    Map<String, Node> nodeSet = new HashMap<String, Node>();
+    Map<Coordinate, Node> nodeSet = new HashMap<Coordinate, Node>();
     
     /**
      * Object representing the robber
@@ -161,8 +216,32 @@ public static void main(String args[]) {
 	                    newNode.setNeighbors(neighbors);
 	                }
 	                
+	                // Extract the coordinate of the node from the node name
+	                int x = 0; int y = 0; int z = 0;
+	                int start = 0;
+	                int finish = 1;
+	                
+	                if (split[0].charAt(start) == '-') {
+	                    finish++;
+	                }
+	                
+	                x = Integer.parseInt(split[0].substring(start, finish));
+	                
+	                start = finish;
+	                finish = start + 1;
+	                
+	                if (split[0].charAt(start) == '-') {
+	                    finish++;
+	                }
+	                
+	                y = Integer.parseInt(split[0].substring(start, finish));
+	                
+	                z = Integer.parseInt(split[0].substring(finish, 
+	                                                        split[0].length()));
+	                
 	                // Add the node to the set of nodes
-	                nodeSet.put(split[0], newNode);
+	                Coordinate coord = new Coordinate(x, y, z);
+	                nodeSet.put(coord.normalizeCoordinate(), newNode);
 	            }
 	            
 	            fileInput.close();
@@ -178,54 +257,54 @@ public static void main(String args[]) {
 	    return isSuccessful;
 	}
 	
-}
-
-
-/**
- * Class representing a node on the board
- */
-class Node {
-    
-    /**
-     * List of all nodes adjacent to this node
-     */
-    private String neighbors[];
-    
-    
-    /**
-     * Sets the list of nodes adjacent to this node.
-     * @param neighbors
-     */
-    public void setNeighbors(String neighbors[]) {
-        this.neighbors = neighbors;
-    }
-    
-    /**
-     * Gets the list of nodes adjacent to this node.
-     * @return the list of neighbors.
-     */
-    public final String[] getNeighbors() {
-        return neighbors;
-    }
-    
-    
-    /**
-     * Returns whether or not this node is adjacent to a certain node.
-     * @param node
-     * return whether or not this node is adjacent to node.
-     */
-    public boolean isAdjacent(String node) {
-        boolean isAdj = false;
-        
-        if (neighbors != null) {
-            for (int i = 0; i < neighbors.length; i++) {
-                if (neighbors[i].equals(node)) {
-                    isAdj = true;
-                    break;
-                }
-            }   
-        }
-        
-        return isAdj;
-    }
+	
+	/**
+	 * Class representing a node on the board
+	 */
+	class Node {
+	    
+	    /**
+	     * List of all nodes adjacent to this node
+	     */
+	    private String neighbors[];
+	    
+	    
+	    /**
+	     * Sets the list of nodes adjacent to this node.
+	     * @param neighbors
+	     */
+	    public void setNeighbors(String neighbors[]) {
+	        this.neighbors = neighbors;
+	    }
+	    
+	    /**
+	     * Gets the list of nodes adjacent to this node.
+	     * @return the list of neighbors.
+	     */
+	    public final String[] getNeighbors() {
+	        return neighbors;
+	    }
+	    
+	    
+	    /**
+	     * Returns whether or not this node is adjacent to a certain node.
+	     * @param node
+	     * return whether or not this node is adjacent to node.
+	     */
+	    public boolean isAdjacent(Coordinate node) {
+	        boolean isAdj = false;
+	        
+	        if (neighbors != null) {
+	            for (int i = 0; i < neighbors.length; i++) {
+	                if (neighbors[i].equals(node)) {
+	                    isAdj = true;
+	                    break;
+	                }
+	            }   
+	        }
+	        
+	        return isAdj;
+	    }
+	}
+	
 }
