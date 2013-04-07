@@ -44,6 +44,7 @@ public class CatanGUI {
 	private JFrame frame;
 	private JSeparator separator;
 	private JTable lobby_table;
+	private JTabbedPane gameAndMatch;
 
 	/**
 	 * Launch the application.
@@ -102,6 +103,16 @@ public class CatanGUI {
 	}
 	
 	/**
+	 * Switch to the game mode
+	 */
+	public void switchToGameMode() {
+	    // Switch the tab to game mode and disable the lobby
+	    gameAndMatch.setEnabledAt(1, true);
+	    gameAndMatch.setSelectedIndex(1);
+	    gameAndMatch.setEnabledAt(0,  false);
+	}
+	
+	/**
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
@@ -125,7 +136,7 @@ public class CatanGUI {
 		gridBagLayout.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		frame.getContentPane().setLayout(gridBagLayout);
 		
-		JTabbedPane gameAndMatch = new JTabbedPane(JTabbedPane.TOP);
+		gameAndMatch = new JTabbedPane(JTabbedPane.TOP);
 		GridBagConstraints gbc_gameAndMatch = new GridBagConstraints();
 		gbc_gameAndMatch.fill = GridBagConstraints.BOTH;
 		gbc_gameAndMatch.gridheight = 2;

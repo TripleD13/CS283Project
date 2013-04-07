@@ -423,6 +423,12 @@ public class ClientMain {
                             objOutputStream.flush();
                         }
                         
+                        EventQueue.invokeAndWait(new Runnable() {
+                            public void run() {
+                                gui.switchToGameMode();
+                            }
+                        });
+                        
                         break;
                         
                     } else {
