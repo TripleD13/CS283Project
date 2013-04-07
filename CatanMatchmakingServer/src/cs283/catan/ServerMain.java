@@ -75,6 +75,12 @@ public class ServerMain {
      * Object that is used to notify user threads that the lobby has changed
      */
     private static Object lobbyChangeNotifier = new Object();
+    
+    
+    /**
+     * Timestamp when the server started (used for debugging purposes) 
+     */
+    private static long serverStartTime;
 
     
     /**
@@ -83,6 +89,11 @@ public class ServerMain {
      */
     @SuppressWarnings("resource")
     public static void main(String[] args) {
+        // Record the starting timestamp and set the thread name for debugging 
+        // purposes
+        serverStartTime = (new Date()).getTime();
+        Thread.currentThread().setName("Main Thread");
+        
         // Read the port from the command line arguments
         if (args.length != 1) {
             System.out.println("Usage: <Port>");
@@ -117,6 +128,8 @@ public class ServerMain {
         String sampleNames[] = {"Austin", "Daniel", "Kevin", null};
         lobbyGames.put("Ultimate Showdown", sampleNames);
         
+        int totalThreadsCreated = 0; // Counter used for debugging purposes
+        
         // Accept connections and start new threads for each connection
         while (true) {
             try {
@@ -126,22 +139,43 @@ public class ServerMain {
                 if (numberConnections.get() < MAX_CONNECTIONS) {
                     numberConnections.getAndIncrement();
                     
-                    (new Thread(new ServerConnectionHandler(childSocket))).start();
+                    totalThreadsCreated++;
+                    
+                    Thread connectionThread = 
+                           new Thread(new ServerConnectionHandler(childSocket));
+                    
+                    // Set name for debugging purposes
+                    connectionThread.setName("Handler Thread " +
+                                             totalThreadsCreated);
+                    
+                    connectionThread.start();
                     
                 } else {
                     // Notify the client that it cannot be served at this moment
                     ObjectOutputStream outputStream = new ObjectOutputStream(
-                                                     childSocket.getOutputStream());
+                                                 childSocket.getOutputStream());
                     outputStream.writeObject(CONN_LIMIT_MSG);
                     outputStream.flush();
                     
                     childSocket.close();
                 }
             } catch (IOException e) {
-                System.out.println("Error accepting new connection: " +
+                printServerMsg("Error accepting new connection: " +
                                    e.getMessage());
             }
         }
+    }
+    
+    /**
+     * Prints a message, prepended with a timestamp and thread id.
+     * @param message
+     */
+    private static void printServerMsg(String message) {
+        double timestamp = 0.001 * ((new Date().getTime()) - serverStartTime);
+        String threadName = Thread.currentThread().getName();
+        
+        System.out.format("[time=%.4f, thread='%s']\t%s\n", timestamp,
+                          threadName, message);
     }
 
     
@@ -367,7 +401,7 @@ public class ServerMain {
             userList.remove(username);
         }
         
-        System.out.println("Successfully logged off user '" + username + "'!");
+        printServerMsg("Successfully logged off user '" + username + "'!");
     }
     
      
@@ -478,7 +512,7 @@ public class ServerMain {
                 // Make sure logon was successful
                 if (isLogonSuccessful) {
                     
-                    System.out.println("'" + username + "' logged on!"); 
+                    printServerMsg("'" + username + "' logged on!"); 
                     
                     objOutputStream.writeObject(LOGIN_SUCCESS_MSG);
                     objOutputStream.flush();
@@ -502,7 +536,7 @@ public class ServerMain {
                     lobbyPushThread.join(1000);
                     
                 } else {
-                    System.out.println("Logon attempt by '" + username +
+                    printServerMsg("Logon attempt by '" + username +
                                        "' failed!");
                     
                     objOutputStream.writeObject(LOGIN_FAILURE_MSG);
@@ -510,7 +544,7 @@ public class ServerMain {
                 }  
                 
             } catch (Exception e) {
-                System.out.println("Connection problem with '" + username + 
+                printServerMsg("Connection problem with '" + username + 
                                    "': " + e.getMessage());
                 
                 if (lobbyPushThread != null && lobbyPushThread.isAlive()) {
@@ -560,6 +594,7 @@ public class ServerMain {
             while (currentMode == UserMode.LobbyMode) {
                 // Receive command from the client
                 String msg = (String) objInputStream.readObject();
+                printServerMsg("Messaged received.");
                 System.out.println("\n=========RECEIVED MESSAGE=========");
                 System.out.println(msg);
                 System.out.println("==================================\n");
@@ -654,7 +689,7 @@ public class ServerMain {
                 }
             }
             
-            System.out.println("'" + username + "' leaving lobby");
+            printServerMsg("'" + username + "' leaving lobby");
         }
      
         /**
@@ -700,7 +735,7 @@ public class ServerMain {
                 }
             }
 
-            System.out.println("Ending lobby push thread.");
+            printServerMsg("Ending lobby push thread.");
             
         }
         
