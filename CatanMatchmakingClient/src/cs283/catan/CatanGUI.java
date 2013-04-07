@@ -27,6 +27,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.JList;
 import javax.swing.JTable;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import java.awt.GridLayout;
 import javax.swing.JScrollPane;
@@ -45,6 +47,10 @@ public class CatanGUI {
 	private JSeparator separator;
 	private JTable lobby_table;
 	private JTabbedPane gameAndMatch;
+	JButton btnCreateGame;
+	JButton btnJoinGame;
+	JButton btnLeaveGame;
+	private String username;
 
 	/**
 	 * Launch the application.
@@ -70,6 +76,14 @@ public class CatanGUI {
 	}
 	
 	/**
+	 * Set the username
+	 * @param username
+	 */
+	public void setUsername(String username) {
+	    this.username = username;
+	}
+	
+	/**
 	 * @return the GUI frame.
 	 */
 	public JFrame getFrame() {
@@ -82,6 +96,9 @@ public class CatanGUI {
 	 * @param lobbyGames
 	 */
 	public void updateLobby(Map<String, String[]> lobbyGames) {
+	    // Keep track of whether the user is currently in a game	    
+	    boolean isAlreadyInGame = false;
+	    
 	    DefaultTableModel model = (DefaultTableModel) lobby_table.getModel();
 	    
 	    // Delete previous data
@@ -94,12 +111,21 @@ public class CatanGUI {
 	        String playerNames[] = game.getValue();
 	        
 	        for (int i = 0; i < playerNames.length; i++) {
+	            if (playerNames[i] != null && playerNames[i].equals(username)) {
+	                isAlreadyInGame = true;
+	            }
 	            rowData[i + 1] = playerNames[i];
 	        }
 	        
 	        // Add the game to the lobby table
 	        model.addRow(rowData);
 	    }
+	    
+	    btnCreateGame.setEnabled(!isAlreadyInGame);
+	    btnJoinGame.setEnabled(!isAlreadyInGame && 
+	                           lobby_table.getSelectedRow() != -1);
+	    btnLeaveGame.setEnabled(isAlreadyInGame &&
+	                            lobby_table.getSelectedRow() != -1);
 	}
 	
 	/**
@@ -178,10 +204,36 @@ public class CatanGUI {
             }
 		});
 		
+		lobby_table.getSelectionModel().addListSelectionListener(
+		                                           new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent arg0) {
+                int row = lobby_table.getSelectedRow();
+                if (btnCreateGame.isEnabled() && row != -1) {
+                    btnJoinGame.setEnabled(true);
+                } else if (!btnCreateGame.isEnabled() && row != -1) {
+                    Vector data = ((Vector) ((DefaultTableModel) lobby_table
+                                   .getModel()).getDataVector().get(row));
+                    
+                    btnLeaveGame.setEnabled(false);
+                    for (int i = 0; i < data.size(); i++) {
+                        String currentString = (String) data.get(i);
+                        if (currentString != null && 
+                            currentString.equals(username)) {
+                            
+                            btnLeaveGame.setEnabled(true);
+                            break;
+                        }
+                    }
+                }
+                
+            }
+		});
+		
 		JPanel panel_1 = new JPanel();
 		matchmaking.add(panel_1);
 		
-		JButton btnCreateGame = new JButton("Create Game");
+		btnCreateGame = new JButton("Create Game");
 		btnCreateGame.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent arg0) {
 		        String gameName = JOptionPane.showInputDialog(frame, 
@@ -199,7 +251,7 @@ public class CatanGUI {
 		});
 		panel_1.add(btnCreateGame);
 		
-		JButton btnJoinGame = new JButton("Join Game");
+		btnJoinGame = new JButton("Join Game");
 		btnJoinGame.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent arg0) {
 		        int row = lobby_table.getSelectedRow();
@@ -224,7 +276,7 @@ public class CatanGUI {
 		});
 		panel_1.add(btnJoinGame);
 		
-		JButton btnLeaveGame = new JButton("Leave Game");
+		btnLeaveGame = new JButton("Leave Game");
 		btnLeaveGame.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent arg0) {
 		        int row = lobby_table.getSelectedRow();

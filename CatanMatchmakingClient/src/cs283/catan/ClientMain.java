@@ -189,6 +189,7 @@ public class ClientMain {
                 public void run() {
                     try {
                         gui = new CatanGUI();
+                        gui.setUsername(username);
                         gui.getFrame().setVisible(true);
                     } catch (Exception e) {
                         e.printStackTrace();
