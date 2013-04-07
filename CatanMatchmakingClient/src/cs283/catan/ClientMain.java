@@ -4,6 +4,7 @@
  */
 package cs283.catan;
 
+import java.awt.EventQueue;
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -21,7 +22,7 @@ public class ClientMain {
      * Enumeration representing the types of lobby messages
      *
      */
-    private enum LobbyMessageType {
+    public enum LobbyMessageType {
         AddUserToGame,
         RemoveUserFromGame,
         CreateGame
@@ -76,6 +77,16 @@ public class ClientMain {
      * Receiver thread object
      */
     private static Thread receiverThread = null;
+    
+    /**
+     * Catan GUI object
+     */
+    private static CatanGUI gui = null;
+    
+    /**
+     * Object that the main thread waits on for the mode to change
+     */
+    public static Object waitForModeChanged = new Object();
     
     
     /**
@@ -173,11 +184,23 @@ public class ClientMain {
             receiverThread = new Thread(new ClientReceiver());
             receiverThread.start();
             
-            // TODO: Start the lobby GUI
+            // Create the GUI
+            EventQueue.invokeLater(new Runnable() {
+                public void run() {
+                    try {
+                        gui = new CatanGUI();
+                        gui.getFrame().setVisible(true);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
             
-            // Enter lobby mode (replace this line with something to start the
-            // GUI
-            lobbyMode();
+            
+            // Wait for lobby mode to finish
+            synchronized (waitForModeChanged) {
+                waitForModeChanged.wait();
+            }
         }
 
         // Terminate the receiver thread (calling interrupt() may be unnecessary
@@ -290,7 +313,6 @@ public class ClientMain {
         scanner.close();
     }
     
-    
     /**
      * Print out the current state of the lobby. TEMPORARY, WILL BE REPLACED BY
      * GUI.
@@ -333,7 +355,7 @@ public class ClientMain {
      * @param gameName
      */
     
-    private static void sendLobbyMsg(LobbyMessageType msgType, String gameName) 
+    public static void sendLobbyMsg(LobbyMessageType msgType, String gameName) 
                                      throws Exception {
         
         String msg = null;
@@ -384,7 +406,13 @@ public class ClientMain {
                         lobbyGames = (Map<String, String[]>) 
                                 objInputStream.readObject();
                    
-                        printLobby();
+                        
+                        EventQueue.invokeAndWait(new Runnable() {
+                            public void run() {
+                                gui.updateLobby(lobbyGames);
+                            }
+                        });
+
                     } else if (message.equals("Game starting")) {
                         
                         // Game starting, confirm that client is ready to play
