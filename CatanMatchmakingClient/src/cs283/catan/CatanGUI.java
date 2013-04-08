@@ -180,9 +180,9 @@ public class CatanGUI {
 		frame.setBounds(100, 100, 450, 300);
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[]{650, 233, 0};
-		gridBagLayout.rowHeights = new int[]{0, 580, 55, 50, 115, 0};
+		gridBagLayout.rowHeights = new int[]{0, 580, 80, 50, 115, 0};
 		gridBagLayout.columnWeights = new double[]{1.0, 1.0, Double.MIN_VALUE};
-		gridBagLayout.rowWeights = new double[]{0.0, 0.0, 1.0, 0.0, 0.0, Double.MIN_VALUE};
+		gridBagLayout.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		frame.getContentPane().setLayout(gridBagLayout);
 		
 		gameAndMatch = new JTabbedPane(JTabbedPane.TOP);
@@ -261,7 +261,10 @@ public class CatanGUI {
 		    public void actionPerformed(ActionEvent arg0) {
 		        String gameName = JOptionPane.showInputDialog(frame, 
 		                                          "Enter the name of the game");
-		        if (gameName != null) {
+		        
+		        gameName = gameName.trim();
+		        
+		        if (gameName != null && !gameName.equals("")) {
 		            try {
 		                ClientMain.sendLobbyMsg(ClientMain.LobbyMessageType
 		                                        .CreateGame, gameName);
