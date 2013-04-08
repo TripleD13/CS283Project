@@ -180,10 +180,6 @@ public class ClientMain {
         // Check to make sure the user is logged on
         if (logonSuccessful) {
             
-            // Start the receiver thread
-            receiverThread = new Thread(new ClientReceiver());
-            receiverThread.start();
-            
             // Create the GUI
             EventQueue.invokeLater(new Runnable() {
                 public void run() {
@@ -196,6 +192,10 @@ public class ClientMain {
                     }
                 }
             });
+            
+            // Start the receiver thread
+            receiverThread = new Thread(new ClientReceiver());
+            receiverThread.start();
             
             
             // Wait for lobby mode to finish
