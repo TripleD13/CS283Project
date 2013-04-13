@@ -43,6 +43,18 @@ public static void main(String args[]) {
     
     System.out.println(b.addRoad(new Coordinate(0,0,4), new Coordinate(0, 0, 3), bob));
     System.out.println(b.addRoad(new Coordinate(0, 0, 3), new Coordinate(0, 0, 2), joe));
+    System.out.println(b.addRoad(new Coordinate(0, 0, 2), new Coordinate(0, 0, 1), joe));
+    
+    
+    System.out.println(b.addSettlement(new Coordinate(-2,2,0), bob));
+    System.out.println(b.addRoad(new Coordinate(-2,2,0), new Coordinate(-2, 2, 1), bob));
+    System.out.println(b.addRoad(new Coordinate(-2,2,1), new Coordinate(-2, 2, 2), bob));
+    System.out.println(b.addRoad(new Coordinate(-2,2,3), new Coordinate(-2, 2, 2), bob));
+    System.out.println(b.addRoad(new Coordinate(-2,2,3), new Coordinate(-2, 2, 4), bob));
+    System.out.println(b.addRoad(new Coordinate(-2,2,4), new Coordinate(-2, 2, 5), bob));
+    System.out.println(b.addRoad(new Coordinate(-2,2,0), new Coordinate(-2, 2, 5), bob));
+    System.out.println(b.addRoad(new Coordinate(-2, 1, 2), new Coordinate(-2, 1, 3), bob));
+    System.out.println(b.addRoad(new Coordinate(-2, 1, 3), new Coordinate(-2, 1, 4), bob));
     
     System.out.println(b.getResourceCardsEarned(5, joe));
     System.out.println(b.getResourceCardsEarned(5, bob));
@@ -56,6 +68,12 @@ public static void main(String args[]) {
     System.out.println(b.moveRobber(0, 0));
     System.out.println(b.moveRobber(1, -1));
     System.out.println(b.moveRobber(2, 0));
+    
+    System.out.println(b.whoHasLongestRoad());
+    
+    System.out.println(b.addSettlement(new Coordinate(-2,1,3), joe));
+
+    System.out.println(b.whoHasLongestRoad());
     
     while (true) {
      // Extract the coordinate of the node from the node name
@@ -143,6 +161,17 @@ public static void main(String args[]) {
      * Object representing the robber
      */
 	private Robber robber = new Robber();
+	
+	
+	/**
+	 * Name of the player with the current longest road
+	 */
+	private String longestRoadOwner = null;
+	
+	/**
+	 * Length of the current longest road
+	 */
+	private int longestRoadLength = 0;
 	
 	
 	/*
@@ -514,15 +543,146 @@ public static void main(String args[]) {
 	 *         one has the longest road.
 	 */
 	public String whoHasLongestRoad() {
-	    // TODO: add algorithm to determine longest road
+	    //if (roadSet.containsKey("John")) {
+	    //    longestRoadOwner = "John";
+	    //}
 	    
-	    String longestRoadOwner = null;
+	    // The current owner of the road keeps the road in the event of a tie
+	    String defendingOwner = this.longestRoadOwner;
+	    int defendingOwnerLength = this.longestRoadLength;
 	    
-	    if (roadSet.containsKey("John")) {
-	        longestRoadOwner = "John";
+	    
+	    String updatedLongestRoadPlayer = null;
+	    int updatedLongestRoadLength = 0;
+	    
+	    for (String playerName : roadSet.keySet()) {
+	        int playersLongestRoad = playersLongestRoad(playerName);
+	        
+	        // If the player is the defending owner, store the length of the
+	        // defending owner's road
+	        if (playerName.equals(defendingOwner)) {
+	            defendingOwnerLength = playersLongestRoad;
+	        }
+	        
+	        // If this player has the longest road so far, set the road length
+	        // as the longest length and the player as the owner of the longest
+	        // road so far
+	        if (playersLongestRoad > updatedLongestRoadLength) {
+	            updatedLongestRoadLength = playersLongestRoad;
+	            
+	            // If the length of this road is greater than the previous
+	            // length of the longest road, take ownership. Otherwise, the
+	            // 
+	            updatedLongestRoadPlayer = playerName;
+	        }
+	        
+	        // DEBUG MESSAGE
+	        System.out.println(playerName + "'s longest road: " + 
+	                           playersLongestRoad);
+	    }
+	    
+        this.longestRoadLength = updatedLongestRoadLength;
+	    
+	    // If all of the roads have length less than 5, no one has longest road
+	    if (updatedLongestRoadLength < 5) {
+	        this.longestRoadOwner = null;
+	    } else {
+	        // If the defending owner still has the longest road length, keep
+	        // the defending owner (even in the event of a tie). Otherwise,
+	        // choose the player with the greatest longest road.
+	        if (defendingOwnerLength != updatedLongestRoadLength) {
+	            this.longestRoadOwner = updatedLongestRoadPlayer;
+	        }
 	    }
 	    
 	    return longestRoadOwner;
+	}
+	
+	/**
+	 * Calculates the longest road for a specific player. Returns 0 if the
+	 * player has no roads or the player does not exist. The algorithm works
+	 * by running a depth-first search starting from each node in the players
+	 * road graph. Each depth-first search returns the length of the longest
+	 * path or cycle from the resulting depth-first search tree. The maximum of 
+	 * all of these values is equal to the player's longest road.
+	 * @param playerName
+	 * @return the length of the player's longest road, or 0 if the player
+	 *         has no roads or does not exist.
+	 */
+	private int playersLongestRoad(String playerName) {
+	    int longestRoad = 0;
+	    
+	    // Make sure the road set contains the player
+	    if (roadSet.containsKey(playerName)) {
+	        // Get the map of coordinates and nodes that make up the player's
+	        // roads
+	        Map<Coordinate, Node> nodeMap = roadSet.get(playerName);
+	        
+	        // Run DFS starting with each of the nodes
+	        for (Node startNode : nodeMap.values()) {
+	            // Set of nodes that have already been visited in the DFS
+	            Set<Node> visitedNodes = new HashSet<Node>();
+	            
+	            longestRoad = Math.max(longestRoad, 
+	                                   longestRoadDFS(startNode, null,
+	                                                  visitedNodes, 
+	                                                  nodeMap, playerName));
+	        }
+	    }
+	    
+	    return longestRoad;
+	}
+	
+	/**
+	 * Performs a depth-first search using the given node as the current
+	 * node and the set as a set of vertices that have been visited already.
+	 * Returns 1 plus the length of the longest path branching out from the
+	 * current node. If the current node is a leaf in the DFS tree, return
+	 * 0 if the leaf does not have a back edge, and 1 if the leaf does have
+	 * a back edge. The parent node is the previous node visited, or null
+	 * if the current node is the root of the DFS tree.
+	 * @param current
+	 * @param visitedNodes
+	 * @param nodeMap
+	 * @param playerName
+	 * @return 0 if the leaf does not have a back edge, and 1 if the leaf does
+	 *           have a back edge.
+	 */
+	private int longestRoadDFS(Node current, Node parent,
+	                           Set<Node> visitedNodes,
+	                           Map<Coordinate, Node> nodeMap,
+	                           String playerName) {
+	    int maxLength = 0;
+	    	    
+	    // Add the current node to the set of visited nodes
+	    visitedNodes.add(current);
+	    
+	    // Look at all of the unvisited neighbors of the current node
+	    for (Coordinate neighborCoord : current.getNeighbors()) {
+	        Node neighbor = nodeMap.get(neighborCoord);
+	        
+	        // Make sure the neighbor does not have a settlement from
+            // another player
+            Settlement settlement = nodeSet.get(neighborCoord).getSettlement();
+            
+            if (settlement != null && 
+                !settlement.getOwner().getUsername().equals(playerName)) {
+                
+                maxLength = Math.max(maxLength, 1);
+                
+            } else if (!visitedNodes.contains(neighbor)) {
+	            maxLength = Math.max(maxLength,
+	                                 longestRoadDFS(neighbor, current, 
+	                                                visitedNodes,
+	                                                nodeMap, playerName) + 1);
+	        } else if (neighbor != parent) {
+	            // The neighbor must be connected to the current node by a
+	            // back edge, so the maximum length is at least 1
+	            maxLength = Math.max(maxLength,  1);
+	        }
+	    }
+	    
+	    return maxLength;
 	}
 	
 	/**
