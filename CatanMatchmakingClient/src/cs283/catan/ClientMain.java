@@ -385,6 +385,55 @@ public class ClientMain {
     
     
     /**
+     * Send a chat message to the server.
+     * @param message
+     */
+    public static void sendChatMsg(String message) throws Exception {
+        String messageToSend = username + ": ";
+
+        //if targeted, packetize
+
+        if(message.charAt(0) == '/' && message.charAt(1) == 'p') {
+            int firstIndex = message.indexOf('"');
+            int lastIndex = message.indexOf('"', firstIndex+1);
+            messageToSend = messageToSend.concat("/*/");
+            messageToSend = messageToSend.concat(message.substring(firstIndex+1, lastIndex));
+            messageToSend = messageToSend.concat("*/*");
+            /*int spacesToAppend = 16-messageToSend.length();
+            char [] spaces = new char [spacesToAppend];
+            for (int i = 0; i <spacesToAppend; i++)
+            {
+                spaces[i] = ' ';
+            }
+            String stringSpace = new String(spaces);
+            messageToSend = messageToSend.concat(stringSpace);*/
+            messageToSend = messageToSend.concat(message.substring(lastIndex+1));
+            messageToSend = messageToSend.concat(" ***PRIVATE***");
+
+        } else {
+            //if not targeted, packetize
+            //messageToSend = "            ";   
+            messageToSend = messageToSend.concat(message);
+        }
+        
+        String chatCommand = "chat*";
+        messageToSend = chatCommand.concat(messageToSend);
+        
+        
+        synchronized (objOutputStream) {
+            System.out.println("Sending chat message: " + messageToSend);
+            
+            objOutputStream.writeObject(messageToSend);
+            objOutputStream.flush();
+        }
+        
+        //byte [] messageBytes = messageToSend.getBytes();
+        
+        //chat*Tester: "Fred" Test this ***PRIVATE***
+    }
+    
+    
+    /**
      * Class that handles the receiving of network data in a separate thread
      * @author John
      *

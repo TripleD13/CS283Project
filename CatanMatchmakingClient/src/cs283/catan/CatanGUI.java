@@ -185,7 +185,15 @@ public class CatanGUI {
     	    chatOutputPane.setText(chatOutputPane.getText() + "\n" +
     	                           message);
     	    
-    	    chatInputField.setText("");
+    	    try {
+    	        ClientMain.sendChatMsg(message);
+    	        chatInputField.setText("");
+    	    } catch (StringIndexOutOfBoundsException e) {
+    	        JOptionPane.showMessageDialog(this.frame, 
+    	                                      "Invalid message format!");
+    	    } catch (Exception e) {
+    	        e.printStackTrace();
+    	    }
 	    }
 	}
 	
