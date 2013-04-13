@@ -67,12 +67,16 @@ public class CatanGUI {
 	private JTextField textField_12;
 	private JTextField textField_13;
 	private JTextField textField_14;
-	private JTextField textField_16;
-	private JTextField textField_15;
+	private JTextField gameCommandField;
+	private JTextField chatInputField;
+	private JEditorPane chatOutputPane;
+	private JButton sendMessageButton;
+	private JButton sendCommandButton;
+	private JButton endTurnButton;
 	
-	JButton btnCreateGame;
-    JButton btnJoinGame;
-    JButton btnLeaveGame;
+	private JButton btnCreateGame;
+    private JButton btnJoinGame;
+    private JButton btnLeaveGame;
     private String username;
     
 	/**
@@ -159,6 +163,41 @@ public class CatanGUI {
 	    gameAndMatch.setEnabledAt(1, true);
 	    gameAndMatch.setSelectedIndex(1);
 	    gameAndMatch.setEnabledAt(0,  false);
+	    
+	    // Enable the chat and game command inputs
+	    chatInputField.setEnabled(true);
+	    sendMessageButton.setEnabled(true);
+	    
+	    gameCommandField.setEnabled(true);
+	    sendCommandButton.setEnabled(true);
+	    
+	    // Enable the game buttons
+	    endTurnButton.setEnabled(true);
+	}
+	
+	/**
+	 * Send a chat message.
+	 */
+	private void sendChatMessage() {
+	    String message = chatInputField.getText().trim();
+	    
+	    if (!message.equals("")) {
+    	    chatOutputPane.setText(chatOutputPane.getText() + "\n" +
+    	                           message);
+    	    
+    	    chatInputField.setText("");
+	    }
+	}
+	
+	private void sendGameCommand() {
+	    String message = gameCommandField.getText().trim();
+	    
+	    if (!message.equals("")) {
+	        chatOutputPane.setText(chatOutputPane.getText() + "\n" +
+	                               message);
+	        
+	        gameCommandField.setText("");
+	    }
 	}
 	
 	/**
@@ -366,9 +405,9 @@ public class CatanGUI {
 		gbc_scrollPane_1.gridy = 1;
 		frame.getContentPane().add(scrollPane_1, gbc_scrollPane_1);
 		
-		JEditorPane editorPane = new JEditorPane();
-		editorPane.setEditable(false);
-		scrollPane_1.setViewportView(editorPane);
+		chatOutputPane = new JEditorPane();
+		chatOutputPane.setEditable(false);
+		scrollPane_1.setViewportView(chatOutputPane);
 		
 		JPanel gameInfoTop = new JPanel();
 		GridBagConstraints gbc_gameInfoTop = new GridBagConstraints();
@@ -394,6 +433,7 @@ public class CatanGUI {
 		gameInfoTop.add(lblNewLabel, gbc_lblNewLabel);
 		
 		textField = new JTextField();
+		textField.setEditable(false);
 		GridBagConstraints gbc_textField = new GridBagConstraints();
 		gbc_textField.insets = new Insets(0, 0, 5, 5);
 		gbc_textField.fill = GridBagConstraints.HORIZONTAL;
@@ -411,6 +451,7 @@ public class CatanGUI {
 		gameInfoTop.add(lblCities, gbc_lblCities);
 		
 		textField_2 = new JTextField();
+		textField_2.setEditable(false);
 		textField_2.setColumns(10);
 		GridBagConstraints gbc_textField_2 = new GridBagConstraints();
 		gbc_textField_2.insets = new Insets(0, 0, 5, 5);
@@ -428,6 +469,7 @@ public class CatanGUI {
 		gameInfoTop.add(lblBiggestArmy, gbc_lblBiggestArmy);
 		
 		textField_4 = new JTextField();
+		textField_4.setEditable(false);
 		textField_4.setColumns(10);
 		GridBagConstraints gbc_textField_4 = new GridBagConstraints();
 		gbc_textField_4.insets = new Insets(0, 0, 5, 0);
@@ -445,6 +487,7 @@ public class CatanGUI {
 		gameInfoTop.add(lblNewLabel_1, gbc_lblNewLabel_1);
 		
 		textField_1 = new JTextField();
+		textField_1.setEditable(false);
 		textField_1.setColumns(10);
 		GridBagConstraints gbc_textField_1 = new GridBagConstraints();
 		gbc_textField_1.insets = new Insets(0, 0, 0, 5);
@@ -462,6 +505,7 @@ public class CatanGUI {
 		gameInfoTop.add(lblLongestRoad, gbc_lblLongestRoad);
 		
 		textField_3 = new JTextField();
+		textField_3.setEditable(false);
 		textField_3.setColumns(10);
 		GridBagConstraints gbc_textField_3 = new GridBagConstraints();
 		gbc_textField_3.insets = new Insets(0, 0, 0, 5);
@@ -493,22 +537,34 @@ public class CatanGUI {
 		gbc_lblNewLabel_8.gridy = 0;
 		panel_2.add(lblNewLabel_8, gbc_lblNewLabel_8);
 		
-		textField_15 = new JTextField();
-		textField_15.setColumns(10);
-		GridBagConstraints gbc_textField_15 = new GridBagConstraints();
-		gbc_textField_15.gridwidth = 2;
-		gbc_textField_15.fill = GridBagConstraints.HORIZONTAL;
-		gbc_textField_15.insets = new Insets(0, 0, 5, 0);
-		gbc_textField_15.gridx = 0;
-		gbc_textField_15.gridy = 1;
-		panel_2.add(textField_15, gbc_textField_15);
+		chatInputField = new JTextField();
+		chatInputField.setEnabled(false);
+		chatInputField.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent arg0) {
+		        sendChatMessage();
+		    }
+		});
+		chatInputField.setColumns(10);
+		GridBagConstraints gbc_chatInputField = new GridBagConstraints();
+		gbc_chatInputField.gridwidth = 2;
+		gbc_chatInputField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_chatInputField.insets = new Insets(0, 0, 5, 0);
+		gbc_chatInputField.gridx = 0;
+		gbc_chatInputField.gridy = 1;
+		panel_2.add(chatInputField, gbc_chatInputField);
 		
-		JButton button = new JButton("Send Message");
-		GridBagConstraints gbc_button = new GridBagConstraints();
-		gbc_button.anchor = GridBagConstraints.EAST;
-		gbc_button.gridx = 1;
-		gbc_button.gridy = 2;
-		panel_2.add(button, gbc_button);
+		sendMessageButton = new JButton("Send Message");
+		sendMessageButton.setEnabled(false);
+		sendMessageButton.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+		        sendChatMessage();
+		    }
+		});
+		GridBagConstraints gbc_sendMessageButton = new GridBagConstraints();
+		gbc_sendMessageButton.anchor = GridBagConstraints.EAST;
+		gbc_sendMessageButton.gridx = 1;
+		gbc_sendMessageButton.gridy = 2;
+		panel_2.add(sendMessageButton, gbc_sendMessageButton);
 		
 		JPanel commandPanel = new JPanel();
 		GridBagConstraints gbc_commandPanel = new GridBagConstraints();
@@ -525,19 +581,27 @@ public class CatanGUI {
 		gbl_commandPanel.rowWeights = new double[]{0.0, 0.0, 1.0, Double.MIN_VALUE};
 		commandPanel.setLayout(gbl_commandPanel);
 		
-		textField_16 = new JTextField();
-		GridBagConstraints gbc_textField_16 = new GridBagConstraints();
-		gbc_textField_16.gridwidth = 2;
-		gbc_textField_16.insets = new Insets(0, 0, 5, 0);
-		gbc_textField_16.fill = GridBagConstraints.HORIZONTAL;
-		gbc_textField_16.gridx = 0;
-		gbc_textField_16.gridy = 0;
-		commandPanel.add(textField_16, gbc_textField_16);
-		textField_16.setColumns(10);
+		gameCommandField = new JTextField();
+		gameCommandField.setEnabled(false);
+		gameCommandField.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+		        sendGameCommand();
+		    }
+		});
+		GridBagConstraints gbc_gameCommandField = new GridBagConstraints();
+		gbc_gameCommandField.gridwidth = 2;
+		gbc_gameCommandField.insets = new Insets(0, 0, 5, 0);
+		gbc_gameCommandField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_gameCommandField.gridx = 0;
+		gbc_gameCommandField.gridy = 0;
+		commandPanel.add(gameCommandField, gbc_gameCommandField);
+		gameCommandField.setColumns(10);
 		
-		JButton btnNewButton_1 = new JButton("Send Command");
-		btnNewButton_1.addActionListener(new ActionListener() {
+		sendCommandButton = new JButton("Send Command");
+		sendCommandButton.setEnabled(false);
+		sendCommandButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
+			    sendGameCommand();
 			}
 		});
 		
@@ -555,12 +619,12 @@ public class CatanGUI {
 		gbc_ErrorText.gridx = 0;
 		gbc_ErrorText.gridy = 1;
 		commandPanel.add(ErrorText, gbc_ErrorText);
-		GridBagConstraints gbc_btnNewButton_1 = new GridBagConstraints();
-		gbc_btnNewButton_1.insets = new Insets(0, 0, 5, 0);
-		gbc_btnNewButton_1.anchor = GridBagConstraints.EAST;
-		gbc_btnNewButton_1.gridx = 1;
-		gbc_btnNewButton_1.gridy = 1;
-		commandPanel.add(btnNewButton_1, gbc_btnNewButton_1);
+		GridBagConstraints gbc_sendCommandButton = new GridBagConstraints();
+		gbc_sendCommandButton.insets = new Insets(0, 0, 5, 0);
+		gbc_sendCommandButton.anchor = GridBagConstraints.EAST;
+		gbc_sendCommandButton.gridx = 1;
+		gbc_sendCommandButton.gridy = 1;
+		commandPanel.add(sendCommandButton, gbc_sendCommandButton);
 		
 		JPanel resourcePanel = new JPanel();
 		GridBagConstraints gbc_resourcePanel = new GridBagConstraints();
@@ -585,6 +649,7 @@ public class CatanGUI {
 		resourcePanel.add(lblNewLabel_2, gbc_lblNewLabel_2);
 		
 		textField_5 = new JTextField();
+		textField_5.setEditable(false);
 		textField_5.setColumns(10);
 		GridBagConstraints gbc_textField_5 = new GridBagConstraints();
 		gbc_textField_5.insets = new Insets(0, 0, 5, 5);
@@ -601,13 +666,15 @@ public class CatanGUI {
 		gbc_lblMonopoly.gridy = 0;
 		resourcePanel.add(lblMonopoly, gbc_lblMonopoly);
 		
-		JButton btnNewButton = new JButton("End Turn");
-		btnNewButton.addActionListener(new ActionListener() {
+		endTurnButton = new JButton("End Turn");
+		endTurnButton.setEnabled(false);
+		endTurnButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 			}
 		});
 		
 		textField_10 = new JTextField();
+		textField_10.setEditable(false);
 		textField_10.setColumns(10);
 		GridBagConstraints gbc_textField_10 = new GridBagConstraints();
 		gbc_textField_10.insets = new Insets(0, 0, 5, 5);
@@ -615,11 +682,11 @@ public class CatanGUI {
 		gbc_textField_10.gridx = 3;
 		gbc_textField_10.gridy = 0;
 		resourcePanel.add(textField_10, gbc_textField_10);
-		GridBagConstraints gbc_btnNewButton = new GridBagConstraints();
-		gbc_btnNewButton.gridheight = 5;
-		gbc_btnNewButton.gridx = 4;
-		gbc_btnNewButton.gridy = 0;
-		resourcePanel.add(btnNewButton, gbc_btnNewButton);
+		GridBagConstraints gbc_endTurnButton = new GridBagConstraints();
+		gbc_endTurnButton.gridheight = 5;
+		gbc_endTurnButton.gridx = 4;
+		gbc_endTurnButton.gridy = 0;
+		resourcePanel.add(endTurnButton, gbc_endTurnButton);
 		
 		JLabel lblNewLabel_3 = new JLabel("Sheep");
 		GridBagConstraints gbc_lblNewLabel_3 = new GridBagConstraints();
@@ -630,6 +697,7 @@ public class CatanGUI {
 		resourcePanel.add(lblNewLabel_3, gbc_lblNewLabel_3);
 		
 		textField_6 = new JTextField();
+		textField_6.setEditable(false);
 		textField_6.setColumns(10);
 		GridBagConstraints gbc_textField_6 = new GridBagConstraints();
 		gbc_textField_6.insets = new Insets(0, 0, 5, 5);
@@ -647,6 +715,7 @@ public class CatanGUI {
 		resourcePanel.add(lblYearOfPlenty, gbc_lblYearOfPlenty);
 		
 		textField_11 = new JTextField();
+		textField_11.setEditable(false);
 		textField_11.setColumns(10);
 		GridBagConstraints gbc_textField_11 = new GridBagConstraints();
 		gbc_textField_11.insets = new Insets(0, 0, 5, 5);
@@ -664,6 +733,7 @@ public class CatanGUI {
 		resourcePanel.add(lblNewLabel_4, gbc_lblNewLabel_4);
 		
 		textField_7 = new JTextField();
+		textField_7.setEditable(false);
 		textField_7.setColumns(10);
 		GridBagConstraints gbc_textField_7 = new GridBagConstraints();
 		gbc_textField_7.insets = new Insets(0, 0, 5, 5);
@@ -681,6 +751,7 @@ public class CatanGUI {
 		resourcePanel.add(lblKnights, gbc_lblKnights);
 		
 		textField_12 = new JTextField();
+		textField_12.setEditable(false);
 		textField_12.setColumns(10);
 		GridBagConstraints gbc_textField_12 = new GridBagConstraints();
 		gbc_textField_12.insets = new Insets(0, 0, 5, 5);
@@ -698,6 +769,7 @@ public class CatanGUI {
 		resourcePanel.add(lblNewLabel_5, gbc_lblNewLabel_5);
 		
 		textField_8 = new JTextField();
+		textField_8.setEditable(false);
 		textField_8.setColumns(10);
 		GridBagConstraints gbc_textField_8 = new GridBagConstraints();
 		gbc_textField_8.insets = new Insets(0, 0, 5, 5);
@@ -715,6 +787,7 @@ public class CatanGUI {
 		resourcePanel.add(lblArmy, gbc_lblArmy);
 		
 		textField_13 = new JTextField();
+		textField_13.setEditable(false);
 		textField_13.setColumns(10);
 		GridBagConstraints gbc_textField_13 = new GridBagConstraints();
 		gbc_textField_13.insets = new Insets(0, 0, 5, 5);
@@ -732,6 +805,7 @@ public class CatanGUI {
 		resourcePanel.add(lblNewLabel_6, gbc_lblNewLabel_6);
 		
 		textField_9 = new JTextField();
+		textField_9.setEditable(false);
 		textField_9.setColumns(10);
 		GridBagConstraints gbc_textField_9 = new GridBagConstraints();
 		gbc_textField_9.insets = new Insets(0, 0, 0, 5);
@@ -749,6 +823,7 @@ public class CatanGUI {
 		resourcePanel.add(lblRoadBuilder, gbc_lblRoadBuilder);
 		
 		textField_14 = new JTextField();
+		textField_14.setEditable(false);
 		textField_14.setColumns(10);
 		GridBagConstraints gbc_textField_14 = new GridBagConstraints();
 		gbc_textField_14.insets = new Insets(0, 0, 0, 5);
