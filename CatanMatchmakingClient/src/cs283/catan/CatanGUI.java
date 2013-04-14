@@ -204,10 +204,17 @@ public class CatanGUI {
 	    String message = gameCommandField.getText().trim();
 	    
 	    if (!message.equals("")) {
-	        chatOutputPane.setText(chatOutputPane.getText() + "\n" +
-	                               message);
 	        
-	        gameCommandField.setText("");
+	        // Attempt to send the game command
+	        try {
+	            ClientMain.sendGameCommand(gameCommandField.getText());
+	            gameCommandField.setText("");
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	            JOptionPane.showMessageDialog(this.frame, 
+	                                          "Connection problem, game over!");
+	            frame.dispose();
+	        }
 	    }
 	}
 	

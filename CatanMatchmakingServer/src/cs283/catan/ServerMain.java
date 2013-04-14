@@ -362,8 +362,6 @@ public class ServerMain {
                           playerNameArray[1], playerNameArray[2], 
                           playerNameArray[3]);
         
-        
-        notifyLobbyChanged();
 
         // Start a new game
         
@@ -381,6 +379,8 @@ public class ServerMain {
         for (int i = 0; i < playerArray.length; i++) {
             playerArray[i].getPlayerHandler().setCatanGame(game);
         }
+        // Notify everyone that the lobby changed
+        notifyLobbyChanged();
     }
     
     /**
@@ -400,7 +400,7 @@ public class ServerMain {
      * @param lobbyGame
      */
     private static void logoffUser(String username, String lobbyGame,
-                                   String inProgressGame) {
+                                   ServerCatanGame inProgressGame) {
         // Check if the user is in a lobby game. If so, remove the user from
         // that game.
         if (lobbyGame != null) {
@@ -411,7 +411,25 @@ public class ServerMain {
         
         // Check if the user is in an in progress game. If so, end the game.
         if (inProgressGame != null) {
-            // TODO
+            Player playerArray[] = inProgressGame.getPlayerArray();
+            
+            if (playerArray != null) {
+                for (int i = 0; i < playerArray.length; i++) {
+                    if (!playerArray[i].getUsername().equals(username)) {
+                        ServerConnectionHandler handler = 
+                                              playerArray[i].getPlayerHandler();
+                        // Notify each player besides the one logging off that
+                        // the game is over.
+                        if (handler != null) {
+                            try {
+                                handler.sendGameOverMsg();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }
+            }
         }
         
         // Remove the user from the list of users
@@ -498,7 +516,6 @@ public class ServerMain {
          * @param game
          */
         public void setCatanGame(ServerCatanGame game) {
-            // TODO: SYNCHRONIZATION!!!
             this.catanGame = game;
         }
         
@@ -602,7 +619,7 @@ public class ServerMain {
             // so that the user will always be logged off the system, 
             // even when an exception is thrown
             if (isLogonSuccessful) {
-                logoffUser(username, lobbyGameName, inProgressGameName);
+                logoffUser(username, lobbyGameName, catanGame);
             }
             
             // Decrease the number of connections
@@ -879,6 +896,18 @@ public class ServerMain {
                            message);
             synchronized (objOutputStream) {
                 objOutputStream.writeObject(message);
+                objOutputStream.flush();
+            }
+        }
+        
+        /**
+         * Send a message to the client notifying them the game is over.
+         */
+        public void sendGameOverMsg() throws Exception {
+            printServerMsg("Sending game over message to client '" + username +
+                           "'");
+            synchronized (objOutputStream) {
+                objOutputStream.writeObject("Game Over");
                 objOutputStream.flush();
             }
         }

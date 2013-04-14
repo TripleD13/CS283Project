@@ -434,6 +434,22 @@ public class ClientMain {
     
     
     /**
+     * Send a game command to the server.
+     * @param command
+     */
+    public static void sendGameCommand(String message) throws Exception {
+        String messageToSend = "cmd**" + message;
+        
+        synchronized (objOutputStream) {
+            System.out.println("Sending game command: " + messageToSend);
+            
+            objOutputStream.writeObject(messageToSend);
+            objOutputStream.flush();
+        }
+    }
+    
+    
+    /**
      * Class that handles the receiving of network data in a separate thread
      * @author John
      *
@@ -481,7 +497,18 @@ public class ClientMain {
                         
                         //break;
                         
-                    } else if (message.startsWith("chat*",  0)) {
+                    } else if (message.equals("Game Over")) {
+                        // The game is over. Exit the loop
+                        EventQueue.invokeAndWait(new Runnable() {
+                            public void run() {
+                                JOptionPane.showMessageDialog(gui.getFrame(),
+                                                             "Someone left the "
+                                                          + "game. Game Over!");
+                            }
+                        });
+                        
+                        break;
+                    }else if (message.startsWith("chat*",  0)) {
                        
                         // Format the chat message and update the GUI
                         message = message.substring(5);
@@ -517,9 +544,7 @@ public class ClientMain {
                     // the thread
                     System.out.println("Receiver can no longer receive from " +
                                        "server.");
-                    
-                    // TODO: Probably should make sure program exits at this
-                    //       point
+
                     break;
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -527,6 +552,17 @@ public class ClientMain {
             }
             
             System.out.println("Ending receiver thread");
+            
+            // Kill the gui
+            try {
+                EventQueue.invokeAndWait(new Runnable() {
+                    public void run() {
+                        gui.getFrame().dispose();
+                    }
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
        
     }
