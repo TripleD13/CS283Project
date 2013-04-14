@@ -39,30 +39,30 @@ public static void main(String args[]) {
     
     Scanner in = new Scanner(System.in);
     
-    Player bob = new Player("Bob");
-    Player joe = new Player("Joe");
+    Player bob = new Player("Bob", 0);
+    Player joe = new Player("Joe", 1);
     
-    System.out.println(b.addSettlement(new Coordinate(0,0,2), joe));
-    System.out.println(b.addSettlement(new Coordinate(0,0,4), bob));
-    System.out.println(b.addSettlement(new Coordinate(1,-1,5), joe));
-    System.out.println(b.addSettlement(new Coordinate(1,-1,1), joe));
+    System.out.println(b.addSettlement(new Coordinate(0,0,2), joe, false));
+    System.out.println(b.addSettlement(new Coordinate(0,0,4), bob, false));
+    System.out.println(b.addSettlement(new Coordinate(1,-1,5), joe, false));
+    System.out.println(b.addSettlement(new Coordinate(1,-1,1), joe, false));
     
     System.out.println(b.upgradeSettlement(new Coordinate(0, 0, 2), joe));
     
-    System.out.println(b.addRoad(new Coordinate(0,0,4), new Coordinate(0, 0, 3), bob));
-    System.out.println(b.addRoad(new Coordinate(0, 0, 3), new Coordinate(0, 0, 2), joe));
-    System.out.println(b.addRoad(new Coordinate(0, 0, 2), new Coordinate(0, 0, 1), joe));
+    System.out.println(b.addRoad(new Coordinate(0,0,4), new Coordinate(0, 0, 3), bob, false));
+    System.out.println(b.addRoad(new Coordinate(0, 0, 3), new Coordinate(0, 0, 2), joe, false));
+    System.out.println(b.addRoad(new Coordinate(0, 0, 2), new Coordinate(0, 0, 1), joe, false));
     
     
-    System.out.println(b.addSettlement(new Coordinate(-2,2,0), bob));
-    System.out.println(b.addRoad(new Coordinate(-2,2,0), new Coordinate(-2, 2, 1), bob));
-    System.out.println(b.addRoad(new Coordinate(-2,2,1), new Coordinate(-2, 2, 2), bob));
-    System.out.println(b.addRoad(new Coordinate(-2,2,3), new Coordinate(-2, 2, 2), bob));
-    System.out.println(b.addRoad(new Coordinate(-2,2,3), new Coordinate(-2, 2, 4), bob));
-    System.out.println(b.addRoad(new Coordinate(-2,2,4), new Coordinate(-2, 2, 5), bob));
-    System.out.println(b.addRoad(new Coordinate(-2,2,0), new Coordinate(-2, 2, 5), bob));
-    System.out.println(b.addRoad(new Coordinate(-2, 1, 2), new Coordinate(-2, 1, 3), bob));
-    System.out.println(b.addRoad(new Coordinate(-2, 1, 3), new Coordinate(-2, 1, 4), bob));
+    System.out.println(b.addSettlement(new Coordinate(-2,2,0), bob, false));
+    System.out.println(b.addRoad(new Coordinate(-2,2,0), new Coordinate(-2, 2, 1), bob, false));
+    System.out.println(b.addRoad(new Coordinate(-2,2,1), new Coordinate(-2, 2, 2), bob, false));
+    System.out.println(b.addRoad(new Coordinate(-2,2,3), new Coordinate(-2, 2, 2), bob, false));
+    System.out.println(b.addRoad(new Coordinate(-2,2,3), new Coordinate(-2, 2, 4), bob, false));
+    System.out.println(b.addRoad(new Coordinate(-2,2,4), new Coordinate(-2, 2, 5), bob, false));
+    System.out.println(b.addRoad(new Coordinate(-2,2,0), new Coordinate(-2, 2, 5), bob, false));
+    System.out.println(b.addRoad(new Coordinate(-2, 1, 2), new Coordinate(-2, 1, 3), bob, false));
+    System.out.println(b.addRoad(new Coordinate(-2, 1, 3), new Coordinate(-2, 1, 4), bob, false));
     
     System.out.println(b.getResourceCardsEarned(5, joe));
     System.out.println(b.getResourceCardsEarned(5, bob));
@@ -79,7 +79,7 @@ public static void main(String args[]) {
     
     System.out.println(b.whoHasLongestRoad());
     
-    System.out.println(b.addSettlement(new Coordinate(-2,1,3), joe));
+    System.out.println(b.addSettlement(new Coordinate(-2,1,3), joe, false));
 
     System.out.println(b.whoHasLongestRoad());
     
@@ -152,11 +152,23 @@ public static void main(String args[]) {
     private Map<Coordinate, Node> nodeSet = new HashMap<Coordinate, Node>();
     
     /**
+     * Also keep a running list of all of the settlements on the board. This
+     * list is used for GUI drawing purposes only.
+     */
+    private List<Settlement> settlementList = new LinkedList<Settlement>();
+    
+    /**
      * Map of all road node sets in the graph. The key is the player name and
      * the value is the map of all nodes of the roads owned by the player.
      */
     private Map<String, Map<Coordinate, Node>> roadSet = 
                                    new HashMap<String, Map<Coordinate, Node>>();
+    
+    /**
+     * Also keep a running list of all of the roads on the board. This list
+     * is used for GUI drawing purposes only.
+     */
+    private List<Road> roadList = new LinkedList<Road>();
     
     /**
      * Map of all the tiles on the board. The key is the coordinate of the tile
@@ -327,9 +339,12 @@ public static void main(String args[]) {
 	 * already another settlement within a distance of 1.
 	 * @param location
 	 * @param owner
+     * @param checkCards - whether or not the method checks to make sure the
+     *                     player has appropriate resources.
 	 * @return whether or not the settlement was successfully added.
 	 */
-	public boolean addSettlement(Coordinate location, Player owner) {
+	public boolean addSettlement(Coordinate location, Player owner, 
+	                             boolean checkCards) {
 	    boolean isSettlementAdded = false;
 	    
 	    location = location.normalizeCoordinate();
@@ -359,8 +374,8 @@ public static void main(String args[]) {
 	        }
 	    }
 	    
-	    if (locationNode != null && hasSheep && hasLumber && hasBrick &&
-            hasWheat) {
+	    if (locationNode != null && ((hasSheep && hasLumber && hasBrick &&
+            hasWheat) | !checkCards)) {
 	        
 	        boolean safeToAdd = true;
 	        List<Coordinate> neighbors = locationNode.getNeighbors();
@@ -379,7 +394,14 @@ public static void main(String args[]) {
             // Add the settlement if there are not settlements directly adjacent
             // to the location
             if (safeToAdd) {
-                locationNode.setSettlement(new Settlement(location, owner));
+                Settlement newSettlement = new Settlement(location, owner);
+               
+                locationNode.setSettlement(newSettlement);
+                
+                // Add the settlement to the settlement list for GUI drawing
+                // purposes
+                settlementList.add(newSettlement);
+                
                 isSettlementAdded = true;
             }
 	    }
@@ -393,10 +415,13 @@ public static void main(String args[]) {
 	 * another road or settlement owned by the player.
 	 * @param start
 	 * @param finish
-	 * @owner
+	 * @param owner
+	 * @param checkCards - whether or not the method checks to make sure the
+	 *                     player has appropriate resources.
 	 * @return whether or not the road was successfully added.
 	 */
-	public boolean addRoad(Coordinate start, Coordinate finish, Player owner) {
+	public boolean addRoad(Coordinate start, Coordinate finish, Player owner,
+	                       boolean checkCards) {
 	    boolean isRoadAdded = false;
 	    
 	    // Normalize the coordinates
@@ -447,7 +472,7 @@ public static void main(String args[]) {
             }
         }
         
-        canAddRoad = canAddRoad && hasLumber && hasBrick;
+        canAddRoad = (canAddRoad && hasLumber && hasBrick) | !checkCards;
         
 	    // Make sure either road is adjacent to a settlement owned by the player
 	    // or adjacent to a road owned by the player
@@ -497,6 +522,9 @@ public static void main(String args[]) {
 	        // Add the edge
 	        startNode.addNeighbor(finish);
 	        finishNode.addNeighbor(start);
+	        
+	        // Add a road object to the list for GUI drawing purposes
+	        roadList.add(new Road(start,finish, owner));
 	        
 	        isRoadAdded = true;
 	    }
@@ -799,4 +827,20 @@ public static void main(String args[]) {
 	    return cardsEarned;
 	}	
 		
+	/**
+	 * Returns a list of all of the settlements on the board.
+	 * @return a list of settlements.
+	 */
+	public List<Settlement> getSettlementList() {
+	    return settlementList;
+	}
+	
+	/**
+	 * Returns a list of all of the roads on the board
+	 * @return a list of roads.
+	 */
+	public List<Road> getRoadList() {
+	    return roadList;
+	}
+	
 }

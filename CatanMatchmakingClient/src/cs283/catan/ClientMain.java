@@ -508,8 +508,8 @@ public class ClientMain {
                         });
                         
                         break;
-                    } else if (message.startsWith("Game Data")) {
-                        ServerCatanGame game = 
+                    } else if (message.startsWith("game*")) {
+                        final ServerCatanGame game = 
                                   (ServerCatanGame) objInputStream.readObject();
                         
                         Player playerArray[] = game.getPlayerArray();
@@ -517,6 +517,14 @@ public class ClientMain {
                         for (int i = 0; i < playerArray.length; i++) {
                             System.out.println(playerArray[i].getUsername());
                         }
+                        
+                        // Redraw the board
+                        EventQueue.invokeAndWait(new Runnable() {
+                            public void run() {
+                                gui.drawBoard(game);
+                            }
+                        });
+                        
                     } else if (message.startsWith("chat*",  0)) {
                        
                         // Format the chat message and update the GUI

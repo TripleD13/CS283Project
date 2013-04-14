@@ -369,7 +369,7 @@ public class ServerMain {
         Player playerArray[] = new Player[4];
         
         for (int i = 0; i < playerArray.length; i++) {
-            playerArray[i] = new Player(playerNameArray[i]);
+            playerArray[i] = new Player(playerNameArray[i], i);
         }
 
         // Create the Catan game
@@ -400,6 +400,7 @@ public class ServerMain {
      * @param lobbyGame
      */
     private static void logoffUser(String username, String lobbyGame,
+                                   String inProgressGameName,
                                    ServerCatanGame inProgressGame) {
         // Check if the user is in a lobby game. If so, remove the user from
         // that game.
@@ -411,6 +412,12 @@ public class ServerMain {
         
         // Check if the user is in an in progress game. If so, end the game.
         if (inProgressGame != null) {
+            // Remove the game name from the list of in progress games
+            synchronized (lobbyGames) {
+                inProgressGames.remove(inProgressGameName);
+            }
+            
+            // Notify each player to end the game
             Player playerArray[] = inProgressGame.getPlayerArray();
             
             if (playerArray != null) {
@@ -637,7 +644,8 @@ public class ServerMain {
             // so that the user will always be logged off the system, 
             // even when an exception is thrown
             if (isLogonSuccessful) {
-                logoffUser(username, lobbyGameName, catanGame);
+                logoffUser(username, lobbyGameName, inProgressGameName,
+                           catanGame);
             }
             
             // Decrease the number of connections
@@ -730,6 +738,7 @@ public class ServerMain {
                             inProgressGames.containsKey(lobbyGameName)) {
                             
                             currentMode = UserMode.GameMode;
+                            inProgressGameName = lobbyGameName;
                             lobbyGameName = null;
                             
                             isSuccessful = true;
@@ -947,7 +956,7 @@ public class ServerMain {
                         if (!board.addSettlement(new Coordinate(coordinate1,
                                                            coordinate2,
                                                            coordinate3),
-                                                owner)) {
+                                                owner, true)) {
                             sendChatMessage("SERVER: Unable to add " +
                                             "settlement.");
                         }
@@ -1001,7 +1010,7 @@ public class ServerMain {
                                            new Coordinate(coordinate4,
                                                           coordinate5,
                                                           coordinate6),
-                                           owner)) {
+                                           owner, true)) {
                             sendChatMessage("SERVER: Unable to add " +
                                             "road.");
                         }
@@ -1252,7 +1261,7 @@ public class ServerMain {
                     synchronized (catanGame) {
                         synchronized (objOutputStream) {
                             objOutputStream.reset();
-                            objOutputStream.writeObject("Game Data");
+                            objOutputStream.writeObject("game*");
                             objOutputStream.writeObject(catanGame);
                             objOutputStream.flush();
                         }

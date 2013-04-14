@@ -12,16 +12,26 @@ public class Player implements Serializable
 	public Set<DevelopmentCard> devCards = new HashSet<DevelopmentCard>();
 	public int points;
 	
+	/**
+	 * Color index used when drawing the board in the GUI.
+	 */
+	private int colorIndex;
+	
 	public String username;
 	
-	public Player(String username)
+	public Player(String username, int colorIndex)
 	{
 		this.username = username;
+		this.colorIndex = colorIndex;
 	}
 	
 	public String getUsername()
 	{
 		return this.username;
+	}
+	
+	public int getColorIndex() {
+	    return colorIndex;
 	}
 	
 	public boolean hasSettlement(int x, int y)

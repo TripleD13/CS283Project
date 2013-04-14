@@ -156,6 +156,36 @@ public class ServerCatanGame implements Serializable
             
             System.out.println("Unable to load tiles from file!");
         }
+        
+        
+        // For debugging, set up an initial configuration
+        myBoard.addSettlement(new Coordinate(-1,-1,0), userArray[0], false);
+        myBoard.addRoad(new Coordinate(-1,-1,0), new Coordinate(-1,-1,1),
+                        userArray[0], false);
+        myBoard.addSettlement(new Coordinate(0,2,0), userArray[0], false);
+        myBoard.addRoad(new Coordinate(0,2,0), new Coordinate(-1,1,1),
+                        userArray[0], false);
+        
+        myBoard.addSettlement(new Coordinate(-2,2,0), userArray[1], false);
+        myBoard.addRoad(new Coordinate(-2,2,0), new Coordinate(-1,1,1),
+                        userArray[1], false);
+        myBoard.addSettlement(new Coordinate(1,-2,0), userArray[1], false);
+        myBoard.addRoad(new Coordinate(1,-2,0), new Coordinate(1,-2,5),
+                        userArray[1], false);
+        
+        myBoard.addSettlement(new Coordinate(0,0,0), userArray[2], false);
+        myBoard.addRoad(new Coordinate(0,0,0), new Coordinate(0,0,1),
+                        userArray[2], false);
+        myBoard.addSettlement(new Coordinate(-2,0,0), userArray[2], false);
+        myBoard.addRoad(new Coordinate(-2,0,0), new Coordinate(-2,0,1),
+                        userArray[2], false);
+        
+        myBoard.addSettlement(new Coordinate(2,-1,0), userArray[3], false);
+        myBoard.addRoad(new Coordinate(2,-1,0), new Coordinate(2,-1,5),
+                        userArray[3], false);
+        myBoard.addSettlement(new Coordinate(1,1,0), userArray[3], false);
+        myBoard.addRoad(new Coordinate(1,1,0), new Coordinate(1,1,5),
+                        userArray[3], false);
 	}
 	
 	

@@ -227,6 +227,39 @@ public class CatanGUI {
 	                           message);
 	}
 	
+	
+	/**
+	 * Draws the catan board.
+	 * @param game
+	 */
+	public void drawBoard(ServerCatanGame game) {
+	    Board board = game.getBoard();
+	    
+	    // Draw all of the settlements
+	    List<Settlement> settlements = board.getSettlementList();
+	    
+	    for (Settlement settlement : settlements) {
+	        /*drawSettlement(settlement.getLocation(), 
+	                       settlement.getOwner().getColorIndex(), 
+	                       settlement.isCity());*/
+	        
+	        System.out.format("Drawing settlement:\nLocation: %s\nOwner: " +
+	                          "%s\nIs City %s\n", settlement.getLocation(), 
+	                          settlement.getOwner(), settlement.isCity());
+	    }
+	    
+	    // Draw all of the roads
+	    List<Road> roads = board.getRoadList();
+	    
+	    for (Road road : roads) {
+	        //drawRoad(road.getStart(), road.getFinish(), 
+	        //         road.getOwner().getColorIndex());
+	        System.out.format("Drawing road:\nStart: %s\nFinish: %s\n" +
+	                          "Owner: %s\n", road.getStart(), road.getFinish(),
+	                          road.getOwner());
+	    }
+	}
+	
 	/**
 	 * Initialize the contents of the frame.
 	 */
