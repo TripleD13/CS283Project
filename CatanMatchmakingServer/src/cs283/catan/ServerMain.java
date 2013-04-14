@@ -53,7 +53,8 @@ public class ServerMain {
     /**
      * Set that will store the usernames currently in use
      */
-    private static Set<String> userList = new HashSet<String>();
+    private static Map<String, ServerConnectionHandler> userList = 
+                                 new HashMap<String, ServerConnectionHandler>();
     
     /**
      * Map that will store the games currently in the lobby. The key is the
@@ -352,17 +353,34 @@ public class ServerMain {
      */
     private static void startNewGame(String gameName) {
         // Remove the game from the lobby and add to in progress games
-        String playerArray[] = lobbyGames.remove(gameName);
+        String playerNameArray[] = lobbyGames.remove(gameName);
         inProgressGames.put(gameName, new Object());
         
         System.out.print("Starting the game '" + gameName + "' with the " +
                            "players ");
-        System.out.printf("'%s', '%s', '%s', and '%s'.\n", playerArray[0], 
-                          playerArray[1], playerArray[2], playerArray[3]);
+        System.out.printf("'%s', '%s', '%s', and '%s'.\n", playerNameArray[0], 
+                          playerNameArray[1], playerNameArray[2], 
+                          playerNameArray[3]);
         
         
         notifyLobbyChanged();
-        // TODO: Actually start the new game
+
+        // Start a new game
+        
+        // Create the player array
+        Player playerArray[] = new Player[4];
+        
+        for (int i = 0; i < playerArray.length; i++) {
+            playerArray[i] = new Player(playerNameArray[i], 
+                                        userList.get(playerNameArray[i]));
+        }
+        
+        // Create the Catan game
+        ServerCatanGame game = new ServerCatanGame(playerArray);
+        
+        for (int i = 0; i < playerArray.length; i++) {
+            playerArray[i].getPlayerHandler().setCatanGame(game);
+        }
     }
     
     /**
@@ -455,6 +473,11 @@ public class ServerMain {
         private String inProgressGameName;
         
         /**
+         * Catan game object
+         */
+        private ServerCatanGame catanGame;
+        
+        /**
          * Indicates the mode the user is currently in
          */
         private UserMode currentMode;
@@ -466,7 +489,17 @@ public class ServerMain {
         public ServerConnectionHandler(Socket socket) {
             this.clientSocket = socket;
             this.username = this.lobbyGameName = this.inProgressGameName = null;
+            this.catanGame = null;
             this.currentMode = UserMode.Initialization;
+        }
+        
+        /**
+         * Set the Catan game object
+         * @param game
+         */
+        public void setCatanGame(ServerCatanGame game) {
+            // TODO: SYNCHRONIZATION!!!
+            this.catanGame = game;
         }
         
         /**
@@ -502,8 +535,8 @@ public class ServerMain {
                 // Attempt a logon of username. First check ensure that the
                 // username is available
                 synchronized (userList) {
-                    if (!userList.contains(username)) {
-                        userList.add(username);
+                    if (!userList.containsKey(username)) {
+                        userList.put(username, this);
                         
                         isLogonSuccessful = true;
                     }
@@ -747,8 +780,105 @@ public class ServerMain {
          * @throws Exception
          */
         private void handleGame() throws Exception {
+            // Initially the game sends a chat message to the client welcoming
+            // it to the game
             synchronized(objOutputStream) {
-                objOutputStream.writeObject("chat*Fred: I hate you!");
+                objOutputStream.writeObject("chat*SERVER: Welcome!");
+                objOutputStream.flush();
+            }
+            
+            while (currentMode == UserMode.GameMode) {
+                // Receive a message
+                String msg = (String) objInputStream.readObject();
+                
+                printServerMsg("Messaged received.");
+                System.out.println("\n=========RECEIVED MESSAGE=========");
+                System.out.println(msg);
+                System.out.println("==================================\n");
+                
+                if (msg.startsWith("chat*")) { // Chat message received
+                    
+                    Player playerArray[] = catanGame.getPlayerArray();
+                    
+                    int firstIndex = msg.indexOf("/*/");
+                    //if this is a targeted message
+                    if (firstIndex != -1) {
+                        int lastIndex = msg.indexOf("*/*");
+                        String address = msg.substring(firstIndex+3, 
+                                                           lastIndex);
+                        
+                        //match address with user's socket
+                        ServerConnectionHandler target = null;  
+                        
+                        // Find the target ServerConnectionHandler to which the
+                        // message will be routed
+                        if (playerArray != null) {
+                            for (int i = 0; i < playerArray.length; i++) {
+                                if (playerArray[i].getUsername()
+                                    .equals(address)) {
+                                    
+                                    target = playerArray[i].getPlayerHandler();
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        //attach chat* command to send out
+                        String chatCommand = "chat*";
+                        String messageToSend = new String(msg.substring(0, 
+                                                                   firstIndex));
+                        messageToSend = messageToSend.concat(msg
+                                                       .substring(lastIndex+3));
+                        //messageToSend = chatCommand.concat(messageToSend);
+                        
+                        if (target != null) {
+                            // Send the message to the target and the sender
+                            int colonIndex = messageToSend.indexOf(":");
+                            String senderConfirmation = 
+                                            String.format("%s: \"%s\" %s",
+                                       messageToSend.substring(0, colonIndex),
+                                       address,
+                                       messageToSend.substring(colonIndex + 2));
+                            
+                            sendChatMessage(senderConfirmation);
+                            target.sendChatMessage(messageToSend);
+                        } else {
+                            // Send an error message to the client
+                            sendChatMessage("chat*SERVER: User '" + address +
+                                            "' was not found!");
+                        }
+                        
+                    }else
+                    {
+                        //not a targeted chat signal
+                        String messageToSend = msg;
+                        
+                        //Iterate through all sockets and send
+                        if (playerArray != null) {
+                            for (int i = 0; i < playerArray.length; i++) {
+                                ServerConnectionHandler handler = 
+                                              playerArray[i].getPlayerHandler();
+                                
+                                if (handler != null) {
+                                    handler.sendChatMessage(messageToSend);
+                                }
+                            }
+                        }
+                    }
+                    
+                }
+            }
+        }
+        
+        /**
+         * Send a chat message to the client.
+         * @param message
+         */
+        public void sendChatMessage(String message) throws Exception {
+            printServerMsg("Sending chat message to " + username + ": " + 
+                           message);
+            synchronized (objOutputStream) {
+                objOutputStream.writeObject(message);
                 objOutputStream.flush();
             }
         }

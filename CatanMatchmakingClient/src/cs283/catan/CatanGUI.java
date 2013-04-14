@@ -108,6 +108,7 @@ public class CatanGUI {
      */
     public void setUsername(String username) {
         this.username = username;
+        this.frame.setTitle(username);
     }
 	
 	/**
@@ -182,9 +183,8 @@ public class CatanGUI {
 	    String message = chatInputField.getText().trim();
 	    
 	    if (!message.equals("")) {
-    	    chatOutputPane.setText(chatOutputPane.getText() + "\n" +
-    	                           message);
-    	    
+	        
+	        // Attempt to send the chat message
     	    try {
     	        ClientMain.sendChatMsg(message);
     	        chatInputField.setText("");

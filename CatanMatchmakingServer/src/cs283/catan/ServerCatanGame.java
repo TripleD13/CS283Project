@@ -30,7 +30,7 @@ public class ServerCatanGame
 	private int turnNumber; //for debugging purposes
 	
 	//alternate constructor = we will use this to construct the game
-	public ServerCatanGame()
+	public ServerCatanGame(Player playerArray[])
 	{
 		myBoard = new Board();
 			
@@ -39,20 +39,31 @@ public class ServerCatanGame
 		turnNumber = 0; // zero indexed
 		victory = false; // nobody has declared victory yet - it's the start of the game
 		//set up user array - using objects John gives us
-		userArray = new Player[numUsers];
+		//userArray = new Player[numUsers];
 		
 		//this isn't C++, so we need to initialize the array with new objects
-		for(int i = 0; i < numUsers; ++i)
-		{
-			String playerString = "Player " + i;// for debugging
-			userArray[i] = new Player(playerString);
-		}
+		//for(int i = 0; i < numUsers; ++i)
+		//{
+		//	String playerString = "Player " + i;// for debugging
+		//	userArray[i] = new Player(playerString);
+		//}
+		
+		this.userArray = playerArray;
 		
 		// we also need a to generate dice rolls
 		rollGenerator = new Random();
 		
 		
 	}
+	
+	/**
+	 * Retrieve the player array.
+	 * @return the player array.
+	 */
+	public Player[] getPlayerArray() {
+	    return this.userArray;
+	}
+	
 	/**
 	 *  - performs all setup not done in constructor, involves putting board together
 	 *  involves the board. ugh.
