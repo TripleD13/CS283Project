@@ -7,9 +7,24 @@ public class Player
 	
 	public String username;
 	
+	private ServerMain.ServerConnectionHandler playerHandler;
+	
 	public Player(String username)
 	{
-		this.username = username;
+		this(username, null);
+	}
+	
+	public Player(String username, ServerMain.ServerConnectionHandler handler) {
+	    this.username = username;
+	    this.playerHandler = handler;
+	}
+	
+	public ServerMain.ServerConnectionHandler getPlayerHandler() {
+	    return this.playerHandler;
+	}
+	
+	public void setPlayerHandler(ServerMain.ServerConnectionHandler handler) {
+	    this.playerHandler = handler;
 	}
 	
 	public String getUsername()

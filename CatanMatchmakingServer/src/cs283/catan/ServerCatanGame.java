@@ -183,8 +183,8 @@ public class ServerCatanGame
 	
 	public void rollDice()
 	{
-		diceRoll = rollGenerator.nextInt(6)+
-				 rollGenerator.nextInt(6)+1;
+		diceRoll = rollGenerator.nextInt(5)+
+				 rollGenerator.nextInt(5)+2;
 	}
 	
 	public int getDiceRoll()

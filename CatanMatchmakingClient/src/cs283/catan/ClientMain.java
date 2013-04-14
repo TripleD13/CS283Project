@@ -479,7 +479,32 @@ public class ClientMain {
                             }
                         });
                         
-                        break;
+                        //break;
+                        
+                    } else if (message.startsWith("chat*",  0)) {
+                       
+                        // Format the chat message and update the GUI
+                        message = message.substring(5);
+                        String messageToDisplay = "";
+                        //Tester: /*/Fred*/* I hate you!!! ***PRIVATE***
+                        int firstIndex = message.indexOf("/*/");
+                        if ( firstIndex != -1) {
+                            int lastIndex = message.indexOf("*/*");
+                            String id = message.substring(0, firstIndex-1);
+                            String messageMessage = 
+                                                 message.substring(lastIndex+3);
+                            messageToDisplay = id.concat(messageMessage);
+                        } else {
+                            messageToDisplay = message;
+                        }
+                        
+                        final String guiMessage = messageToDisplay;
+                        
+                        EventQueue.invokeAndWait(new Runnable() {
+                            public void run() {
+                                gui.receiveChatMessage(guiMessage);
+                            }
+                        });
                         
                     } else {
                         System.out.println("Server response: " + message);

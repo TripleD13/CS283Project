@@ -197,6 +197,9 @@ public class CatanGUI {
 	    }
 	}
 	
+	/**
+	 * Send a game command.
+	 */
 	private void sendGameCommand() {
 	    String message = gameCommandField.getText().trim();
 	    
@@ -206,6 +209,15 @@ public class CatanGUI {
 	        
 	        gameCommandField.setText("");
 	    }
+	}
+	
+	/**
+	 * Receive a chat message and update the chat window.
+	 * @param message
+	 */
+	public void receiveChatMessage(String message) {
+	    chatOutputPane.setText(chatOutputPane.getText() + "\n" +
+	                           message);
 	}
 	
 	/**

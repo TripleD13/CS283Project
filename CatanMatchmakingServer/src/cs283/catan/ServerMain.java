@@ -410,7 +410,7 @@ public class ServerMain {
      * @author John
      *
      */
-    private static class ServerConnectionHandler implements Runnable {
+    public static class ServerConnectionHandler implements Runnable {
         
         /**
          * Enum that represents the possible modes the user could be in
@@ -534,6 +534,9 @@ public class ServerMain {
                     // End the lobby push thread
                     lobbyPushThread.interrupt();
                     lobbyPushThread.join(1000);
+                    
+                    // Handle the game
+                    handleGame();
                     
                 } else {
                     printServerMsg("Logon attempt by '" + username +
@@ -737,6 +740,17 @@ public class ServerMain {
 
             printServerMsg("Ending lobby push thread.");
             
+        }
+        
+        /**
+         * Manages all of the user interaction with the game, including chat.
+         * @throws Exception
+         */
+        private void handleGame() throws Exception {
+            synchronized(objOutputStream) {
+                objOutputStream.writeObject("chat*Fred: I hate you!");
+                objOutputStream.flush();
+            }
         }
         
     }
