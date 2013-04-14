@@ -967,6 +967,10 @@ public class ServerMain {
         private void parseGameCommand(String message) throws Exception {
             Board board = catanGame.getBoard();
             
+            // Indicates whether the state of the game has changed because of
+            // a command
+            boolean isGameChanged = false;
+            
             // Find the player representing the current player
             Player playerArray[] = catanGame.getPlayerArray();
             Player owner = null;
@@ -1002,6 +1006,8 @@ public class ServerMain {
                                                 owner, true)) {
                             sendChatMessage("chat*SERVER: Unable to add " +
                                             "settlement.");
+                        } else {
+                            isGameChanged = true;
                         }
                         
                         }catch (Exception InputMismatchException)
@@ -1025,6 +1031,8 @@ public class ServerMain {
                                                      owner)) {
                              sendChatMessage("chat*SERVER: Unable to add " +
                                              "city.");
+                        } else {
+                            isGameChanged = true;
                         }
                         //command
                         }catch (Exception InputMismatchException)
@@ -1056,6 +1064,8 @@ public class ServerMain {
                                            owner, true)) {
                             sendChatMessage("chat*SERVER: Unable to add " +
                                             "road.");
+                        } else {
+                            isGameChanged = true;
                         }
                         //command
                         }catch (Exception InputMismatchException)
@@ -1067,7 +1077,12 @@ public class ServerMain {
                 }else if (message.indexOf("devcard") != -1)
                 {
                 
-                    catanGame.drawDevelopmentCard(owner);
+                    if (!catanGame.drawDevelopmentCard(owner)) {
+                        sendChatMessage("chat*SERVER: Unable to buy " +
+                                        "development card.");
+                    } else {
+                        isGameChanged = true;
+                    }
                 }else 
                 {
                     sendChatMessage("chat*SERVER: Invalid command, " +
@@ -1281,6 +1296,15 @@ public class ServerMain {
             {
                 sendChatMessage("chat*SERVER: Do not pass go, " +
                                 "you will not collect $200.");
+            }
+            
+            // If the game was changed from any of the commands, notify all of
+            // the players that the game has been changed so that they can
+            // send the updated information to their clients.
+            if (isGameChanged) {
+                synchronized (catanGame.gameChangedNotifier) {
+                    catanGame.gameChangedNotifier.notifyAll();
+                }
             }
             
         }

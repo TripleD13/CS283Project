@@ -403,6 +403,10 @@ public static void main(String args[]) {
                 settlementList.add(newSettlement);
                 
                 isSettlementAdded = true;
+                
+                if (checkCards) {
+                    owner.doSettlementPurchase();
+                }
             }
 	    }
 	    
@@ -527,6 +531,10 @@ public static void main(String args[]) {
 	        roadList.add(new Road(start,finish, owner));
 	        
 	        isRoadAdded = true;
+	        
+	        if (checkCards) {
+	            owner.doRoadPurchase();
+	        }
 	    }
 	    
 	    return isRoadAdded;
@@ -595,6 +603,8 @@ public static void main(String args[]) {
 	        if (settlement.getOwner() == owner) {
 	            settlement.upgradeToCity();
 	            isUpgraded = true;
+	            
+	            owner.doCityPurchase();
 	        }
 	    }
 	    

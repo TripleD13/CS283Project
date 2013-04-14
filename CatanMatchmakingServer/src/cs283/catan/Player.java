@@ -54,6 +54,45 @@ public class Player implements Serializable
 	    devCards.add(card);
 	}
 	
+	/**
+	 * Removes one wheat, one wool, one brick, and one lumber from the player's
+	 * hand.
+	 */
+	public void doSettlementPurchase() {
+	    resCards.remove(new ResourceCard(ResourceCard.CardType.WHEAT));
+	    resCards.remove(new ResourceCard(ResourceCard.CardType.WOOL));
+	    resCards.remove(new ResourceCard(ResourceCard.CardType.BRICK));
+	    resCards.remove(new ResourceCard(ResourceCard.CardType.LUMBER));
+	}
+	
+	/**
+	 * Removes one brick and one lumber from the player's hand.
+	 */
+	public void doRoadPurchase() {
+	    resCards.remove(new ResourceCard(ResourceCard.CardType.BRICK));
+	    resCards.remove(new ResourceCard(ResourceCard.CardType.LUMBER));
+	}
+	
+	/**
+	 * Removes three ore and two wheat from the player's hand.
+	 */
+	public void doCityPurchase() {
+	    resCards.remove(new ResourceCard(ResourceCard.CardType.ORE));
+	    resCards.remove(new ResourceCard(ResourceCard.CardType.ORE));
+	    resCards.remove(new ResourceCard(ResourceCard.CardType.ORE));
+	    resCards.remove(new ResourceCard(ResourceCard.CardType.WHEAT));
+	    resCards.remove(new ResourceCard(ResourceCard.CardType.WHEAT));
+	}
+	
+	/**
+	 * Removes one ore, one wheat, and one wool from the player's hand.
+	 */
+	public void doDevCardPurchase() {
+	    resCards.remove(new ResourceCard(ResourceCard.CardType.ORE));
+        resCards.remove(new ResourceCard(ResourceCard.CardType.WHEAT));
+        resCards.remove(new ResourceCard(ResourceCard.CardType.WOOL));
+	}
+	
 	@Override
 	public String toString() {
 	    return username;

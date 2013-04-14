@@ -159,15 +159,16 @@ public class ServerCatanGame implements Serializable
         
         
         // For debugging, set up an initial configuration
-        myBoard.addSettlement(new Coordinate(-1,-1,0), userArray[0], false);
-        myBoard.addRoad(new Coordinate(-1,-1,0), new Coordinate(-1,-1,1),
-                        userArray[0], false);
         myBoard.addSettlement(new Coordinate(0,2,0), userArray[0], false);
         myBoard.addRoad(new Coordinate(0,2,0), new Coordinate(-1,1,1),
                         userArray[0], false);
         
+        myBoard.addSettlement(new Coordinate(-1,-1,0), userArray[0], false);
+        myBoard.addRoad(new Coordinate(-1,-1,0), new Coordinate(-1,-1,1),
+                        userArray[0], false);
+        
         userArray[0].resCards.addAll(
-                      myBoard.getPlacementResourceCards(new Coordinate(0,2,0)));
+                    myBoard.getPlacementResourceCards(new Coordinate(-1,-1,0)));
         
         myBoard.addSettlement(new Coordinate(-2,2,0), userArray[1], false);
         myBoard.addRoad(new Coordinate(-2,2,0), new Coordinate(-1,1,1),
@@ -348,8 +349,10 @@ public class ServerCatanGame implements Serializable
 	    rollDice();
 	}
 	
-	public void drawDevelopmentCard(Player owner)
+	public boolean drawDevelopmentCard(Player owner)
 	{
+	    boolean devCardAdded = false;
+	    
 	    DevelopmentCard devCard = null;
 	    
 		int nextCard = rollGenerator.nextInt(25);
@@ -379,14 +382,20 @@ public class ServerCatanGame implements Serializable
         if (hasSheep && hasOre && hasWheat) {
             
 
-            int purchasedCard = rollGenerator.nextInt(cardDeck.size()-1);
+            int purchasedCard = rollGenerator.nextInt(cardDeck.size());
 
             devCard = cardDeck.get(purchasedCard);
 
             cardDeck.remove(purchasedCard);
 
             owner.addDevCard(devCard);
+            
+            owner.doDevCardPurchase();
+            
+            devCardAdded = true;
         }
+        
+        return devCardAdded;
 		
 	}
 	
