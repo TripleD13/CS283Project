@@ -15,7 +15,13 @@ import java.util.*;
 import cs283.catan.ResourceCard.CardType;
 
 
-public class Board {
+public class Board implements Serializable {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1070958368003158458L;
+
+
     /**TEMPORARY METHOD!!!*/
 public static void main(String args[]) {
     Board b = new Board();

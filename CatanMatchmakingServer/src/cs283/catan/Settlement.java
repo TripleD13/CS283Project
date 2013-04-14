@@ -3,8 +3,15 @@
  */
 package cs283.catan;
 
-public class Settlement {
+import java.io.Serializable;
+
+public class Settlement implements Serializable {
     
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 8502684121006880852L;
+
     /**
      * Coordinates of the settlement on the board
      */

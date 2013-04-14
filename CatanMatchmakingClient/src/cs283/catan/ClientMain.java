@@ -508,7 +508,16 @@ public class ClientMain {
                         });
                         
                         break;
-                    }else if (message.startsWith("chat*",  0)) {
+                    } else if (message.startsWith("Game Data")) {
+                        ServerCatanGame game = 
+                                  (ServerCatanGame) objInputStream.readObject();
+                        
+                        Player playerArray[] = game.getPlayerArray();
+                        
+                        for (int i = 0; i < playerArray.length; i++) {
+                            System.out.println(playerArray[i].getUsername());
+                        }
+                    } else if (message.startsWith("chat*",  0)) {
                        
                         // Format the chat message and update the GUI
                         message = message.substring(5);

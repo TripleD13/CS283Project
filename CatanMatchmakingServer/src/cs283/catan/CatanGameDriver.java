@@ -5,7 +5,7 @@ public class CatanGameDriver
 {
 	public static void main(String args[])
 	{
-		ServerCatanGame testGame = new ServerCatanGame();
+		/*ServerCatanGame testGame = new ServerCatanGame();
 		System.out.println("DEBUG: ROLLING DICE");
 		testGame.rollDice();
 		
@@ -26,7 +26,7 @@ public class CatanGameDriver
 		System.out.println("DEBUG: DRAWING DEVELOPMENT CARDS");
 		System.out.println(testGame.drawDevelopmentCard().toString());
 		
-		testGame.mainGameLoop();
+		testGame.mainGameLoop();*/
 		
 	}
 		

@@ -2,11 +2,17 @@
  * Class representing a node on the board
  */
 package cs283.catan;
+import java.io.Serializable;
 import java.util.*;
 
 
-public class Node {
+public class Node implements Serializable {
     
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -1127640882347468344L;
+
     /**
      * List of all nodes adjacent to this node
      */

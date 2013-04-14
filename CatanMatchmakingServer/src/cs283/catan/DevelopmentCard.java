@@ -1,7 +1,15 @@
 package cs283.catan;
-public class DevelopmentCard extends Card
+
+import java.io.Serializable;
+
+public class DevelopmentCard extends Card implements Serializable
 {
-	public enum DevCardType
+	/**
+     * 
+     */
+    private static final long serialVersionUID = -4236592709613944278L;
+
+    public enum DevCardType
 	{
 		KNIGHT, VICTORY_POINTS, YEAR_OF_PLENTY, MONOPOLY, ROAD_BUILDING
 	}

@@ -369,15 +369,15 @@ public class ServerMain {
         Player playerArray[] = new Player[4];
         
         for (int i = 0; i < playerArray.length; i++) {
-            playerArray[i] = new Player(playerNameArray[i], 
-                                        userList.get(playerNameArray[i]));
+            playerArray[i] = new Player(playerNameArray[i]);
         }
-        
+
         // Create the Catan game
         ServerCatanGame game = new ServerCatanGame(playerArray);
+        game.gameSetup();
         
         for (int i = 0; i < playerArray.length; i++) {
-            playerArray[i].getPlayerHandler().setCatanGame(game);
+            userList.get(playerArray[i].getUsername()).setCatanGame(game);
         }
         // Notify everyone that the lobby changed
         notifyLobbyChanged();
@@ -417,7 +417,7 @@ public class ServerMain {
                 for (int i = 0; i < playerArray.length; i++) {
                     if (!playerArray[i].getUsername().equals(username)) {
                         ServerConnectionHandler handler = 
-                                              playerArray[i].getPlayerHandler();
+                                     userList.get(playerArray[i].getUsername());
                         // Notify each player besides the one logging off that
                         // the game is over.
                         if (handler != null) {
@@ -528,6 +528,7 @@ public class ServerMain {
             boolean isLogonSuccessful = false;
             
             Thread lobbyPushThread = null;
+            Thread gamePushThread = null;
             
             try {
                 
@@ -586,7 +587,24 @@ public class ServerMain {
                     lobbyPushThread.join(1000);
                     
                     // Handle the game
+                    
+                    // Start thread that will push game changes to the user
+                    gamePushThread = new Thread() {
+                        public void run() {
+                            handleGamePush();
+                        }
+                    };
+                    
+                    gamePushThread.start();
+                    Thread.sleep(1000);
+                    synchronized (catanGame.gameChangedNotifier) {
+                        catanGame.gameChangedNotifier.notifyAll();
+                    }
                     handleGame();
+                    
+                    // End the game push thread
+                    gamePushThread.interrupt();
+                    gamePushThread.join(1000);
                     
                 } else {
                     printServerMsg("Logon attempt by '" + username +
@@ -836,7 +854,8 @@ public class ServerMain {
                                 if (playerArray[i].getUsername()
                                     .equals(address)) {
                                     
-                                    target = playerArray[i].getPlayerHandler();
+                                    target = 
+                                     userList.get(playerArray[i].getUsername());
                                     break;
                                 }
                             }
@@ -876,7 +895,7 @@ public class ServerMain {
                         if (playerArray != null) {
                             for (int i = 0; i < playerArray.length; i++) {
                                 ServerConnectionHandler handler = 
-                                              playerArray[i].getPlayerHandler();
+                                     userList.get(playerArray[i].getUsername());
                                 
                                 if (handler != null) {
                                     handler.sendChatMessage(messageToSend);
@@ -1211,6 +1230,47 @@ public class ServerMain {
                 sendChatMessage("SERVER: Do not pass go, " +
                                 "you will not collect $200.");
             }
+            
+        }
+        
+        /**
+         * Waits for notification of a change to the game. When the game
+         * changes, send the update to the user.
+         */
+        private void handleGamePush() {
+            while (!Thread.interrupted()) {
+                try {
+                    // Wait for a notification that the lobby has been 
+                    // updated
+                    synchronized (catanGame.gameChangedNotifier) {
+                        catanGame.gameChangedNotifier.wait();
+                    }
+                    
+                    printServerMsg("Sending game data");
+                    
+                    // Send the lobby data to the user
+                    synchronized (catanGame) {
+                        synchronized (objOutputStream) {
+                            objOutputStream.reset();
+                            objOutputStream.writeObject("Game Data");
+                            objOutputStream.writeObject(catanGame);
+                            objOutputStream.flush();
+                        }
+                    }
+                    
+                } catch (InterruptedException e) {
+                    // End the thread since it has been interrupted
+                    break;
+                } catch (NotSerializableException e) {
+                    e.printStackTrace();
+                    System.out.println(e.getMessage());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    // Just continue loop
+                }
+            }
+
+            printServerMsg("Ending game push thread.");
             
         }
         

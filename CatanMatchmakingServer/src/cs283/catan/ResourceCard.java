@@ -1,7 +1,15 @@
 package cs283.catan;
-public class ResourceCard extends Card
+
+import java.io.Serializable;
+
+public class ResourceCard extends Card implements Serializable
 {
-	public enum CardType
+	/**
+     * 
+     */
+    private static final long serialVersionUID = -4232348882475754703L;
+
+    public enum CardType
 	{
 		LUMBER, WOOL, WHEAT, BRICK, ORE, /* used by tiles */ DESERT
 	}

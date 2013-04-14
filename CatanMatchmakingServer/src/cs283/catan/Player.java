@@ -1,32 +1,22 @@
 package cs283.catan;
+import java.io.Serializable;
 import java.util.*;
 
-public class Player
+public class Player implements Serializable
 {
-	public Set<ResourceCard> resCards = new HashSet<ResourceCard>();
+	/**
+     * 
+     */
+    private static final long serialVersionUID = -687219382118580014L;
+    public Set<ResourceCard> resCards = new HashSet<ResourceCard>();
 	public Set<DevelopmentCard> devCards = new HashSet<DevelopmentCard>();
 	public int points;
 	
 	public String username;
 	
-	private ServerMain.ServerConnectionHandler playerHandler;
-	
 	public Player(String username)
 	{
-		this(username, null);
-	}
-	
-	public Player(String username, ServerMain.ServerConnectionHandler handler) {
-	    this.username = username;
-	    this.playerHandler = handler;
-	}
-	
-	public ServerMain.ServerConnectionHandler getPlayerHandler() {
-	    return this.playerHandler;
-	}
-	
-	public void setPlayerHandler(ServerMain.ServerConnectionHandler handler) {
-	    this.playerHandler = handler;
+		this.username = username;
 	}
 	
 	public String getUsername()

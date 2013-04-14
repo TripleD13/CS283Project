@@ -3,8 +3,14 @@
  */
 package cs283.catan;
 
-public class Robber {
+import java.io.Serializable;
+
+public class Robber implements Serializable {
 	
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -5978014340822365199L;
     /**
      * Coordinates of the robber on the board.
      */

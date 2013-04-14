@@ -2,11 +2,17 @@
  * Class representing a tile on the board
  */
 package cs283.catan;
+import java.io.Serializable;
 import java.util.*;
 
 
-public class Tile {
+public class Tile implements Serializable {
             
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -2181213301324341579L;
+
     /**
      * X coordinate of the tile
      */

@@ -1,6 +1,8 @@
 //Kevin Zeillmann
 //CS283
 package cs283.catan;
+import java.io.Serializable;
+import java.util.LinkedList;
 import java.util.Random;
 
 
@@ -8,13 +10,26 @@ import java.util.Random;
 
 
 
-public class ServerCatanGame
+public class ServerCatanGame implements Serializable
 {
-	//number of users playing the game
+	/**
+     * 
+     */
+    private static final long serialVersionUID = -5218511975631672561L;
+    //number of users playing the game
 	private int numUsers;
 	//array representing the users in the game
 	private Player[] userArray; //keep users in sorted order
 	
+	// Object used to notify threads when game has been modified
+	public class Notifier implements Serializable {
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 4132743921540603718L;
+	    
+	}
+	public Notifier gameChangedNotifier = new Notifier();
 	 
 	// array of development cards represents the deck
 	private DevelopmentCard[] resDeck;
@@ -28,6 +43,9 @@ public class ServerCatanGame
 	private boolean victory;
 	
 	private int turnNumber; //for debugging purposes
+	
+	private LinkedList<DevelopmentCard> cardDeck = 
+	                                          new LinkedList<DevelopmentCard>();
 	
 	//alternate constructor = we will use this to construct the game
 	public ServerCatanGame(Player playerArray[])
@@ -53,6 +71,59 @@ public class ServerCatanGame
 		// we also need a to generate dice rolls
 		rollGenerator = new Random();
 		
+		
+		// Generate the development card deck
+
+		        // KNIGHT, VICTORY_POINTS, YEAR_OF_PLENTY, MONOPOLY, ROAD_BUILDING
+		        int i;
+		        for (i = 0; i < 15; i++)
+
+		        {
+
+		        cardDeck.add(
+
+		        new DevelopmentCard(DevelopmentCard.DevCardType.KNIGHT));
+
+		        }
+
+		        for (i = 0; i < 4; i++)
+
+		        {
+
+		        cardDeck.add(
+
+		       new DevelopmentCard(DevelopmentCard.DevCardType.VICTORY_POINTS));
+
+		        }
+
+		        for (i = 0; i < 2; i++)
+
+		        {
+
+		        cardDeck.add(
+
+		       new DevelopmentCard(DevelopmentCard.DevCardType.YEAR_OF_PLENTY));
+
+		        }
+
+		        for (i = 0; i < 2; i++)
+
+		        {
+
+		        cardDeck.add(
+
+		        new DevelopmentCard(DevelopmentCard.DevCardType.MONOPOLY));
+
+		        }
+
+		        for (i = 0; i < 2; i++)
+
+		        {
+
+		        cardDeck.add(
+
+		        new DevelopmentCard(DevelopmentCard.DevCardType.ROAD_BUILDING));
+		        }
 		
 	}
 	
@@ -215,32 +286,7 @@ public class ServerCatanGame
 	    
 		int nextCard = rollGenerator.nextInt(25);
 		System.out.println("DEBUG: Card number is: " + nextCard);
-		//if 0<=nextCard<=14
-		if(nextCard <15)
-		{
-			devCard = new DevelopmentCard(DevelopmentCard.DevCardType.KNIGHT);
-		}
-		//if 15<=nextCard<=18
-		else if(nextCard < 19)
-		{
-			devCard = 
-			    new DevelopmentCard(DevelopmentCard.DevCardType.VICTORY_POINTS);
-		}
-		//if nextCard is 19 or 20
-		else if(nextCard < 21)
-		{
-			devCard = 
-			    new DevelopmentCard(DevelopmentCard.DevCardType.YEAR_OF_PLENTY);
-		}
-		else if(nextCard < 23)
-		{
-			devCard = new DevelopmentCard(DevelopmentCard.DevCardType.MONOPOLY);
-		}
-		else
-		{
-			devCard = 
-			     new DevelopmentCard(DevelopmentCard.DevCardType.ROAD_BUILDING);
-		}
+
 		
 		// Make sure user has proper hand
         boolean hasSheep = false;
@@ -263,6 +309,14 @@ public class ServerCatanGame
         }
 		
         if (hasSheep && hasOre && hasWheat) {
+            
+
+            int purchasedCard = rollGenerator.nextInt(cardDeck.size()-1);
+
+            devCard = cardDeck.get(purchasedCard);
+
+            cardDeck.remove(purchasedCard);
+
             owner.addDevCard(devCard);
         }
 		
