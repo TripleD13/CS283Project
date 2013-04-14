@@ -12,6 +12,8 @@ package cs283.catan;
 import java.io.*;
 import java.util.*;
 
+import cs283.catan.ResourceCard.CardType;
+
 
 public class Board {
     /**TEMPORARY METHOD!!!*/
@@ -327,7 +329,33 @@ public static void main(String args[]) {
 	    location = location.normalizeCoordinate();
 	    Node locationNode = nodeSet.get(location);
 	    
-	    if (locationNode != null) {
+	    // Make sure user has proper hand
+	    boolean hasSheep = false;
+	    boolean hasLumber = false;
+	    boolean hasBrick = false;
+	    boolean hasWheat = false;
+	    
+	    for (ResourceCard card : owner.resCards) {
+	        switch (card.getCardType()) {
+	        case WOOL:
+	            hasSheep = true;
+	            break;
+	        case LUMBER:
+	            hasLumber = true;
+	            break;
+	        case BRICK:
+	            hasBrick = true;
+	            break;
+	        case WHEAT:
+	            hasWheat = true;
+	            break;
+            default:
+	        }
+	    }
+	    
+	    if (locationNode != null && hasSheep && hasLumber && hasBrick &&
+            hasWheat) {
+	        
 	        boolean safeToAdd = true;
 	        List<Coordinate> neighbors = locationNode.getNeighbors();
 	    
@@ -396,6 +424,25 @@ public static void main(String args[]) {
         Map<Coordinate, Node> playerRoadNodeSet = 
                                               roadSet.get(owner.getUsername());
 	    
+        
+        // Make sure user has proper hand
+        boolean hasLumber = false;
+        boolean hasBrick = false;
+        
+        for (ResourceCard card : owner.resCards) {
+            switch (card.getCardType()) {
+            case LUMBER:
+                hasLumber = true;
+                break;
+            case BRICK:
+                hasBrick = true;
+                break;
+            default:
+            }
+        }
+        
+        canAddRoad = canAddRoad && hasLumber && hasBrick;
+        
 	    // Make sure either road is adjacent to a settlement owned by the player
 	    // or adjacent to a road owned by the player
 	    if (canAddRoad && !((nodeStartFromBoard.hasSettlement() && 
@@ -490,7 +537,25 @@ public static void main(String args[]) {
 	    // Attempt to find the settlement and upgrade it
 	    Node locationNode = nodeSet.get(location);
 	    
-	    if (locationNode != null && locationNode.hasSettlement()) {
+	    // Make sure user has proper hand
+        int numOre = 0;
+        int numWheat = 0;
+        
+        for (ResourceCard card : owner.resCards) {
+            switch (card.getCardType()) {
+            case ORE:
+                numOre++;
+                break;
+            case WHEAT:
+                numWheat++;
+                break;
+            default:
+            }
+        }
+	    
+	    if (locationNode != null && locationNode.hasSettlement() &&
+	        numOre >= 3 && numWheat >= 2) {
+	        
 	        Settlement settlement = locationNode.getSettlement();
 	        
 	        if (settlement.getOwner() == owner) {

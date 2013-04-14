@@ -209,39 +209,73 @@ public class ServerCatanGame
 		turnNumber++;
 	}
 	
-	public DevelopmentCard drawDevelopmentCard()
+	public void drawDevelopmentCard(Player owner)
 	{
+	    DevelopmentCard devCard = null;
+	    
 		int nextCard = rollGenerator.nextInt(25);
 		System.out.println("DEBUG: Card number is: " + nextCard);
 		//if 0<=nextCard<=14
 		if(nextCard <15)
 		{
-			return new DevelopmentCard(DevelopmentCard.DevCardType.KNIGHT);
+			devCard = new DevelopmentCard(DevelopmentCard.DevCardType.KNIGHT);
 		}
 		//if 15<=nextCard<=18
 		else if(nextCard < 19)
 		{
-			return new DevelopmentCard(DevelopmentCard.DevCardType.VICTORY_POINTS);
+			devCard = 
+			    new DevelopmentCard(DevelopmentCard.DevCardType.VICTORY_POINTS);
 		}
 		//if nextCard is 19 or 20
 		else if(nextCard < 21)
 		{
-			return new DevelopmentCard(DevelopmentCard.DevCardType.YEAR_OF_PLENTY);
+			devCard = 
+			    new DevelopmentCard(DevelopmentCard.DevCardType.YEAR_OF_PLENTY);
 		}
 		else if(nextCard < 23)
 		{
-			return new DevelopmentCard(DevelopmentCard.DevCardType.MONOPOLY);
+			devCard = new DevelopmentCard(DevelopmentCard.DevCardType.MONOPOLY);
 		}
 		else
 		{
-			return new DevelopmentCard(DevelopmentCard.DevCardType.ROAD_BUILDING);
+			devCard = 
+			     new DevelopmentCard(DevelopmentCard.DevCardType.ROAD_BUILDING);
 		}
+		
+		// Make sure user has proper hand
+        boolean hasSheep = false;
+        boolean hasOre = false;
+        boolean hasWheat = false;
+        
+        for (ResourceCard card : owner.resCards) {
+            switch (card.getCardType()) {
+            case WOOL:
+                hasSheep = true;
+                break;
+            case ORE:
+                hasOre = true;
+                break;
+            case WHEAT:
+                hasWheat = true;
+                break;
+            default:
+            }
+        }
+		
+        if (hasSheep && hasOre && hasWheat) {
+            owner.addDevCard(devCard);
+        }
 		
 	}
 	
 	
-	
-	
+	/**
+	 * Returns the board.
+	 * @return the board.
+	 */
+	public Board getBoard() {
+	    return this.myBoard;
+	}
 	
 	
 }

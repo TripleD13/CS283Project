@@ -1,8 +1,10 @@
 package cs283.catan;
+import java.util.*;
+
 public class Player
 {
-	public ResourceCard[] resCards;
-	public DevelopmentCard[] devCards;
+	public Set<ResourceCard> resCards = new HashSet<ResourceCard>();
+	public Set<DevelopmentCard> devCards = new HashSet<DevelopmentCard>();
 	public int points;
 	
 	public String username;
@@ -46,6 +48,10 @@ public class Player
 	private void addResCard(ResourceCard.CardType type)
 	{
 		
+	}
+	
+	public void addDevCard(DevelopmentCard card) {
+	    devCards.add(card);
 	}
 	
 	@Override
