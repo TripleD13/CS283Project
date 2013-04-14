@@ -166,12 +166,18 @@ public class ServerCatanGame implements Serializable
         myBoard.addRoad(new Coordinate(0,2,0), new Coordinate(-1,1,1),
                         userArray[0], false);
         
+        userArray[0].resCards.addAll(
+                      myBoard.getPlacementResourceCards(new Coordinate(0,2,0)));
+        
         myBoard.addSettlement(new Coordinate(-2,2,0), userArray[1], false);
         myBoard.addRoad(new Coordinate(-2,2,0), new Coordinate(-1,1,1),
                         userArray[1], false);
         myBoard.addSettlement(new Coordinate(1,-2,0), userArray[1], false);
         myBoard.addRoad(new Coordinate(1,-2,0), new Coordinate(1,-2,5),
                         userArray[1], false);
+        
+        userArray[1].resCards.addAll(
+                     myBoard.getPlacementResourceCards(new Coordinate(1,-2,0)));
         
         myBoard.addSettlement(new Coordinate(0,0,0), userArray[2], false);
         myBoard.addRoad(new Coordinate(0,0,0), new Coordinate(0,0,1),
@@ -180,12 +186,22 @@ public class ServerCatanGame implements Serializable
         myBoard.addRoad(new Coordinate(-2,0,0), new Coordinate(-2,0,1),
                         userArray[2], false);
         
+        userArray[2].resCards.addAll(
+                     myBoard.getPlacementResourceCards(new Coordinate(-2,0,0)));
+        
         myBoard.addSettlement(new Coordinate(2,-1,0), userArray[3], false);
         myBoard.addRoad(new Coordinate(2,-1,0), new Coordinate(2,-1,5),
                         userArray[3], false);
         myBoard.addSettlement(new Coordinate(1,1,0), userArray[3], false);
         myBoard.addRoad(new Coordinate(1,1,0), new Coordinate(1,1,5),
                         userArray[3], false);
+        
+        userArray[3].resCards.addAll(
+                myBoard.getPlacementResourceCards(new Coordinate(1,1,0)));
+        
+        
+        // Make the first roll
+        rollDice();
 	}
 	
 	
@@ -202,7 +218,7 @@ public class ServerCatanGame implements Serializable
 		{
 			System.out.println("It's turn number: " + turnNumber + ".");
 			playTurn();
-			advanceTurn();
+			advanceTurn("");
 			if(turnNumber == 100)
 				victory = true;
 		}
@@ -297,6 +313,14 @@ public class ServerCatanGame implements Serializable
 	{
 		diceRoll = rollGenerator.nextInt(5)+
 				 rollGenerator.nextInt(5)+2;
+		
+		
+		// Give the appropriate resources to the players
+		for (int i = 0 ; i < userArray.length; i++) {
+		    userArray[i].resCards.addAll(myBoard
+		                                 .getResourceCardsEarned(diceRoll, 
+		                                                         userArray[i]));
+		}
 	}
 	
 	public int getDiceRoll()
@@ -304,10 +328,24 @@ public class ServerCatanGame implements Serializable
 		return diceRoll;
 	}
 	
-	public void advanceTurn()
+	/**
+	 * Returns whether or not the turn belongs to the user with username.
+	 * @param username
+	 * @return whether or not the turn bleongs to the user.
+	 */
+	public boolean isTurn(String username) {
+	    return userArray[turn].getUsername().equals(username);
+	}
+	
+	public void advanceTurn(String username)
 	{
-		turn = (turn+1)%numUsers;
-		turnNumber++;
+	    // Make sure user advancing the turn is the user currently with control
+	    if (userArray[turn].getUsername().equals(username)) {
+	        turn = (turn+1)%numUsers;
+	        turnNumber++;
+	    }
+	    
+	    rollDice();
 	}
 	
 	public void drawDevelopmentCard(Player owner)

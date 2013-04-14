@@ -825,7 +825,48 @@ public static void main(String args[]) {
 	    }
 	    
 	    return cardsEarned;
-	}	
+	}
+	
+	/**
+	 * Returns a list of the resource cards earned by placing a settlement.
+	 * @param coord
+	 * @return a list of resource cards.
+	 */
+	public List<ResourceCard> getPlacementResourceCards(Coordinate coord) {
+	    coord = coord.normalizeCoordinate();
+	    
+	    List<ResourceCard> cardsEarned = new LinkedList<ResourceCard>();
+	    
+	    // Get the node at the coordinate
+	    Node settlementLocation = nodeSet.get(coord);
+	    
+	    if (settlementLocation != null && settlementLocation.hasSettlement()) {
+	        // Obtain the three bordering tiles
+	        Coordinate neighboringTiles[] = new Coordinate[3];
+	        
+	        if (coord.z == 0) {
+	            neighboringTiles[0] = new Coordinate(coord.x, coord.y, 0);
+	            neighboringTiles[1] = new Coordinate(coord.x + 1, coord.y, 0);
+	            neighboringTiles[2] = new Coordinate(coord.x + 1, coord.y - 1,
+	                                                 0);
+	        } else {
+	            neighboringTiles[0] = new Coordinate(coord.x, coord.y, 0);
+                neighboringTiles[1] = new Coordinate(coord.x, coord.y + 1, 0);
+                neighboringTiles[2] = new Coordinate(coord.x + 1, coord.y, 0);
+	        }
+	        
+	        // Add the resources, if any
+	        for (int i = 0; i < neighboringTiles.length; i++) {
+                
+                Tile tile = tileSet.get(neighboringTiles[i]);
+                if (tile != null) {
+                    cardsEarned.add(new ResourceCard(tile.getTileType()));
+                }
+            }
+	    }
+	    
+	    return cardsEarned;
+	}
 		
 	/**
 	 * Returns a list of all of the settlements on the board.

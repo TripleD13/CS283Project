@@ -57,16 +57,16 @@ public class CatanGUI {
 	private JTextField textField_2;
 	private JTextField textField_3;
 	private JTextField textField_4;
-	private JTextField textField_5;
-	private JTextField textField_6;
-	private JTextField textField_7;
-	private JTextField textField_8;
-	private JTextField textField_9;
-	private JTextField textField_10;
-	private JTextField textField_11;
-	private JTextField textField_12;
-	private JTextField textField_13;
-	private JTextField textField_14;
+	private JTextField wheatField;
+	private JTextField woolField;
+	private JTextField oreField;
+	private JTextField lumberField;
+	private JTextField brickField;
+	private JTextField monField;
+	private JTextField plentyField;
+	private JTextField knightField;
+	private JTextField victoryField;
+	private JTextField roadBuildField;
 	private JTextField gameCommandField;
 	private JTextField chatInputField;
 	private JEditorPane chatOutputPane;
@@ -173,7 +173,7 @@ public class CatanGUI {
 	    sendCommandButton.setEnabled(true);
 	    
 	    // Enable the game buttons
-	    endTurnButton.setEnabled(true);
+	    endTurnButton.setEnabled(false);
 	}
 	
 	/**
@@ -258,6 +258,116 @@ public class CatanGUI {
 	                          "Owner: %s\n", road.getStart(), road.getFinish(),
 	                          road.getOwner());
 	    }
+	    
+	    // Update the counts for the cards
+	    Player playerArray[] = game.getPlayerArray();
+	    for (int i = 0; i < playerArray.length; i++) {
+	        if (playerArray[i].getUsername().equals(username)) {
+	            updateCardCount(playerArray[i]);
+	            break;
+	        }
+	    }
+	}
+	
+	/**
+	 * Handles a new roll.
+	 * @roll
+	 * @currentPlayer
+	 * @playerArray
+	 */
+	public void newRoll(int roll, int currentPlayer, Player playerArray[]) {
+	    JOptionPane.showMessageDialog(frame, 
+	                                  String.format("'%s' rolls a %d!", 
+	                                  playerArray[currentPlayer].getUsername(), 
+	                                  roll));
+	    
+	    // Update the current player's info
+	    for (int i = 0; i < playerArray.length; i++) {
+	        if (playerArray[i].getUsername().equals(username)) {
+	            if (i == currentPlayer) {
+    	            // Enable the end turn button
+	                endTurnButton.setEnabled(true);
+	            } else {
+	                // Disable the end turn button
+	                endTurnButton.setEnabled(false);
+	            }
+	            
+	            // Update the counts for the cards
+	            updateCardCount(playerArray[i]);
+	            
+	            break;
+	        }
+	    }
+	}
+	
+	/**
+	 * Updates the counts for the cards
+	 * @param player
+	 */
+	private void updateCardCount(Player player) {
+	    int woolCount = 0;
+	    int lumberCount = 0;
+	    int brickCount = 0;
+	    int wheatCount = 0;
+	    int oreCount = 0;
+	    
+	    for (ResourceCard card : player.resCards) {
+	        switch (card.getCardType()) {
+	        case WOOL:
+	            woolCount++;
+	            break;
+	        case LUMBER:
+	            lumberCount++;
+	            break;
+	        case BRICK:
+	            brickCount++;
+	            break;
+	        case WHEAT:
+	            wheatCount++;
+	            break;
+	        case ORE:
+	            oreCount++;
+	            break;
+	        }
+	    }
+	    
+	    woolField.setText(String.valueOf(woolCount));
+	    lumberField.setText(String.valueOf(lumberCount));
+	    brickField.setText(String.valueOf(brickCount));
+	    wheatField.setText(String.valueOf(wheatCount));
+	    oreField.setText(String.valueOf(oreCount));
+	    
+	    int monCount = 0;
+	    int plentyCount = 0;
+	    int knightCount = 0;
+	    int victoryCount = 0;
+	    int roadBuildCount = 0;
+	    
+	    for (DevelopmentCard card : player.devCards) {
+	        switch (card.getDevCardType()) {
+	        case MONOPOLY:
+	            monCount++;
+	            break;
+	        case YEAR_OF_PLENTY:
+	            plentyCount++;
+	            break;
+	        case KNIGHT:
+	            knightCount++;
+	            break;
+	        case VICTORY_POINTS:
+	            victoryCount++;
+	            break;
+	        case ROAD_BUILDING:
+	            roadBuildCount++;
+	            break;
+	        }
+	    }
+	    
+	    monField.setText(String.valueOf(monCount));
+	    plentyField.setText(String.valueOf(plentyCount));
+	    knightField.setText(String.valueOf(knightCount));
+	    victoryField.setText(String.valueOf(victoryCount));
+	    roadBuildField.setText(String.valueOf(roadBuildCount));
 	}
 	
 	/**
@@ -708,15 +818,15 @@ public class CatanGUI {
 		gbc_lblNewLabel_2.gridy = 0;
 		resourcePanel.add(lblNewLabel_2, gbc_lblNewLabel_2);
 		
-		textField_5 = new JTextField();
-		textField_5.setEditable(false);
-		textField_5.setColumns(10);
-		GridBagConstraints gbc_textField_5 = new GridBagConstraints();
-		gbc_textField_5.insets = new Insets(0, 0, 5, 5);
-		gbc_textField_5.fill = GridBagConstraints.HORIZONTAL;
-		gbc_textField_5.gridx = 1;
-		gbc_textField_5.gridy = 0;
-		resourcePanel.add(textField_5, gbc_textField_5);
+		wheatField = new JTextField();
+		wheatField.setEditable(false);
+		wheatField.setColumns(10);
+		GridBagConstraints gbc_wheatField = new GridBagConstraints();
+		gbc_wheatField.insets = new Insets(0, 0, 5, 5);
+		gbc_wheatField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_wheatField.gridx = 1;
+		gbc_wheatField.gridy = 0;
+		resourcePanel.add(wheatField, gbc_wheatField);
 		
 		JLabel lblMonopoly = new JLabel("Monopoly");
 		GridBagConstraints gbc_lblMonopoly = new GridBagConstraints();
@@ -730,18 +840,24 @@ public class CatanGUI {
 		endTurnButton.setEnabled(false);
 		endTurnButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
+			    try {
+			        ClientMain.sendEndTurn();
+			    } catch (Exception e) {
+			        e.printStackTrace();
+			        frame.dispose();
+			    }
 			}
 		});
 		
-		textField_10 = new JTextField();
-		textField_10.setEditable(false);
-		textField_10.setColumns(10);
-		GridBagConstraints gbc_textField_10 = new GridBagConstraints();
-		gbc_textField_10.insets = new Insets(0, 0, 5, 5);
-		gbc_textField_10.fill = GridBagConstraints.HORIZONTAL;
-		gbc_textField_10.gridx = 3;
-		gbc_textField_10.gridy = 0;
-		resourcePanel.add(textField_10, gbc_textField_10);
+		monField = new JTextField();
+		monField.setEditable(false);
+		monField.setColumns(10);
+		GridBagConstraints gbc_monField = new GridBagConstraints();
+		gbc_monField.insets = new Insets(0, 0, 5, 5);
+		gbc_monField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_monField.gridx = 3;
+		gbc_monField.gridy = 0;
+		resourcePanel.add(monField, gbc_monField);
 		GridBagConstraints gbc_endTurnButton = new GridBagConstraints();
 		gbc_endTurnButton.gridheight = 5;
 		gbc_endTurnButton.gridx = 4;
@@ -756,15 +872,15 @@ public class CatanGUI {
 		gbc_lblNewLabel_3.gridy = 1;
 		resourcePanel.add(lblNewLabel_3, gbc_lblNewLabel_3);
 		
-		textField_6 = new JTextField();
-		textField_6.setEditable(false);
-		textField_6.setColumns(10);
-		GridBagConstraints gbc_textField_6 = new GridBagConstraints();
-		gbc_textField_6.insets = new Insets(0, 0, 5, 5);
-		gbc_textField_6.fill = GridBagConstraints.HORIZONTAL;
-		gbc_textField_6.gridx = 1;
-		gbc_textField_6.gridy = 1;
-		resourcePanel.add(textField_6, gbc_textField_6);
+		woolField = new JTextField();
+		woolField.setEditable(false);
+		woolField.setColumns(10);
+		GridBagConstraints gbc_woolField = new GridBagConstraints();
+		gbc_woolField.insets = new Insets(0, 0, 5, 5);
+		gbc_woolField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_woolField.gridx = 1;
+		gbc_woolField.gridy = 1;
+		resourcePanel.add(woolField, gbc_woolField);
 		
 		JLabel lblYearOfPlenty = new JLabel("Year of Plenty");
 		GridBagConstraints gbc_lblYearOfPlenty = new GridBagConstraints();
@@ -774,15 +890,15 @@ public class CatanGUI {
 		gbc_lblYearOfPlenty.gridy = 1;
 		resourcePanel.add(lblYearOfPlenty, gbc_lblYearOfPlenty);
 		
-		textField_11 = new JTextField();
-		textField_11.setEditable(false);
-		textField_11.setColumns(10);
-		GridBagConstraints gbc_textField_11 = new GridBagConstraints();
-		gbc_textField_11.insets = new Insets(0, 0, 5, 5);
-		gbc_textField_11.fill = GridBagConstraints.HORIZONTAL;
-		gbc_textField_11.gridx = 3;
-		gbc_textField_11.gridy = 1;
-		resourcePanel.add(textField_11, gbc_textField_11);
+		plentyField = new JTextField();
+		plentyField.setEditable(false);
+		plentyField.setColumns(10);
+		GridBagConstraints gbc_plentyField = new GridBagConstraints();
+		gbc_plentyField.insets = new Insets(0, 0, 5, 5);
+		gbc_plentyField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_plentyField.gridx = 3;
+		gbc_plentyField.gridy = 1;
+		resourcePanel.add(plentyField, gbc_plentyField);
 		
 		JLabel lblNewLabel_4 = new JLabel("Ore");
 		GridBagConstraints gbc_lblNewLabel_4 = new GridBagConstraints();
@@ -792,15 +908,15 @@ public class CatanGUI {
 		gbc_lblNewLabel_4.gridy = 2;
 		resourcePanel.add(lblNewLabel_4, gbc_lblNewLabel_4);
 		
-		textField_7 = new JTextField();
-		textField_7.setEditable(false);
-		textField_7.setColumns(10);
-		GridBagConstraints gbc_textField_7 = new GridBagConstraints();
-		gbc_textField_7.insets = new Insets(0, 0, 5, 5);
-		gbc_textField_7.fill = GridBagConstraints.HORIZONTAL;
-		gbc_textField_7.gridx = 1;
-		gbc_textField_7.gridy = 2;
-		resourcePanel.add(textField_7, gbc_textField_7);
+		oreField = new JTextField();
+		oreField.setEditable(false);
+		oreField.setColumns(10);
+		GridBagConstraints gbc_oreField = new GridBagConstraints();
+		gbc_oreField.insets = new Insets(0, 0, 5, 5);
+		gbc_oreField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_oreField.gridx = 1;
+		gbc_oreField.gridy = 2;
+		resourcePanel.add(oreField, gbc_oreField);
 		
 		JLabel lblKnights = new JLabel("Knights");
 		GridBagConstraints gbc_lblKnights = new GridBagConstraints();
@@ -810,15 +926,15 @@ public class CatanGUI {
 		gbc_lblKnights.gridy = 2;
 		resourcePanel.add(lblKnights, gbc_lblKnights);
 		
-		textField_12 = new JTextField();
-		textField_12.setEditable(false);
-		textField_12.setColumns(10);
-		GridBagConstraints gbc_textField_12 = new GridBagConstraints();
-		gbc_textField_12.insets = new Insets(0, 0, 5, 5);
-		gbc_textField_12.fill = GridBagConstraints.HORIZONTAL;
-		gbc_textField_12.gridx = 3;
-		gbc_textField_12.gridy = 2;
-		resourcePanel.add(textField_12, gbc_textField_12);
+		knightField = new JTextField();
+		knightField.setEditable(false);
+		knightField.setColumns(10);
+		GridBagConstraints gbc_knightField = new GridBagConstraints();
+		gbc_knightField.insets = new Insets(0, 0, 5, 5);
+		gbc_knightField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_knightField.gridx = 3;
+		gbc_knightField.gridy = 2;
+		resourcePanel.add(knightField, gbc_knightField);
 		
 		JLabel lblNewLabel_5 = new JLabel("Lumber");
 		GridBagConstraints gbc_lblNewLabel_5 = new GridBagConstraints();
@@ -828,17 +944,17 @@ public class CatanGUI {
 		gbc_lblNewLabel_5.gridy = 3;
 		resourcePanel.add(lblNewLabel_5, gbc_lblNewLabel_5);
 		
-		textField_8 = new JTextField();
-		textField_8.setEditable(false);
-		textField_8.setColumns(10);
-		GridBagConstraints gbc_textField_8 = new GridBagConstraints();
-		gbc_textField_8.insets = new Insets(0, 0, 5, 5);
-		gbc_textField_8.fill = GridBagConstraints.HORIZONTAL;
-		gbc_textField_8.gridx = 1;
-		gbc_textField_8.gridy = 3;
-		resourcePanel.add(textField_8, gbc_textField_8);
+		lumberField = new JTextField();
+		lumberField.setEditable(false);
+		lumberField.setColumns(10);
+		GridBagConstraints gbc_lumberField = new GridBagConstraints();
+		gbc_lumberField.insets = new Insets(0, 0, 5, 5);
+		gbc_lumberField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_lumberField.gridx = 1;
+		gbc_lumberField.gridy = 3;
+		resourcePanel.add(lumberField, gbc_lumberField);
 		
-		JLabel lblArmy = new JLabel("Army");
+		JLabel lblArmy = new JLabel("Victory Points");
 		GridBagConstraints gbc_lblArmy = new GridBagConstraints();
 		gbc_lblArmy.anchor = GridBagConstraints.WEST;
 		gbc_lblArmy.insets = new Insets(0, 0, 5, 5);
@@ -846,15 +962,15 @@ public class CatanGUI {
 		gbc_lblArmy.gridy = 3;
 		resourcePanel.add(lblArmy, gbc_lblArmy);
 		
-		textField_13 = new JTextField();
-		textField_13.setEditable(false);
-		textField_13.setColumns(10);
-		GridBagConstraints gbc_textField_13 = new GridBagConstraints();
-		gbc_textField_13.insets = new Insets(0, 0, 5, 5);
-		gbc_textField_13.fill = GridBagConstraints.HORIZONTAL;
-		gbc_textField_13.gridx = 3;
-		gbc_textField_13.gridy = 3;
-		resourcePanel.add(textField_13, gbc_textField_13);
+		victoryField = new JTextField();
+		victoryField.setEditable(false);
+		victoryField.setColumns(10);
+		GridBagConstraints gbc_victoryField = new GridBagConstraints();
+		gbc_victoryField.insets = new Insets(0, 0, 5, 5);
+		gbc_victoryField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_victoryField.gridx = 3;
+		gbc_victoryField.gridy = 3;
+		resourcePanel.add(victoryField, gbc_victoryField);
 		
 		JLabel lblNewLabel_6 = new JLabel("Brick");
 		GridBagConstraints gbc_lblNewLabel_6 = new GridBagConstraints();
@@ -864,15 +980,15 @@ public class CatanGUI {
 		gbc_lblNewLabel_6.gridy = 4;
 		resourcePanel.add(lblNewLabel_6, gbc_lblNewLabel_6);
 		
-		textField_9 = new JTextField();
-		textField_9.setEditable(false);
-		textField_9.setColumns(10);
-		GridBagConstraints gbc_textField_9 = new GridBagConstraints();
-		gbc_textField_9.insets = new Insets(0, 0, 0, 5);
-		gbc_textField_9.fill = GridBagConstraints.HORIZONTAL;
-		gbc_textField_9.gridx = 1;
-		gbc_textField_9.gridy = 4;
-		resourcePanel.add(textField_9, gbc_textField_9);
+		brickField = new JTextField();
+		brickField.setEditable(false);
+		brickField.setColumns(10);
+		GridBagConstraints gbc_brickField = new GridBagConstraints();
+		gbc_brickField.insets = new Insets(0, 0, 0, 5);
+		gbc_brickField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_brickField.gridx = 1;
+		gbc_brickField.gridy = 4;
+		resourcePanel.add(brickField, gbc_brickField);
 		
 		JLabel lblRoadBuilder = new JLabel("Road Builder");
 		GridBagConstraints gbc_lblRoadBuilder = new GridBagConstraints();
@@ -882,15 +998,15 @@ public class CatanGUI {
 		gbc_lblRoadBuilder.gridy = 4;
 		resourcePanel.add(lblRoadBuilder, gbc_lblRoadBuilder);
 		
-		textField_14 = new JTextField();
-		textField_14.setEditable(false);
-		textField_14.setColumns(10);
-		GridBagConstraints gbc_textField_14 = new GridBagConstraints();
-		gbc_textField_14.insets = new Insets(0, 0, 0, 5);
-		gbc_textField_14.fill = GridBagConstraints.HORIZONTAL;
-		gbc_textField_14.gridx = 3;
-		gbc_textField_14.gridy = 4;
-		resourcePanel.add(textField_14, gbc_textField_14);
+		roadBuildField = new JTextField();
+		roadBuildField.setEditable(false);
+		roadBuildField.setColumns(10);
+		GridBagConstraints gbc_roadBuildField = new GridBagConstraints();
+		gbc_roadBuildField.insets = new Insets(0, 0, 0, 5);
+		gbc_roadBuildField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_roadBuildField.gridx = 3;
+		gbc_roadBuildField.gridy = 4;
+		resourcePanel.add(roadBuildField, gbc_roadBuildField);
 	}
 
 }

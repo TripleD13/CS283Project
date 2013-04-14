@@ -603,10 +603,7 @@ public class ServerMain {
                     };
                     
                     gamePushThread.start();
-                    Thread.sleep(1000);
-                    synchronized (catanGame.gameChangedNotifier) {
-                        catanGame.gameChangedNotifier.notifyAll();
-                    }
+
                     handleGame();
                     
                     // End the game push thread
@@ -826,10 +823,20 @@ public class ServerMain {
         private void handleGame() throws Exception {
             // Initially the game sends a chat message to the client welcoming
             // it to the game
-            synchronized(objOutputStream) {
-                objOutputStream.writeObject("chat*SERVER: Welcome!");
-                objOutputStream.flush();
+            sendChatMessage("chat*SERVER: Welcome!");
+            
+            // Send the initial game data to the user
+            synchronized (catanGame) {
+                synchronized (objOutputStream) {
+                    objOutputStream.reset();
+                    objOutputStream.writeObject("game*");
+                    objOutputStream.writeObject(catanGame);
+                    objOutputStream.flush();
+                }
             }
+            
+            // Send the first roll
+            sendRollMessage(catanGame.getDiceRoll(), catanGame.getTurn());
             
             while (currentMode == UserMode.GameMode) {
                 // Receive a message
@@ -841,7 +848,17 @@ public class ServerMain {
                 System.out.println("==================================\n");
                 
                 if (msg.startsWith("cmd**")) { // Game command received
-                    parseGameCommand(msg.substring(5));
+                    boolean isTurn = false;
+                    synchronized (catanGame) {
+                        isTurn = catanGame.isTurn(username);
+                    }
+                    
+                    // Make sure it is the player's turn
+                    if (isTurn) {
+                        parseGameCommand(msg.substring(5));
+                    } else {
+                        sendChatMessage("chat*SERVER: Wait your turn!");
+                    }
                 } else if (msg.startsWith("chat*")) { // Chat message received
                     
                     Player playerArray[] = catanGame.getPlayerArray();
@@ -895,7 +912,7 @@ public class ServerMain {
                                             "' was not found!");
                         }
                         
-                    }else
+                    } else
                     {
                         //not a targeted chat signal
                         String messageToSend = msg;
@@ -913,6 +930,32 @@ public class ServerMain {
                         }
                     }
                     
+                } else if (msg.equals("End Turn")) {
+                    // Notify the game that a player's turn has ended
+                    synchronized (catanGame) {
+                        catanGame.advanceTurn(username);
+                    }
+                    
+                    // Notify each player of the new turn
+                    Player playerArray[] = catanGame.getPlayerArray();
+                    
+                    if (playerArray != null) {
+                        for (int i = 0; i < playerArray.length; i++) {
+                            ServerConnectionHandler handler = 
+                                     userList.get(playerArray[i].getUsername());
+                            
+                            // Notify each user of the roll
+                            if (handler != null) {
+                                try {
+                                    handler.sendRollMessage(
+                                            catanGame.getDiceRoll(),
+                                            catanGame.getTurn());
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -957,13 +1000,13 @@ public class ServerMain {
                                                            coordinate2,
                                                            coordinate3),
                                                 owner, true)) {
-                            sendChatMessage("SERVER: Unable to add " +
+                            sendChatMessage("chat*SERVER: Unable to add " +
                                             "settlement.");
                         }
                         
                         }catch (Exception InputMismatchException)
                         {
-                            sendChatMessage("SERVER: Invalid command, " +
+                            sendChatMessage("chat*SERVER: Invalid command, " +
                                                  "you dummy!");
                         }
                     
@@ -980,13 +1023,13 @@ public class ServerMain {
                                                      coordinate2,
                                                      coordinate3),
                                                      owner)) {
-                             sendChatMessage("SERVER: Unable to add " +
+                             sendChatMessage("chat*SERVER: Unable to add " +
                                              "city.");
                         }
                         //command
                         }catch (Exception InputMismatchException)
                         {
-                            sendChatMessage("SERVER: Invalid command, " +
+                            sendChatMessage("chat*SERVER: Invalid command, " +
                                     "you dummy!");
                         }
                     
@@ -1011,13 +1054,13 @@ public class ServerMain {
                                                           coordinate5,
                                                           coordinate6),
                                            owner, true)) {
-                            sendChatMessage("SERVER: Unable to add " +
+                            sendChatMessage("chat*SERVER: Unable to add " +
                                             "road.");
                         }
                         //command
                         }catch (Exception InputMismatchException)
                         {
-                            sendChatMessage("SERVER: Invalid command, " +
+                            sendChatMessage("chat*SERVER: Invalid command, " +
                                     "you dummy!");
                         }
                     
@@ -1027,7 +1070,7 @@ public class ServerMain {
                     catanGame.drawDevelopmentCard(owner);
                 }else 
                 {
-                    sendChatMessage("SERVER: Invalid command, " +
+                    sendChatMessage("chat*SERVER: Invalid command, " +
                             "you dummy!");
                 }
                 
@@ -1045,7 +1088,7 @@ public class ServerMain {
                     
                 }catch (Exception InputMismatchException)
                 {
-                    sendChatMessage("SERVER: Invalid command, " +
+                    sendChatMessage("chat*SERVER: Invalid command, " +
                             "you dummy!");
                 }
                 
@@ -1164,7 +1207,7 @@ public class ServerMain {
                     }
                     }catch (Exception InputMismatchException)
                     {
-                        sendChatMessage("SERVER: Invalid command, " +
+                        sendChatMessage("chat*SERVER: Invalid command, " +
                                 "you dummy!");
                     }
                 }
@@ -1194,7 +1237,7 @@ public class ServerMain {
                         int coordinate3 = scanMessage.nextInt();
                         }catch (Exception InputMismatchException)
                         {
-                            sendChatMessage("SERVER: Invalid command, " +
+                            sendChatMessage("chat*SERVER: Invalid command, " +
                                              "you dummy!");
                         }
                     //command
@@ -1226,7 +1269,7 @@ public class ServerMain {
                     int coordinate3 = scanMessage.nextInt();
                     }catch (Exception InputMismatchException)
                     {
-                        sendChatMessage("SERVER: Invalid command, " +
+                        sendChatMessage("chat*SERVER: Invalid command, " +
                                          "you dummy!");
                     }
                 
@@ -1236,7 +1279,7 @@ public class ServerMain {
               //debug mode  
             }else
             {
-                sendChatMessage("SERVER: Do not pass go, " +
+                sendChatMessage("chat*SERVER: Do not pass go, " +
                                 "you will not collect $200.");
             }
             
@@ -1257,7 +1300,7 @@ public class ServerMain {
                     
                     printServerMsg("Sending game data");
                     
-                    // Send the lobby data to the user
+                    // Send the game data to the user
                     synchronized (catanGame) {
                         synchronized (objOutputStream) {
                             objOutputStream.reset();
@@ -1304,6 +1347,28 @@ public class ServerMain {
                            "'");
             synchronized (objOutputStream) {
                 objOutputStream.writeObject("Game Over");
+                objOutputStream.flush();
+            }
+        }
+        
+        /**
+         * Sends a message to the client indicating a roll has been made.
+         * @param roll
+         * @param currentPlayer
+         */
+        public void sendRollMessage(int roll, int currentPlayer) 
+                                                              throws Exception {
+            Player playerArray[] = catanGame.getPlayerArray();
+            
+            // Write the data to the client
+            synchronized (objOutputStream) {
+                objOutputStream.reset();
+                
+                objOutputStream.writeObject("roll*");
+                objOutputStream.writeInt(roll);
+                objOutputStream.writeInt(currentPlayer);
+                objOutputStream.writeObject(playerArray);
+                
                 objOutputStream.flush();
             }
         }

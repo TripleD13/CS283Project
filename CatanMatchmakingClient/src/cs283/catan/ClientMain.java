@@ -448,6 +448,18 @@ public class ClientMain {
         }
     }
     
+    /**
+     * Send a command to the server indicating the end of the turn.
+     */
+    public static void sendEndTurn() throws Exception {
+        synchronized (objOutputStream) {
+            System.out.println("Sending end of turn message.");
+            
+            objOutputStream.writeObject("End Turn");
+            objOutputStream.flush();
+        }
+    }
+    
     
     /**
      * Class that handles the receiving of network data in a separate thread
@@ -525,7 +537,7 @@ public class ClientMain {
                             }
                         });
                         
-                    } else if (message.startsWith("chat*",  0)) {
+                    } else if (message.startsWith("chat*")) {
                        
                         // Format the chat message and update the GUI
                         message = message.substring(5);
@@ -547,6 +559,21 @@ public class ClientMain {
                         EventQueue.invokeAndWait(new Runnable() {
                             public void run() {
                                 gui.receiveChatMessage(guiMessage);
+                            }
+                        });
+                        
+                    } else if (message.startsWith("roll*")) {
+                        final int rollNumber = objInputStream.readInt();
+                        final int playerNumber = objInputStream.readInt();
+                        
+                        final Player playerArray[] = 
+                                         (Player[]) objInputStream.readObject();
+                        
+                        // Update the GUI based on the roll information
+                        EventQueue.invokeAndWait(new Runnable() {
+                            public void run() {
+                                gui.newRoll(rollNumber, playerNumber, 
+                                            playerArray);
                             }
                         });
                         

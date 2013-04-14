@@ -8,8 +8,8 @@ public class Player implements Serializable
      * 
      */
     private static final long serialVersionUID = -687219382118580014L;
-    public Set<ResourceCard> resCards = new HashSet<ResourceCard>();
-	public Set<DevelopmentCard> devCards = new HashSet<DevelopmentCard>();
+    public List<ResourceCard> resCards = new LinkedList<ResourceCard>();
+	public List<DevelopmentCard> devCards = new LinkedList<DevelopmentCard>();
 	public int points;
 	
 	/**
