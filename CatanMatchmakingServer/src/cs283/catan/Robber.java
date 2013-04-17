@@ -5,7 +5,7 @@ package cs283.catan;
 
 import java.io.Serializable;
 
-public class Robber implements Serializable {
+public final class Robber implements Serializable {
 	
     /**
      * 
@@ -32,7 +32,7 @@ public class Robber implements Serializable {
      * @param y
      * @return whether or not the robber was actually moved.
      */
-    public final boolean setLocation(int x, int y) {
+    public boolean setLocation(int x, int y) {
         boolean isRobberMoved = false;
         
         Coordinate newCoord = new Coordinate(x, y, 0);
@@ -49,7 +49,7 @@ public class Robber implements Serializable {
      * Retrieves the location of the robber.
      * @return the location of the robber.
      */
-    public final Coordinate getLocation() {
+    public Coordinate getLocation() {
         return location;
     }
 }

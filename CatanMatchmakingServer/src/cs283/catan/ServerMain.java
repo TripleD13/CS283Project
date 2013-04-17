@@ -1003,7 +1003,7 @@ public class ServerMain {
                         if (!board.addSettlement(new Coordinate(coordinate1,
                                                            coordinate2,
                                                            coordinate3),
-                                                owner, true)) {
+                                                owner, true, true)) {
                             sendChatMessage("chat*SERVER: Unable to add " +
                                             "settlement.");
                         } else {

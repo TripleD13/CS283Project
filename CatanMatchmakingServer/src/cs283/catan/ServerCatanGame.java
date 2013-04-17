@@ -1,14 +1,12 @@
 //Kevin Zeillmann
 //CS283
+/**
+ * Class representing a single in-progress Catan game
+ */
 package cs283.catan;
 import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.Random;
-
-
-
-
-
 
 public class ServerCatanGame implements Serializable
 {
@@ -16,12 +14,17 @@ public class ServerCatanGame implements Serializable
      * 
      */
     private static final long serialVersionUID = -5218511975631672561L;
+    
     //number of users playing the game
 	private int numUsers;
+	
 	//array representing the users in the game
 	private Player[] userArray; //keep users in sorted order
 	
-	// Object used to notify threads when game has been modified
+	/**
+	 * Object used to notify threads when the game has been modified
+	 *
+	 */
 	public class Notifier implements Serializable {
         /**
          * 
@@ -29,13 +32,19 @@ public class ServerCatanGame implements Serializable
         private static final long serialVersionUID = 4132743921540603718L;
 	    
 	}
+	/**
+	 * Object used to notify threads when the game has been modified
+	 */
 	public Notifier gameChangedNotifier = new Notifier();
 	 
 	// array of development cards represents the deck
-	private DevelopmentCard[] resDeck;
+	//private DevelopmentCard[] resDeck;
 	//this should represent an index in the userArray - whose turn it is
+	
 	private int turn; 
+	
 	private int diceRoll;
+	
 	private Random rollGenerator;
 	
 	private Board myBoard;
@@ -44,6 +53,9 @@ public class ServerCatanGame implements Serializable
 	
 	private int turnNumber; //for debugging purposes
 	
+	/**
+	 * Deck of development cards
+	 */
 	private LinkedList<DevelopmentCard> cardDeck = 
 	                                          new LinkedList<DevelopmentCard>();
 	
@@ -55,7 +67,8 @@ public class ServerCatanGame implements Serializable
 		numUsers = 4;
 		turn = 0;
 		turnNumber = 0; // zero indexed
-		victory = false; // nobody has declared victory yet - it's the start of the game
+		victory = false; // nobody has declared victory yet 
+		                 // - it's the start of the game
 		//set up user array - using objects John gives us
 		//userArray = new Player[numUsers];
 		
@@ -74,56 +87,31 @@ public class ServerCatanGame implements Serializable
 		
 		// Generate the development card deck
 
-		        // KNIGHT, VICTORY_POINTS, YEAR_OF_PLENTY, MONOPOLY, ROAD_BUILDING
-		        int i;
-		        for (i = 0; i < 15; i++)
+        // KNIGHT, VICTORY_POINTS, YEAR_OF_PLENTY, MONOPOLY, ROAD_BUILDING
 
-		        {
+        for (int i = 0; i < 15; i++) {
+            cardDeck.add(new DevelopmentCard(DevelopmentCard.DevCardType.KNIGHT));
+        }
 
-		        cardDeck.add(
+        for (int i = 0; i < 4; i++) {
+            cardDeck.add(new DevelopmentCard(DevelopmentCard
+                                             .DevCardType.VICTORY_POINTS));
+        }
 
-		        new DevelopmentCard(DevelopmentCard.DevCardType.KNIGHT));
+        for (int i = 0; i < 2; i++) {
+            cardDeck.add(new DevelopmentCard(DevelopmentCard
+                                             .DevCardType.YEAR_OF_PLENTY));
+        }
 
-		        }
+        for (int i = 0; i < 2; i++) {
+            cardDeck.add(new DevelopmentCard(DevelopmentCard
+                                             .DevCardType.MONOPOLY));
+        }
 
-		        for (i = 0; i < 4; i++)
-
-		        {
-
-		        cardDeck.add(
-
-		       new DevelopmentCard(DevelopmentCard.DevCardType.VICTORY_POINTS));
-
-		        }
-
-		        for (i = 0; i < 2; i++)
-
-		        {
-
-		        cardDeck.add(
-
-		       new DevelopmentCard(DevelopmentCard.DevCardType.YEAR_OF_PLENTY));
-
-		        }
-
-		        for (i = 0; i < 2; i++)
-
-		        {
-
-		        cardDeck.add(
-
-		        new DevelopmentCard(DevelopmentCard.DevCardType.MONOPOLY));
-
-		        }
-
-		        for (i = 0; i < 2; i++)
-
-		        {
-
-		        cardDeck.add(
-
-		        new DevelopmentCard(DevelopmentCard.DevCardType.ROAD_BUILDING));
-		        }
+        for (int i = 0; i < 2; i++) {
+            cardDeck.add(new DevelopmentCard(DevelopmentCard
+                                             .DevCardType.ROAD_BUILDING));
+        }
 		
 	}
 	
@@ -159,41 +147,49 @@ public class ServerCatanGame implements Serializable
         
         
         // For debugging, set up an initial configuration
-        myBoard.addSettlement(new Coordinate(0,2,0), userArray[0], false);
+        myBoard.addSettlement(new Coordinate(0,2,0), userArray[0], false, 
+                              false);
         myBoard.addRoad(new Coordinate(0,2,0), new Coordinate(-1,1,1),
                         userArray[0], false);
         
-        myBoard.addSettlement(new Coordinate(-1,-1,0), userArray[0], false);
+        myBoard.addSettlement(new Coordinate(-1,-1,0), userArray[0], false,
+                              false);
         myBoard.addRoad(new Coordinate(-1,-1,0), new Coordinate(-1,-1,1),
                         userArray[0], false);
         
         userArray[0].resCards.addAll(
                     myBoard.getPlacementResourceCards(new Coordinate(-1,-1,0)));
         
-        myBoard.addSettlement(new Coordinate(-2,2,0), userArray[1], false);
+        myBoard.addSettlement(new Coordinate(-2,2,0), userArray[1], false,
+                              false);
         myBoard.addRoad(new Coordinate(-2,2,0), new Coordinate(-1,1,1),
                         userArray[1], false);
-        myBoard.addSettlement(new Coordinate(1,-2,0), userArray[1], false);
+        myBoard.addSettlement(new Coordinate(1,-2,0), userArray[1], false,
+                              false);
         myBoard.addRoad(new Coordinate(1,-2,0), new Coordinate(1,-2,5),
                         userArray[1], false);
         
         userArray[1].resCards.addAll(
                      myBoard.getPlacementResourceCards(new Coordinate(1,-2,0)));
         
-        myBoard.addSettlement(new Coordinate(0,0,0), userArray[2], false);
+        myBoard.addSettlement(new Coordinate(0,0,0), userArray[2], false,
+                              false);
         myBoard.addRoad(new Coordinate(0,0,0), new Coordinate(0,0,1),
                         userArray[2], false);
-        myBoard.addSettlement(new Coordinate(-2,0,0), userArray[2], false);
+        myBoard.addSettlement(new Coordinate(-2,0,0), userArray[2], false,
+                              false);
         myBoard.addRoad(new Coordinate(-2,0,0), new Coordinate(-2,0,1),
                         userArray[2], false);
         
         userArray[2].resCards.addAll(
                      myBoard.getPlacementResourceCards(new Coordinate(-2,0,0)));
         
-        myBoard.addSettlement(new Coordinate(2,-1,0), userArray[3], false);
+        myBoard.addSettlement(new Coordinate(2,-1,0), userArray[3], false,
+                              false);
         myBoard.addRoad(new Coordinate(2,-1,0), new Coordinate(2,-1,5),
                         userArray[3], false);
-        myBoard.addSettlement(new Coordinate(1,1,0), userArray[3], false);
+        myBoard.addSettlement(new Coordinate(1,1,0), userArray[3], false,
+                              false);
         myBoard.addRoad(new Coordinate(1,1,0), new Coordinate(1,1,5),
                         userArray[3], false);
         
@@ -212,7 +208,7 @@ public class ServerCatanGame implements Serializable
 	 * mainGameLoop - we set up the game, play until victory
 	 * then clean up the game
 	 */
-	public void mainGameLoop()
+	/*public void mainGameLoop()
 	{
 		gameSetup();
 		while(!victory)
@@ -225,46 +221,46 @@ public class ServerCatanGame implements Serializable
 		}
 		System.out.println("Victory!");
 		cleanup();
-	}
+	}*/
 	
 	/**
 	 * - performs all necessary cleanup to end the game - requires integration
 	 * with networking environment - perhaps unnecessary due to Java's memory
 	 * managmeent
 	 */
-	public void cleanup()
+	/*public void cleanup()
 	{
 		
-	}
+	}*/
 	
 	/**
 	 * playTurn () - three things happen - the server rolls the dice and 
 	 * players get resource cards and perform trades. They may also play
 	 * development cards
 	 */
-	public void playTurn()
+	/*public void playTurn()
 	{
 		
 		deliverResCards();
 		trade(); //complete any trades
 		playDevCards();		
 		
-	}
+	}*/
 	
-	public void playDevCards()
+	/*public void playDevCards()
 	{
 		System.out.println("Here's where we play development cards."+
 				userArray[turn].getUsername() + " can play development cards."); 
-	}
+	}*/
 	
-	public void trade()
+	/*public void trade()
 	{
 		System.out.println("Here's where we trade. At this time, " 
 				+ userArray[turn].getUsername() + " can trade."); 
 		
-	}
+	}*/
 	
-	public void deliverResCards()
+	/*public void deliverResCards()
 	{
 		//we roll the dice
 		rollDice();
@@ -281,23 +277,23 @@ public class ServerCatanGame implements Serializable
 		// users now have updated dice rolls
 		
 		
-	}
+	}*/
 	
-	public void rolledSeven()
+	/*public void rolledSeven()
 	{
 		moveRobber();
 		stealCard();
-	}
+	}*/
 	
-	private void moveRobber()
+	/*private void moveRobber()
 	{
 		
-	}
+	}*/
 	
-	private void stealCard()
+	/*private void stealCard()
 	{
 		
-	}
+	}*/
 	
 	/**
 	 * getTurn
@@ -332,7 +328,7 @@ public class ServerCatanGame implements Serializable
 	/**
 	 * Returns whether or not the turn belongs to the user with username.
 	 * @param username
-	 * @return whether or not the turn bleongs to the user.
+	 * @return whether or not the turn belongs to the user.
 	 */
 	public boolean isTurn(String username) {
 	    return userArray[turn].getUsername().equals(username);
@@ -379,7 +375,7 @@ public class ServerCatanGame implements Serializable
             }
         }
 		
-        if (hasSheep && hasOre && hasWheat) {
+        if (hasSheep && hasOre && hasWheat && cardDeck.size() > 0) {
             
 
             int purchasedCard = rollGenerator.nextInt(cardDeck.size());
@@ -408,5 +404,19 @@ public class ServerCatanGame implements Serializable
 	    return this.myBoard;
 	}
 	
+	/**
+	 * Returns the current turn number for debugging purposes.
+	 * @return the turn number.
+	 */
+	public int getTurnNumber() {
+	    return this.turnNumber;
+	}
 	
+	/**
+	 * Returns whether or not victory has been achieved.
+	 * @return true if victory has been achieved, false otherwise.
+	 */
+	public boolean isVictory() {
+	    return this.victory;
+	}
 }

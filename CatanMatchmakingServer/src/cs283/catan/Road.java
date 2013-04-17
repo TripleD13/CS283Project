@@ -1,11 +1,12 @@
 /**
- * Road class used primarily for drawing the roads in the GUI.
+ * Road class used primarily for drawing the roads in the GUI. A road object is
+ * immutable.
  */
 package cs283.catan;
 
 import java.io.Serializable;
 
-public class Road implements Serializable {
+public final class Road implements Serializable {
     
     /**
      * 
@@ -45,7 +46,7 @@ public class Road implements Serializable {
      * Gets the start coordinate.
      * @return the start coordinate.
      */
-    public final Coordinate getStart() {
+    public Coordinate getStart() {
         return start;
     }
     
@@ -53,7 +54,7 @@ public class Road implements Serializable {
      * Gets the finish coordinate.
      * @return the finish coordinate.
      */
-    public final Coordinate getFinish() {
+    public Coordinate getFinish() {
         return finish;
     }
     
@@ -61,7 +62,7 @@ public class Road implements Serializable {
      * Get the owner of the road.
      * @return the owner.
      */
-    public final Player getOwner() {
+    public Player getOwner() {
         return owner;
     }
 }

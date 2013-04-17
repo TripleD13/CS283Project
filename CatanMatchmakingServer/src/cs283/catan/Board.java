@@ -12,10 +12,8 @@ package cs283.catan;
 import java.io.*;
 import java.util.*;
 
-import cs283.catan.ResourceCard.CardType;
 
-
-public class Board implements Serializable {
+public final class Board implements Serializable {
     /**
      * 
      */
@@ -42,10 +40,10 @@ public static void main(String args[]) {
     Player bob = new Player("Bob", 0);
     Player joe = new Player("Joe", 1);
     
-    System.out.println(b.addSettlement(new Coordinate(0,0,2), joe, false));
-    System.out.println(b.addSettlement(new Coordinate(0,0,4), bob, false));
-    System.out.println(b.addSettlement(new Coordinate(1,-1,5), joe, false));
-    System.out.println(b.addSettlement(new Coordinate(1,-1,1), joe, false));
+    System.out.println(b.addSettlement(new Coordinate(0,0,2), joe, false, false));
+    System.out.println(b.addSettlement(new Coordinate(0,0,4), bob, false, false));
+    System.out.println(b.addSettlement(new Coordinate(1,-1,5), joe, false, false));
+    System.out.println(b.addSettlement(new Coordinate(1,-1,1), joe, false, false));
     
     System.out.println(b.upgradeSettlement(new Coordinate(0, 0, 2), joe));
     
@@ -54,7 +52,7 @@ public static void main(String args[]) {
     System.out.println(b.addRoad(new Coordinate(0, 0, 2), new Coordinate(0, 0, 1), joe, false));
     
     
-    System.out.println(b.addSettlement(new Coordinate(-2,2,0), bob, false));
+    System.out.println(b.addSettlement(new Coordinate(-2,2,0), bob, false, false));
     System.out.println(b.addRoad(new Coordinate(-2,2,0), new Coordinate(-2, 2, 1), bob, false));
     System.out.println(b.addRoad(new Coordinate(-2,2,1), new Coordinate(-2, 2, 2), bob, false));
     System.out.println(b.addRoad(new Coordinate(-2,2,3), new Coordinate(-2, 2, 2), bob, false));
@@ -79,7 +77,7 @@ public static void main(String args[]) {
     
     System.out.println(b.whoHasLongestRoad());
     
-    System.out.println(b.addSettlement(new Coordinate(-2,1,3), joe, false));
+    System.out.println(b.addSettlement(new Coordinate(-2,1,3), joe, false, false));
 
     System.out.println(b.whoHasLongestRoad());
     
@@ -139,48 +137,54 @@ public static void main(String args[]) {
         System.out.printf("Normalized: %s %s\n", coord.normalizeCoordinate(), coord2.normalizeCoordinate());
         
         Node test = b.nodeSet.get(coord.normalizeCoordinate());
-        System.out.println(b.nodeSet.get(coord.normalizeCoordinate()).isAdjacent(coord2.normalizeCoordinate()));
+        System.out.println(test.isAdjacent(coord2.normalizeCoordinate()));
+        
+        break;
         
     }
-} /** Temporary Method!!!!*/
+    in.close();
+} /** End of Temporary Method!!!!*/
    
     
     /**
-     * Map of all of the nodes in the graph. The key is the coordinate of the
-     * node and the value is the node.
+     * Map of the coordinates to the nodes in the graph. The key is the 
+     * coordinate of the node and the value is the node.
      */
-    private Map<Coordinate, Node> nodeSet = new HashMap<Coordinate, Node>();
+    private final Map<Coordinate, Node> nodeSet = 
+                                                new HashMap<Coordinate, Node>();
     
     /**
-     * Also keep a running list of all of the settlements on the board. This
+     * Running list of all of the settlements on the board. This
      * list is used for GUI drawing purposes only.
      */
-    private List<Settlement> settlementList = new LinkedList<Settlement>();
+    private final List<Settlement> settlementList = 
+                                                   new LinkedList<Settlement>();
     
     /**
-     * Map of all road node sets in the graph. The key is the player name and
-     * the value is the map of all nodes of the roads owned by the player.
+     * Map of players to road node sets in the graph. The key is the player name
+     * and the value is the map of coordinates to nodes for all of the roads 
+     * owned by the player.
      */
-    private Map<String, Map<Coordinate, Node>> roadSet = 
+    private final Map<String, Map<Coordinate, Node>> roadSet = 
                                    new HashMap<String, Map<Coordinate, Node>>();
     
     /**
-     * Also keep a running list of all of the roads on the board. This list
+     * Running list of all of the roads on the board. This list
      * is used for GUI drawing purposes only.
      */
-    private List<Road> roadList = new LinkedList<Road>();
+    private final List<Road> roadList = new LinkedList<Road>();
     
     /**
-     * Map of all the tiles on the board. The key is the coordinate of the tile
-     * (Coordinate object, but the z coordinate is always 0) and the value is
-     * the Tile object representing the tile.
+     * Map of coordinates to the tiles on the board. The key is the coordinate 
+     * of the tile (Coordinate object, but the z coordinate is always 0) and the
+     * value is the Tile object representing the tile.
      */
-    private Map<Coordinate, Tile> tileSet = new HashMap<Coordinate, Tile>();
+    private final Map<Coordinate, Tile> tileSet = new HashMap<Coordinate, Tile>();
     
     /**
      * Object representing the robber
      */
-	private Robber robber = new Robber();
+	private final Robber robber = new Robber();
 	
 	
 	/**
@@ -198,7 +202,7 @@ public static void main(String args[]) {
 	 * Constructor
 	 */
 	public Board() {
-	    // Nothing to do
+	    // Nothing to do!
 	}  
 	
 	
@@ -235,14 +239,11 @@ public static void main(String args[]) {
 	                // Create the list of neighbors of the node if the node
 	                // has neighbors
 	                if (split.length > 1) {
-	                    Coordinate neighbors[] = 
-	                                           new Coordinate[split.length - 1];
 	                    
 	                    for (int i = 1; i < split.length; i++) {
-	                        neighbors[i - 1] = new Coordinate(split[i]);
+	                        newNode.addNeighbor(new Coordinate(split[i]));
 	                    }
 	                    
-	                    newNode.setNeighbors(neighbors);
 	                }
 	                
 	                // Extract the coordinate of the node from the node name
@@ -316,6 +317,8 @@ public static void main(String args[]) {
                         cardType = ResourceCard.CardType.DESERT;
                     }
                     
+                    // Add the tile to the set of tiles. Note that a tile
+                    // coordinate always has a z value of 0
                     tileSet.put(new Coordinate(x, y, 0),  
                                 new Tile(x, y, rollNumber, cardType));
                 }
@@ -341,10 +344,12 @@ public static void main(String args[]) {
 	 * @param owner
      * @param checkCards - whether or not the method checks to make sure the
      *                     player has appropriate resources.
+     * @param checkRoads - whether or not the method checks whether the player
+     *                     has an adjacent road to the settlement location.                     
 	 * @return whether or not the settlement was successfully added.
 	 */
 	public boolean addSettlement(Coordinate location, Player owner, 
-	                             boolean checkCards) {
+	                             boolean checkCards, boolean checkRoads) {
 	    boolean isSettlementAdded = false;
 	    
 	    location = location.normalizeCoordinate();
@@ -375,7 +380,7 @@ public static void main(String args[]) {
 	    }
 	    
 	    if (locationNode != null && ((hasSheep && hasLumber && hasBrick &&
-            hasWheat) | !checkCards)) {
+            hasWheat) || !checkCards)) {
 	        
 	        boolean safeToAdd = true;
 	        List<Coordinate> neighbors = locationNode.getNeighbors();
@@ -391,8 +396,15 @@ public static void main(String args[]) {
                 }
             }
             
+            // If performing a road check, make sure the player has a road
+            // adjacent to the settlement location
+            if (checkRoads && safeToAdd) {
+                safeToAdd = roadSet.get(owner).containsKey(location);
+            }
+            
             // Add the settlement if there are not settlements directly adjacent
-            // to the location
+            // to the location (and if performing a road check, there is a road
+            // adjacent to the settlement)
             if (safeToAdd) {
                 Settlement newSettlement = new Settlement(location, owner);
                
@@ -476,7 +488,7 @@ public static void main(String args[]) {
             }
         }
         
-        canAddRoad = (canAddRoad && hasLumber && hasBrick) | !checkCards;
+        canAddRoad = canAddRoad && ((hasLumber && hasBrick) || !checkCards);
         
 	    // Make sure either road is adjacent to a settlement owned by the player
 	    // or adjacent to a road owned by the player
@@ -565,7 +577,8 @@ public static void main(String args[]) {
 	}
 	
 	/**
-	 * Upgrades a settlement to a city.
+	 * Upgrades a settlement to a city. Always checks whether a player has
+	 * enough cards.
 	 * @param location
 	 * @param owner
 	 * @return whether or not the upgrade was successful. Returns true if the
@@ -665,7 +678,7 @@ public static void main(String args[]) {
 	    int updatedLongestRoadLength = 0;
 	    
 	    for (String playerName : roadSet.keySet()) {
-	        int playersLongestRoad = playersLongestRoad(playerName);
+	        int playersLongestRoad = getPlayersLongestRoad(playerName);
 	        
 	        // If the player is the defending owner, store the length of the
 	        // defending owner's road
@@ -679,9 +692,6 @@ public static void main(String args[]) {
 	        if (playersLongestRoad > updatedLongestRoadLength) {
 	            updatedLongestRoadLength = playersLongestRoad;
 	            
-	            // If the length of this road is greater than the previous
-	            // length of the longest road, take ownership. Otherwise, the
-	            // 
 	            updatedLongestRoadPlayer = playerName;
 	        }
 	        
@@ -718,7 +728,7 @@ public static void main(String args[]) {
 	 * @return the length of the player's longest road, or 0 if the player
 	 *         has no roads or does not exist.
 	 */
-	private int playersLongestRoad(String playerName) {
+	public int getPlayersLongestRoad(String playerName) {
 	    int longestRoad = 0;
 	    
 	    // Make sure the road set contains the player
@@ -818,10 +828,10 @@ public static void main(String args[]) {
 	                    
 	                    Settlement settlement = tileNode.getSettlement();
 	                    
-	                    if (settlement.getOwner() ==  player) {
+	                    if (settlement.getOwner() == player) {
 	                        
-	                        // If the settlement is a city, add 2 points,
-	                        // otherwise add 1 point
+	                        // If the settlement is a city, add 2 cards,
+	                        // otherwise add 1 card
 	                        for (int i = 0; i < (settlement.isCity() ? 2 : 1);
 	                             i++) {
 	                            
@@ -866,9 +876,9 @@ public static void main(String args[]) {
 	        }
 	        
 	        // Add the resources, if any
-	        for (int i = 0; i < neighboringTiles.length; i++) {
+	        for (Coordinate tileCoord : neighboringTiles) {
                 
-                Tile tile = tileSet.get(neighboringTiles[i]);
+                Tile tile = tileSet.get(tileCoord);
                 if (tile != null) {
                     cardsEarned.add(new ResourceCard(tile.getTileType()));
                 }

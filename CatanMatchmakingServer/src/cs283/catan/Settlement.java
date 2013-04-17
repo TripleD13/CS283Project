@@ -5,7 +5,7 @@ package cs283.catan;
 
 import java.io.Serializable;
 
-public class Settlement implements Serializable {
+public final class Settlement implements Serializable {
     
     /**
      * 
@@ -44,7 +44,7 @@ public class Settlement implements Serializable {
      * Retrieves the location of the settlement.
      * @return the location of the settlement.
      */
-    public final Coordinate getLocation() {
+    public Coordinate getLocation() {
         return location;
     }
     
@@ -52,7 +52,7 @@ public class Settlement implements Serializable {
      * Retrieves the owner of the settlement.
      * @return the owner of the settlement.
      */
-    public final Player getOwner() {
+    public Player getOwner() {
         return owner;
     }
     
@@ -60,7 +60,7 @@ public class Settlement implements Serializable {
      * Retrieves whether or not the settlement is a city.
      * @return whether or not the settlement is a city.
      */
-    public final boolean isCity() {
+    public boolean isCity() {
         return isCity;
     }
     

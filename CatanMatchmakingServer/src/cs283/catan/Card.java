@@ -1,10 +1,12 @@
+/**
+ * Card abstract base class.
+ */
 package cs283.catan;
 
 import java.io.Serializable;
 
 public class Card implements Serializable
 {
-
     /**
      * 
      */

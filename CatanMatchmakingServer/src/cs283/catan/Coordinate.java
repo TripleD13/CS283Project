@@ -139,7 +139,8 @@ public final class Coordinate implements Serializable {
     }
     
     /**
-     * Computes the hashcode for this class.
+     * Computes the hashcode for this class. This hashcode is method is
+     * overridden since the equals method is overridden. 
      * @return the computed hashcode.
      */
     @Override

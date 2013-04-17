@@ -1,3 +1,6 @@
+/**
+ * Class to represent a player.
+ */
 package cs283.catan;
 import java.io.Serializable;
 import java.util.*;
@@ -8,8 +11,20 @@ public class Player implements Serializable
      * 
      */
     private static final long serialVersionUID = -687219382118580014L;
+    
+    /**
+     * List of resource cards owned by the player
+     */
     public List<ResourceCard> resCards = new LinkedList<ResourceCard>();
+    
+    /**
+     * List of development cards
+     */
 	public List<DevelopmentCard> devCards = new LinkedList<DevelopmentCard>();
+	
+	/**
+	 * Number of victory points
+	 */
 	public int points;
 	
 	/**
@@ -30,25 +45,24 @@ public class Player implements Serializable
 		return this.username;
 	}
 	
+	/**
+	 * Returns the color index of the player used by the GUI.
+	 * @return the color index.
+	 */
 	public int getColorIndex() {
 	    return colorIndex;
 	}
 	
-	public boolean hasSettlement(int x, int y)
-	{
-		return false; //still need to figure out board geometry
-		
-	}
 	
 	public void giveResCard(int diceRoll) 
 	{
 		
 	}
 	
-	private void addResCard(ResourceCard.CardType type)
-	{
-		
-	}
+	/*private void addResCard(ResourceCard.CardType type)
+	 *{
+	 *
+	}*/
 	
 	public void addDevCard(DevelopmentCard card) {
 	    devCards.add(card);
@@ -93,6 +107,10 @@ public class Player implements Serializable
         resCards.remove(new ResourceCard(ResourceCard.CardType.WOOL));
 	}
 	
+	/**
+	 * Overrides the toString method, so that when a Player is converted to
+	 * a String, the name of the player is returned.
+	 */
 	@Override
 	public String toString() {
 	    return username;

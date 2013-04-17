@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.util.*;
 
 
-public class Node implements Serializable {
+public final class Node implements Serializable {
     
     /**
      * 
@@ -14,9 +14,10 @@ public class Node implements Serializable {
     private static final long serialVersionUID = -1127640882347468344L;
 
     /**
-     * List of all nodes adjacent to this node
+     * List of all nodes adjacent to this node (part of the adjacency list
+     * representation)
      */
-    private List<Coordinate> neighbors = new LinkedList<Coordinate>();
+    private final List<Coordinate> neighbors = new LinkedList<Coordinate>();
     
     /**
      * Settlement on this node, if any.
@@ -25,20 +26,10 @@ public class Node implements Serializable {
     
     
     /**
-     * Sets the list of nodes adjacent to this node.
-     * @param neighbors
-     */
-    public void setNeighbors(Coordinate neighbors[]) {
-        for (Coordinate neighbor : neighbors) {
-            this.neighbors.add(neighbor);
-        }
-    }
-    
-    /**
      * Gets the list of nodes adjacent to this node.
      * @return the list of neighbors.
      */
-    public final List<Coordinate> getNeighbors() {
+    public List<Coordinate> getNeighbors() {
         return neighbors;
     }
     

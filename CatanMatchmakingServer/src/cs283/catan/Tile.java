@@ -1,12 +1,12 @@
 /**
- * Class representing a tile on the board
+ * Class representing a tile on the board. A tile object is immutable.
  */
 package cs283.catan;
 import java.io.Serializable;
 import java.util.*;
 
 
-public class Tile implements Serializable {
+public final class Tile implements Serializable {
             
     /**
      * 
@@ -36,7 +36,7 @@ public class Tile implements Serializable {
     /**
      * List of coordinates of nodes adjacent to the tile
      */
-    private List<Coordinate> coordinates = new LinkedList<Coordinate>();
+    private final List<Coordinate> coordinates = new LinkedList<Coordinate>();
     
     
     /**
@@ -66,7 +66,7 @@ public class Tile implements Serializable {
      * Retrieves the value of the x coordinate.
      * @return the value of the x coordinate.
      */
-    public final int getX() {
+    public int getX() {
         return x;
     }
     
@@ -74,7 +74,7 @@ public class Tile implements Serializable {
      * Retrieves the value of the y coordinate.
      * @return the value of the y coordinate.
      */
-    public final int getY() {
+    public int getY() {
         return y;
     }
     
@@ -83,7 +83,7 @@ public class Tile implements Serializable {
      * always be 0.
      * @return the location of the tile as a Coordinate.
      */
-    public final Coordinate getLocation() {
+    public Coordinate getLocation() {
         return new Coordinate(x, y, 0);
     }
     
@@ -91,7 +91,7 @@ public class Tile implements Serializable {
      * Retrieves the value of the roll number.
      * @return the value of the roll number.
      */
-    public final int getRollNumber() {
+    public int getRollNumber() {
         return rollNumber;
     }
     
@@ -101,7 +101,7 @@ public class Tile implements Serializable {
      * check to make sure the tile is not a desert.
      * @return the tile type.
      */
-    public final ResourceCard.CardType getTileType() {
+    public ResourceCard.CardType getTileType() {
         return tileType;
     }
     
@@ -109,7 +109,7 @@ public class Tile implements Serializable {
      * Determines whether or not the tile is a desert.
      * @return whether or not the tile is a desert.
      */
-    public final boolean isDesert() {
+    public boolean isDesert() {
         return tileType == ResourceCard.CardType.DESERT;
     }
     
@@ -119,7 +119,7 @@ public class Tile implements Serializable {
      * @return a list of normalized coordinates of nodes that are adjacent
      *         to the tile.
      */
-    public final List<Coordinate> getNormalizedCoordinates() {
+    public List<Coordinate> getNormalizedCoordinates() {
         return coordinates;
     }
 }
