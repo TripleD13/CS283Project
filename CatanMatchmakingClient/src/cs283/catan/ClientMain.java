@@ -12,10 +12,7 @@ import java.util.*;
 import javax.swing.*;
 import javax.swing.UIManager.*;
 
-/**
- * @author John
- *
- */
+
 public class ClientMain {
     
     /**
@@ -86,7 +83,7 @@ public class ClientMain {
     /**
      * Object that the main thread waits on for the mode to change
      */
-    public static Object waitForModeChanged = new Object();
+    public static Object waitForGuiDone = new Object();
     
     
     /**
@@ -177,31 +174,29 @@ public class ClientMain {
             frame.dispose();
         } while (!logonSuccessful);
         
-        // Check to make sure the user is logged on
-        if (logonSuccessful) {
+        // The user is now logged on (otherwise the program would have exited)
             
-            // Create the GUI
-            EventQueue.invokeLater(new Runnable() {
-                public void run() {
-                    try {
-                        gui = new CatanGUI();
-                        gui.setUsername(username);
-                        gui.getFrame().setVisible(true);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+        // Create the GUI
+        EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                try {
+                    gui = new CatanGUI();
+                    gui.setUsername(username);
+                    gui.getFrame().setVisible(true);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-            });
-            
-            // Start the receiver thread
-            receiverThread = new Thread(new ClientReceiver());
-            receiverThread.start();
-            
-            
-            // Wait for lobby mode to finish
-            synchronized (waitForModeChanged) {
-                waitForModeChanged.wait();
             }
+        });
+        
+        // Start the receiver thread
+        receiverThread = new Thread(new ClientReceiver());
+        receiverThread.start();
+        
+        
+        // Wait for gui to finish
+        synchronized (waitForGuiDone) {
+            waitForGuiDone.wait();
         }
 
         // Terminate the receiver thread (calling interrupt() may be unnecessary
@@ -226,7 +221,6 @@ public class ClientMain {
      * @return the message from the server
      */
     private static String attemptLogon(String username) {
-        
         
         // Attempt to connect to the server
         String message = null;
@@ -267,87 +261,6 @@ public class ClientMain {
         return message;
     }
     
-    /**
-     * Manage the lobby mode. TEMPORARY, WILL BE REPLACED BY GUI.
-     */
-    private static void lobbyMode() {
-        Scanner scanner = new Scanner(System.in);
-        
-        try {
-            
-            String input;
-            
-            do {
-                input = scanner.nextLine();
-                
-                if (input.toLowerCase().equals("new game")) {
-                    
-                    System.out.print("Please enter the name of the game: ");
-                    String gameName = scanner.nextLine();
-                    sendLobbyMsg(LobbyMessageType.CreateGame, gameName);
-                    
-                } else if (input.toLowerCase().equals("join game")) {
-                    
-                    System.out.print("Please enter the name of the game: ");
-                    String gameName = scanner.nextLine();
-                    sendLobbyMsg(LobbyMessageType.AddUserToGame, gameName);
-                    
-                } else if (input.toLowerCase().equals("exit game")) {
-                    
-                    System.out.print("Please enter the name of the game: ");
-                    String gameName = scanner.nextLine();
-                    sendLobbyMsg(LobbyMessageType.RemoveUserFromGame, gameName);
-                    
-                } else if (input.toLowerCase().equals("query")) {
-                    // TEMPORARY CODE FOR DEBUGGING PURPOSES
-                    objOutputStream.writeObject(new String("Query"));
-                    objOutputStream.flush();
-                    
-                }
-                
-            } while (!input.toLowerCase().equals("quit"));
-            
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        
-        scanner.close();
-    }
-    
-    /**
-     * Print out the current state of the lobby. TEMPORARY, WILL BE REPLACED BY
-     * GUI.
-     */
-    private static void printLobby() {
-        System.out.println("==============Lobby Games===============\n");
-        
-        // Iterate through each game in the lobby and print it out
-        for (Map.Entry<String, String[]> entry : lobbyGames.entrySet()) {
-            System.out.println("Game: '" + entry.getKey() + "'");
-            
-            // Print out the players in the game
-            for (int i = 0; i < entry.getValue().length; i++) {
-                System.out.print("Player " + (i + 1)  + ": ");
-                if (entry.getValue()[i] != null) {
-                    System.out.print("'" + entry.getValue()[i] + "'");
-                } else {
-                    System.out.print("N/A");
-                }
-                
-                if (i != entry.getValue().length - 1) {
-                    System.out.print("    ");
-                }
-                
-                if (i % 2 == 1) {
-                    System.out.println();
-                }
-            }
-            
-            System.out.println("\n");
-        }
-        
-        System.out.println("========================================");
-    }
     
     /**
      * Sends a lobby message to the server requesting to perform some action
@@ -399,20 +312,12 @@ public class ClientMain {
             messageToSend = messageToSend.concat("/*/");
             messageToSend = messageToSend.concat(message.substring(firstIndex+1, lastIndex));
             messageToSend = messageToSend.concat("*/*");
-            /*int spacesToAppend = 16-messageToSend.length();
-            char [] spaces = new char [spacesToAppend];
-            for (int i = 0; i <spacesToAppend; i++)
-            {
-                spaces[i] = ' ';
-            }
-            String stringSpace = new String(spaces);
-            messageToSend = messageToSend.concat(stringSpace);*/
+
             messageToSend = messageToSend.concat(message.substring(lastIndex+1));
             messageToSend = messageToSend.concat(" ***PRIVATE***");
 
         } else {
             //if not targeted, packetize
-            //messageToSend = "            ";   
             messageToSend = messageToSend.concat(message);
         }
         
@@ -426,10 +331,7 @@ public class ClientMain {
             objOutputStream.writeObject(messageToSend);
             objOutputStream.flush();
         }
-        
-        //byte [] messageBytes = messageToSend.getBytes();
-        
-        //chat*Tester: "Fred" Test this ***PRIVATE***
+
     }
     
     
@@ -507,8 +409,6 @@ public class ClientMain {
                             }
                         });
                         
-                        //break;
-                        
                     } else if (message.equals("Game Over")) {
                         // The game is over. Exit the loop
                         EventQueue.invokeAndWait(new Runnable() {
@@ -542,7 +442,7 @@ public class ClientMain {
                         // Format the chat message and update the GUI
                         message = message.substring(5);
                         String messageToDisplay = "";
-                        //Tester: /*/Fred*/* I hate you!!! ***PRIVATE***
+                        
                         int firstIndex = message.indexOf("/*/");
                         if ( firstIndex != -1) {
                             int lastIndex = message.indexOf("*/*");

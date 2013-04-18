@@ -55,8 +55,8 @@ public class CatanGUI {
 	private JTextField textField;
 	private JTextField textField_1;
 	private JTextField textField_2;
-	private JTextField textField_3;
-	private JTextField textField_4;
+	private JTextField longestRoadField;
+	private JTextField victoryPointTotalField;
 	private JTextField wheatField;
 	private JTextField woolField;
 	private JTextField oreField;
@@ -163,7 +163,7 @@ public class CatanGUI {
 	    // Switch the tab to game mode and disable the lobby
 	    gameAndMatch.setEnabledAt(1, true);
 	    gameAndMatch.setSelectedIndex(1);
-	    gameAndMatch.setEnabledAt(0,  false);
+	    gameAndMatch.setEnabledAt(0, false);
 	    
 	    // Enable the chat and game command inputs
 	    chatInputField.setEnabled(true);
@@ -172,7 +172,7 @@ public class CatanGUI {
 	    gameCommandField.setEnabled(true);
 	    sendCommandButton.setEnabled(true);
 	    
-	    // Enable the game buttons
+	    // Make sure the end turn button is initially disabled
 	    endTurnButton.setEnabled(false);
 	}
 	
@@ -259,14 +259,24 @@ public class CatanGUI {
 	                          road.getOwner());
 	    }
 	    
-	    // Update the counts for the cards
+	    // Update the counts for the cards and the victory point count
 	    Player playerArray[] = game.getPlayerArray();
 	    for (int i = 0; i < playerArray.length; i++) {
 	        if (playerArray[i].getUsername().equals(username)) {
 	            updateCardCount(playerArray[i]);
+	            victoryPointTotalField.setText(String
+	                                           .valueOf(playerArray[i].points));
 	            break;
 	        }
 	    }
+	    
+	    // Update the owner of the longest road
+	    String longestRoadOwner = board.whoHasLongestRoad();
+	    if (longestRoadOwner == null) {
+	        longestRoadOwner = "N/A";
+	    }
+	    
+	    longestRoadField.setText(longestRoadOwner);
 	}
 	
 	/**
@@ -328,9 +338,11 @@ public class CatanGUI {
 	        case ORE:
 	            oreCount++;
 	            break;
+	        case DESERT:
 	        }
 	    }
 	    
+	    // Set the resource card counts
 	    woolField.setText(String.valueOf(woolCount));
 	    lumberField.setText(String.valueOf(lumberCount));
 	    brickField.setText(String.valueOf(brickCount));
@@ -363,6 +375,7 @@ public class CatanGUI {
 	        }
 	    }
 	    
+	    // Set the development card counts
 	    monField.setText(String.valueOf(monCount));
 	    plentyField.setText(String.valueOf(plentyCount));
 	    knightField.setText(String.valueOf(knightCount));
@@ -379,8 +392,9 @@ public class CatanGUI {
 		frame.addWindowListener(new WindowAdapter() {
 		    @Override
 		    public void windowClosed(WindowEvent e) {
-		        synchronized (ClientMain.waitForModeChanged) {
-		            ClientMain.waitForModeChanged.notifyAll();
+		        synchronized (ClientMain.waitForGuiDone) {
+		            // Notify the main thread that the client program is exiting
+		            ClientMain.waitForGuiDone.notifyAll();
 		        }
 		    }
 		});
@@ -471,15 +485,17 @@ public class CatanGUI {
 		        String gameName = JOptionPane.showInputDialog(frame, 
 		                                          "Enter the name of the game");
 		        
-		        gameName = gameName.trim();
+		        if (gameName != null) {
+		            gameName = gameName.trim();
 		        
-		        if (gameName != null && !gameName.equals("")) {
-		            try {
-		                ClientMain.sendLobbyMsg(ClientMain.LobbyMessageType
-		                                        .CreateGame, gameName);
-		            } catch (Exception e) {
-		                e.printStackTrace();
-		                frame.dispose();
+		            if (!gameName.equals("")) {
+		                try {
+		                    ClientMain.sendLobbyMsg(ClientMain.LobbyMessageType
+		                                            .CreateGame, gameName);
+		                } catch (Exception e) {
+		                    e.printStackTrace();
+		                    frame.dispose();
+		                }
 		            }
 		        }
 		    }
@@ -638,15 +654,15 @@ public class CatanGUI {
 		gbc_lblBiggestArmy.gridy = 0;
 		gameInfoTop.add(lblBiggestArmy, gbc_lblBiggestArmy);
 		
-		textField_4 = new JTextField();
-		textField_4.setEditable(false);
-		textField_4.setColumns(10);
-		GridBagConstraints gbc_textField_4 = new GridBagConstraints();
-		gbc_textField_4.insets = new Insets(0, 0, 5, 0);
-		gbc_textField_4.fill = GridBagConstraints.HORIZONTAL;
-		gbc_textField_4.gridx = 5;
-		gbc_textField_4.gridy = 0;
-		gameInfoTop.add(textField_4, gbc_textField_4);
+		victoryPointTotalField = new JTextField();
+		victoryPointTotalField.setEditable(false);
+		victoryPointTotalField.setColumns(10);
+		GridBagConstraints gbc_victoryPointTotalField = new GridBagConstraints();
+		gbc_victoryPointTotalField.insets = new Insets(0, 0, 5, 0);
+		gbc_victoryPointTotalField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_victoryPointTotalField.gridx = 5;
+		gbc_victoryPointTotalField.gridy = 0;
+		gameInfoTop.add(victoryPointTotalField, gbc_victoryPointTotalField);
 		
 		JLabel lblNewLabel_1 = new JLabel("Cities");
 		GridBagConstraints gbc_lblNewLabel_1 = new GridBagConstraints();
@@ -674,15 +690,15 @@ public class CatanGUI {
 		gbc_lblLongestRoad.gridy = 1;
 		gameInfoTop.add(lblLongestRoad, gbc_lblLongestRoad);
 		
-		textField_3 = new JTextField();
-		textField_3.setEditable(false);
-		textField_3.setColumns(10);
-		GridBagConstraints gbc_textField_3 = new GridBagConstraints();
-		gbc_textField_3.insets = new Insets(0, 0, 0, 5);
-		gbc_textField_3.fill = GridBagConstraints.HORIZONTAL;
-		gbc_textField_3.gridx = 3;
-		gbc_textField_3.gridy = 1;
-		gameInfoTop.add(textField_3, gbc_textField_3);
+		longestRoadField = new JTextField();
+		longestRoadField.setEditable(false);
+		longestRoadField.setColumns(10);
+		GridBagConstraints gbc_longestRoadField = new GridBagConstraints();
+		gbc_longestRoadField.insets = new Insets(0, 0, 0, 5);
+		gbc_longestRoadField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_longestRoadField.gridx = 3;
+		gbc_longestRoadField.gridy = 1;
+		gameInfoTop.add(longestRoadField, gbc_longestRoadField);
 		
 		JPanel panel_2 = new JPanel();
 		GridBagConstraints gbc_panel_2 = new GridBagConstraints();
