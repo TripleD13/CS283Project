@@ -51,15 +51,16 @@ public class ServerMain {
     private static AtomicInteger numberConnections = new AtomicInteger(0);
     
     /**
-     * Set that will store the usernames currently in use
+     * Map that will store the usernames currently in use mapped to 
+     * ServerConnectionHandler objects
      */
     private static Map<String, ServerConnectionHandler> userList = 
                                  new HashMap<String, ServerConnectionHandler>();
     
     /**
-     * Map that will store the games currently in the lobby. The key is the
-     * String name of the game, and the value is the String array of players 
-     * in the game (should be size 4).
+     * Map that will store the games currently in the lobby mapped to the list 
+     * of players in each game. The key is the String name of the game, and the 
+     * value is the String array of players in the game (should be size 4).
      */
     private static Map<String, String[]> lobbyGames = 
                                                 new HashMap<String, String[]>();
@@ -68,8 +69,8 @@ public class ServerMain {
      * Map that will store the games currently in progress. The key is the
      * String name of the game, and the value is the game object.
      */
-    private static Map<String, Object> inProgressGames = 
-                                                  new HashMap<String, Object>();
+    private static Map<String, ServerCatanGame> inProgressGames = 
+                                         new HashMap<String, ServerCatanGame>();
     
     
     /**
@@ -105,7 +106,7 @@ public class ServerMain {
         ServerSocket parentSocket = null;
         
         try {
-            int listenBacklog = 10;
+            int listenBacklog = 50;
             // Create the socket. Address 0.0.0.0 indicates that the socket
             // will accept connections on any of the interfaces of the server
             parentSocket = 
@@ -126,8 +127,9 @@ public class ServerMain {
         System.out.println("Server starting...\n");
         
         // Code for testing purposes. These players are not actually playing.
-        String sampleNames[] = {"Austin", "Daniel", "Kevin", null};
-        lobbyGames.put("Ultimate Showdown", sampleNames);
+        // UNCOMMENT FOR DEBUGGING: 
+        // String sampleNames[] = {"Austin", "Daniel", "Kevin", null};
+        // lobbyGames.put("Ultimate Showdown", sampleNames);
         
         int totalThreadsCreated = 0; // Counter used for debugging purposes
         
@@ -183,7 +185,7 @@ public class ServerMain {
     /**
      * Adds a new game to lobby with the name gameName and one player so far
      * with the name username. Note: responsibility of caller to synchronize
-     * access to lobbyGames.
+     * access to lobbyGames for thread safety.
      * @param gameName
      * @param username
      * @return true if the game was added, false if the game could not be added.
@@ -218,7 +220,7 @@ public class ServerMain {
     /**
      * Adds a player named username to a game in the lobby with the name
      * gameName. Note: responsibility of caller to synchronize access to
-     * lobbyGames.
+     * lobbyGames for thread safety.
      * @param gameName
      * @param username
      * @return true if the player was added to the game, false if the player
@@ -257,7 +259,7 @@ public class ServerMain {
     /**
      * Removes a player named username from a game in the lobby with the name
      * gameName. Note: responsibility of sender to synchronize access to
-     * lobbyGames.
+     * lobbyGames for thread safety.
      * @param gameName
      * @param username
      * @return true if the player was removed from the game, false if the player
@@ -312,7 +314,7 @@ public class ServerMain {
     /**
      * Determines whether or not a game with name gameName is completely full 
      * of players. Note: responsibility of sender to synchronize access to
-     * lobbyGames.
+     * lobbyGames for thread safety.
      * @param gameName
      * @return true if the game is full, false if the game does not exist or
      *         is not full.
@@ -348,13 +350,13 @@ public class ServerMain {
     
     /**
      * Removes a game named gameName from the lobby and starts the game. Note:
-     * responsibility of sender to synchronize access to lobbyGames.
+     * responsibility of sender to synchronize access to lobbyGames for thread
+     * safety.
      * @param gameName
      */
     private static void startNewGame(String gameName) {
         // Remove the game from the lobby and add to in progress games
         String playerNameArray[] = lobbyGames.remove(gameName);
-        inProgressGames.put(gameName, new Object());
         
         System.out.print("Starting the game '" + gameName + "' with the " +
                            "players ");
@@ -376,8 +378,12 @@ public class ServerMain {
         ServerCatanGame game = new ServerCatanGame(playerArray);
         game.gameSetup();
         
-        for (int i = 0; i < playerArray.length; i++) {
-            userList.get(playerArray[i].getUsername()).setCatanGame(game);
+        inProgressGames.put(gameName, game);
+        
+        synchronized (userList) {
+            for (int i = 0; i < playerArray.length; i++) {
+                userList.get(playerArray[i].getUsername()).setCatanGame(game);
+            }
         }
         // Notify everyone that the lobby changed
         notifyLobbyChanged();
@@ -423,8 +429,12 @@ public class ServerMain {
             if (playerArray != null) {
                 for (int i = 0; i < playerArray.length; i++) {
                     if (!playerArray[i].getUsername().equals(username)) {
-                        ServerConnectionHandler handler = 
+                        
+                        ServerConnectionHandler handler;
+                        synchronized (userList) {
+                            handler = 
                                      userList.get(playerArray[i].getUsername());
+                        }
                         // Notify each player besides the one logging off that
                         // the game is over.
                         if (handler != null) {
@@ -450,7 +460,6 @@ public class ServerMain {
      
     /**
      * Connection handler class that manages one user.
-     * @author John
      *
      */
     public static class ServerConnectionHandler implements Runnable {
@@ -557,7 +566,7 @@ public class ServerMain {
                 }
                 
 
-                // Attempt a logon of username. First check ensure that the
+                // Attempt a logon of username. First check to ensure that the
                 // username is available
                 synchronized (userList) {
                     if (!userList.containsKey(username)) {
@@ -625,6 +634,10 @@ public class ServerMain {
                 if (lobbyPushThread != null && lobbyPushThread.isAlive()) {
                     lobbyPushThread.interrupt();
                 }
+                
+                if (gamePushThread != null && gamePushThread.isAlive()) {
+                    gamePushThread.interrupt();
+                }
             }
             
             
@@ -658,8 +671,8 @@ public class ServerMain {
             
             // Initially, server sends the client the current state of the
             // lobby
-            synchronized (objOutputStream) {
-                synchronized (lobbyGames) {
+            synchronized (lobbyGames) {
+                synchronized (objOutputStream) {
                     objOutputStream.writeObject("Lobby");
                     objOutputStream.writeObject(lobbyGames);
                     objOutputStream.flush();
@@ -745,16 +758,6 @@ public class ServerMain {
                             failureMsg = "Failed to begin playing game '" +
                                          split[1] + "'";
                         }
-                    } else if (split[0].equals("Query")) { // DEBUGGING CODE
-                        // TEMPORARY CODE FOR DEBUGGING
-                        synchronized (objOutputStream) {
-                            objOutputStream.reset();
-                            objOutputStream.writeObject("Lobby");
-                            objOutputStream.writeObject(lobbyGames);
-                            objOutputStream.flush();
-                        }
-                        
-                        continue;
                     }
                 }
                 
@@ -791,7 +794,7 @@ public class ServerMain {
                             objOutputStream.flush();
                             
                             
-                            // Check if lobby game has been move to in progress
+                            // Check if lobby game has been moved to in progress
                             // games
                             if (lobbyGameName != null &&
                                 inProgressGames.containsKey(lobbyGameName)) {
@@ -880,8 +883,12 @@ public class ServerMain {
                                 if (playerArray[i].getUsername()
                                     .equals(address)) {
                                     
-                                    target = 
-                                     userList.get(playerArray[i].getUsername());
+                                    synchronized (userList) {
+                                        target = 
+                                                userList.get(playerArray[i]
+                                                             .getUsername());
+                                    }
+                                    
                                     break;
                                 }
                             }
@@ -920,8 +927,11 @@ public class ServerMain {
                         //Iterate through all sockets and send
                         if (playerArray != null) {
                             for (int i = 0; i < playerArray.length; i++) {
-                                ServerConnectionHandler handler = 
-                                     userList.get(playerArray[i].getUsername());
+                                ServerConnectionHandler handler;
+                                synchronized (userList) {
+                                    handler = userList.get(playerArray[i]
+                                                          .getUsername());
+                                }
                                 
                                 if (handler != null) {
                                     handler.sendChatMessage(messageToSend);
@@ -941,8 +951,12 @@ public class ServerMain {
                     
                     if (playerArray != null) {
                         for (int i = 0; i < playerArray.length; i++) {
-                            ServerConnectionHandler handler = 
+                            
+                            ServerConnectionHandler handler;
+                            synchronized (userList) {
+                                handler = 
                                      userList.get(playerArray[i].getUsername());
+                            }
                             
                             // Notify each user of the roll
                             if (handler != null) {
