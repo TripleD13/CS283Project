@@ -895,7 +895,7 @@ public class ServerMain {
                         }
                         
                         //attach chat* command to send out
-                        String chatCommand = "chat*";
+                        //String chatCommand = "chat*";
                         String messageToSend = new String(msg.substring(0, 
                                                                    firstIndex));
                         messageToSend = messageToSend.concat(msg
@@ -1024,6 +1024,8 @@ public class ServerMain {
                             isGameChanged = true;
                         }
                         
+                        scanMessage.close();
+                        
                         }catch (Exception InputMismatchException)
                         {
                             sendChatMessage("chat*SERVER: Invalid command, " +
@@ -1048,6 +1050,8 @@ public class ServerMain {
                         } else {
                             isGameChanged = true;
                         }
+                        
+                        scanMessage.close();
                         //command
                         }catch (Exception InputMismatchException)
                         {
@@ -1064,6 +1068,8 @@ public class ServerMain {
                         int coordinate2 = scanMessage.nextInt();
                         int coordinate3 = scanMessage.nextInt();
                         message = message.substring(message.indexOf(',') +1);
+                        scanMessage.close();
+                        
                         scanMessage = new Scanner(message);
                         int coordinate4 = scanMessage.nextInt();
                         int coordinate5 = scanMessage.nextInt();
@@ -1081,6 +1087,8 @@ public class ServerMain {
                         } else {
                             isGameChanged = true;
                         }
+                        
+                        scanMessage.close();
                         //command
                         }catch (Exception InputMismatchException)
                         {
@@ -1114,7 +1122,7 @@ public class ServerMain {
                     String resourceOne = message.substring(3, message.indexOf("to"));
                     String resourceTwo = message.substring(message.indexOf("to")+3);
                     
-                    
+                    messageScanner.close();
                 }catch (Exception InputMismatchException)
                 {
                     sendChatMessage("chat*SERVER: Invalid command, " +
@@ -1140,6 +1148,7 @@ public class ServerMain {
                         int thisItemNumber = numberScan.nextInt();
                         String thisItem = message.substring(2, message.indexOf("for")-1);
                         message = message.substring(message.indexOf("for")+3);
+                        numberScan.close();
                         numberScan = new Scanner(message);
                         int thatItemNumber = numberScan.nextInt();
                         String thatItem = message.substring(3);
@@ -1148,6 +1157,8 @@ public class ServerMain {
                         System.out.println(thisItem);
                         System.out.println(thatItemNumber);
                         System.out.println(thatItem);
+                        
+                        numberScan.close();
                     }else if (andIndex2 == -1 && andIndex1 < forIndex)
                     {
                         //2 for 1 trade
@@ -1157,12 +1168,14 @@ public class ServerMain {
                         String thisItem = message.substring(2, message.indexOf("and")-1);
                         message = message.substring(message.indexOf("and")+4);
                         //System.out.println(message);
+                        numberScan.close();
                         numberScan = new Scanner(message);
                         int andThisItemNumber = numberScan.nextInt();
                         String andThisItem = message.substring(2, message.indexOf("for")-1);
                         
                         message = message.substring(message.indexOf("for")+4);
                     //  System.out.println(message);
+                        numberScan.close();
                         numberScan = new Scanner(message);
                         int thatItemNumber = numberScan.nextInt();
                         String thatItem = message.substring(2);
@@ -1175,6 +1188,8 @@ public class ServerMain {
                         System.out.println(andThisItem);
                         System.out.println(thatItemNumber);
                         System.out.println(thatItem);
+                        
+                        numberScan.close();
 
                     }else if (andIndex2 == -1 && andIndex1 > forIndex)
                     {
@@ -1185,11 +1200,13 @@ public class ServerMain {
                         String thisItem = message.substring(2 ,message.indexOf("for")-1);
                         message = message.substring(message.indexOf("for")+4);
                     //  System.out.println(message);
+                        numberScan.close();
                         numberScan = new Scanner(message);
                         int thatItemNumber = numberScan.nextInt();
                         String thatItem = message.substring(2, message.indexOf("and")-1);
                         message = message.substring(message.indexOf("and")+4);
                     //  System.out.println(message);
+                        numberScan.close();
                         numberScan = new Scanner(message);
                         int andThatItemNumber = numberScan.nextInt();
                         String andThatItem = message.substring(2);
@@ -1201,6 +1218,7 @@ public class ServerMain {
                         System.out.println(thatItem);
                         System.out.println(andThatItemNumber);
                         System.out.println(andThatItem);
+                        numberScan.close();
 
                     }else
                     {
@@ -1210,16 +1228,19 @@ public class ServerMain {
                         String thisItem = message.substring(2, message.indexOf("and")-1);
                         message = message.substring(message.indexOf("and")+4);
                         //System.out.println(message);
+                        numberScan.close();
                         numberScan = new Scanner(message);
                         int andThisItemNumber = numberScan.nextInt();
                         String andThisItem = message.substring(2, message.indexOf("for")-1);
                         message = message.substring(message.indexOf("for")+4);
                         //System.out.println(message);
+                        numberScan.close();
                         numberScan = new Scanner(message);
                         int thatItemNumber = numberScan.nextInt();
                         String thatItem = message.substring(2, message.indexOf("and")-1);
                         message = message.substring(message.indexOf("and")+4);
                         //System.out.println(message);
+                        numberScan.close();
                         numberScan = new Scanner(message);
                         int andThatItemNumber = numberScan.nextInt();
                         String andThatItem = message.substring(2);
@@ -1233,6 +1254,7 @@ public class ServerMain {
                         System.out.println(thatItem);
                         System.out.println(andThatItemNumber);
                         System.out.println(andThatItem);
+                        numberScan.close();
                     }
                     }catch (Exception InputMismatchException)
                     {
@@ -1264,6 +1286,8 @@ public class ServerMain {
                         int coordinate1 = scanMessage.nextInt();
                         int coordinate2 = scanMessage.nextInt();
                         int coordinate3 = scanMessage.nextInt();
+                        
+                        scanMessage.close();
                         }catch (Exception InputMismatchException)
                         {
                             sendChatMessage("chat*SERVER: Invalid command, " +
@@ -1296,6 +1320,7 @@ public class ServerMain {
                     int coordinate1 = scanMessage.nextInt();
                     int coordinate2 = scanMessage.nextInt();
                     int coordinate3 = scanMessage.nextInt();
+                    scanMessage.close();
                     }catch (Exception InputMismatchException)
                     {
                         sendChatMessage("chat*SERVER: Invalid command, " +
