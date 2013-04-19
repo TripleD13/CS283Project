@@ -160,6 +160,7 @@ public class ServerCatanGame implements Serializable
         }
         
         // TODO: if we have time, we could make tile generation random
+        //NO  - would involve too much GUI code
         if (!myBoard.
              loadBoardTilesFromResource("cs283/catan/resources/tiles.csv")) {
             
