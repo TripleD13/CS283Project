@@ -283,28 +283,28 @@ public static void main(String args[]) {
                     int y = fileInput.nextInt();
                     int rollNumber = fileInput.nextInt();
                     String cardTypeString = fileInput.next();
-                    ResourceCard.CardType cardType;
+                    ResourceCard cardType;
                     
                     switch (cardTypeString.toLowerCase()) {
                     case "lumber":
-                        cardType = ResourceCard.CardType.LUMBER;
+                        cardType = ResourceCard.LUMBER;
                         break;
                     case "wool":
-                        cardType = ResourceCard.CardType.WOOL;
+                        cardType = ResourceCard.WOOL;
                         break;
                     case "wheat":
-                        cardType = ResourceCard.CardType.WHEAT;
+                        cardType = ResourceCard.WHEAT;
                         break;
                     case "brick":
-                        cardType = ResourceCard.CardType.BRICK;
+                        cardType = ResourceCard.BRICK;
                         break;
                     case "ore":
-                        cardType = ResourceCard.CardType.ORE;
+                        cardType = ResourceCard.ORE;
                         break;
                     case "desert":
-                        cardType = ResourceCard.CardType.DESERT;
+                        cardType = ResourceCard.DESERT;
                     default:
-                        cardType = ResourceCard.CardType.DESERT;
+                        cardType = ResourceCard.DESERT;
                     }
                     
                     // Add the tile to the set of tiles. Note that a tile
@@ -346,28 +346,10 @@ public static void main(String args[]) {
 	    Node locationNode = nodeSet.get(location);
 	    
 	    // Make sure user has proper hand
-	    boolean hasSheep = false;
-	    boolean hasLumber = false;
-	    boolean hasBrick = false;
-	    boolean hasWheat = false;
-	    
-	    for (ResourceCard card : owner.resCards) {
-	        switch (card.getCardType()) {
-	        case WOOL:
-	            hasSheep = true;
-	            break;
-	        case LUMBER:
-	            hasLumber = true;
-	            break;
-	        case BRICK:
-	            hasBrick = true;
-	            break;
-	        case WHEAT:
-	            hasWheat = true;
-	            break;
-            default:
-	        }
-	    }
+	    boolean hasSheep = owner.getNumCards(ResourceCard.WOOL) > 0;
+	    boolean hasLumber = owner.getNumCards(ResourceCard.LUMBER) > 0;
+	    boolean hasBrick = owner.getNumCards(ResourceCard.BRICK) > 0;
+	    boolean hasWheat = owner.getNumCards(ResourceCard.WHEAT) > 0;
 	    
 	    if (locationNode != null && ((hasSheep && hasLumber && hasBrick &&
             hasWheat) || !checkCards)) {
@@ -463,20 +445,8 @@ public static void main(String args[]) {
 	    
         
         // Make sure user has proper hand
-        boolean hasLumber = false;
-        boolean hasBrick = false;
-        
-        for (ResourceCard card : owner.resCards) {
-            switch (card.getCardType()) {
-            case LUMBER:
-                hasLumber = true;
-                break;
-            case BRICK:
-                hasBrick = true;
-                break;
-            default:
-            }
-        }
+        boolean hasLumber = owner.getNumCards(ResourceCard.LUMBER);
+        boolean hasBrick = owner.getNumCards(ResourceCard.BRICK);
         
         canAddRoad = canAddRoad && ((hasLumber && hasBrick) || !checkCards);
         
@@ -551,7 +521,7 @@ public static void main(String args[]) {
 	 * @return whether or not the tile was added.
 	 */
 	public boolean addTile(int x, int y, int rollNumber,
-	                       ResourceCard.CardType tileType) {
+	                       ResourceCard tileType) {
 	    boolean isTileAdded = false;
 	    
 	    Coordinate tileCoordinate = new Coordinate(x, y, 0);
@@ -583,21 +553,9 @@ public static void main(String args[]) {
 	    Node locationNode = nodeSet.get(location);
 	    
 	    // Make sure user has proper hand
-        int numOre = 0;
-        int numWheat = 0;
+        int numOre = owner.getNumCards(ResourceCard.ORE);
+        int numWheat = owner.getNumCards(ResourceCard.WHEAT);
         
-        for (ResourceCard card : owner.resCards) {
-            switch (card.getCardType()) {
-            case ORE:
-                numOre++;
-                break;
-            case WHEAT:
-                numWheat++;
-                break;
-            default:
-            }
-        }
-	    
 	    if (locationNode != null && locationNode.hasSettlement() &&
 	        numOre >= 3 && numWheat >= 2) {
 	        
@@ -737,15 +695,17 @@ public static void main(String args[]) {
 	}
 	
 	/**
-	 * Returns a list of the resource cards a player would earn if a certain 
+	 * Returns an array of the resource cards a player would earn if a certain 
 	 * number was rolled.
 	 * @param rollNumber
 	 * @param player
-	 * @return a list of the earned resource cards.
+	 * @return an array of the earned resource cards.
 	 */
-	public List<ResourceCard> getResourceCardsEarned(int rollNumber, 
-	                                                 Player player) {
-	    List<ResourceCard> cardsEarned = new LinkedList<ResourceCard>();
+	public int[] getResourceCardsEarned(int rollNumber, Player player) {
+	    int cardsEarned[] = new int[5];
+	    for (int i = 0; i < cardsEarned.length; i++) {
+	        cardsEarned[i] = 0;
+	    }
 	    
 	    // For each tile that has the roll number, look at all of its nodes
 	    // and see if the player has a settlement on any of them
@@ -764,12 +724,8 @@ public static void main(String args[]) {
 	                        
 	                        // If the settlement is a city, add 2 cards,
 	                        // otherwise add 1 card
-	                        for (int i = 0; i < (settlement.isCity() ? 2 : 1);
-	                             i++) {
-	                            
-	                            cardsEarned.add(
-	                                      new ResourceCard(tile.getTileType()));
-	                        }
+	                        cardsEarned[tile.getTileType().getIndex()] += 
+	                                                settlement.isCity() ? 2 : 1;
 	                    }
 	                }
 	            }
@@ -780,14 +736,17 @@ public static void main(String args[]) {
 	}
 	
 	/**
-	 * Returns a list of the resource cards earned by placing a settlement.
+	 * Returns an array of the resource cards earned by placing a settlement.
 	 * @param coord
 	 * @return a list of resource cards.
 	 */
-	public List<ResourceCard> getPlacementResourceCards(Coordinate coord) {
+	public int[] getPlacementResourceCards(Coordinate coord) {
 	    coord = coord.normalizeCoordinate();
 	    
-	    List<ResourceCard> cardsEarned = new LinkedList<ResourceCard>();
+	    int cardsEarned[] = new int[5];
+	    for (int i = 0; i < cardsEarned.length; i++) {
+	        cardsEarned[i] = 0;
+	    }
 	    
 	    // Get the node at the coordinate
 	    Node settlementLocation = nodeSet.get(coord);
@@ -812,7 +771,7 @@ public static void main(String args[]) {
                 
                 Tile tile = tileSet.get(tileCoord);
                 if (tile != null) {
-                    cardsEarned.add(new ResourceCard(tile.getTileType()));
+                    cardsEarned[tile.getTileType().getIndex()]++;
                 }
             }
 	    }
