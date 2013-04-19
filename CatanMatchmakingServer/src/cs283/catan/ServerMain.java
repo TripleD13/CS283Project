@@ -1122,6 +1122,12 @@ public class ServerMain {
                     int tradeNumber = messageScanner.nextInt();
                     String resourceOne = message.substring(3, message.indexOf("to"));
                     String resourceTwo = message.substring(message.indexOf("to")+3);
+                    String errorMessage = board.tradeport(tradeNumber, resourceOne, resourceTwo, owner);
+                    
+                    if (errorMessage != null)
+                    {
+                    	sendChatMessage(errorMessage);
+                    }
                     
                     messageScanner.close();
                 }catch (Exception InputMismatchException)
