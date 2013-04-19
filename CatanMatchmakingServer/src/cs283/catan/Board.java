@@ -346,10 +346,11 @@ public static void main(String args[]) {
 	    Node locationNode = nodeSet.get(location);
 	    
 	    // Make sure user has proper hand
-	    boolean hasSheep = owner.getNumCards(ResourceCard.WOOL) > 0;
-	    boolean hasLumber = owner.getNumCards(ResourceCard.LUMBER) > 0;
-	    boolean hasBrick = owner.getNumCards(ResourceCard.BRICK) > 0;
-	    boolean hasWheat = owner.getNumCards(ResourceCard.WHEAT) > 0;
+	    boolean hasSheep = owner.getNumCards(ResourceCard.WOOL.toString()) > 0;
+	    boolean hasLumber = 
+	                      owner.getNumCards(ResourceCard.LUMBER.toString()) > 0;
+	    boolean hasBrick = owner.getNumCards(ResourceCard.BRICK.toString()) > 0;
+	    boolean hasWheat = owner.getNumCards(ResourceCard.WHEAT.toString()) > 0;
 	    
 	    if (locationNode != null && ((hasSheep && hasLumber && hasBrick &&
             hasWheat) || !checkCards)) {
@@ -445,8 +446,10 @@ public static void main(String args[]) {
 	    
         
         // Make sure user has proper hand
-        boolean hasLumber = owner.getNumCards(ResourceCard.LUMBER);
-        boolean hasBrick = owner.getNumCards(ResourceCard.BRICK);
+        boolean hasLumber = 
+                          owner.getNumCards(ResourceCard.LUMBER.toString()) > 0;
+        boolean hasBrick = 
+                           owner.getNumCards(ResourceCard.BRICK.toString()) > 0;
         
         canAddRoad = canAddRoad && ((hasLumber && hasBrick) || !checkCards);
         
@@ -553,8 +556,8 @@ public static void main(String args[]) {
 	    Node locationNode = nodeSet.get(location);
 	    
 	    // Make sure user has proper hand
-        int numOre = owner.getNumCards(ResourceCard.ORE);
-        int numWheat = owner.getNumCards(ResourceCard.WHEAT);
+        int numOre = owner.getNumCards(ResourceCard.ORE.toString());
+        int numWheat = owner.getNumCards(ResourceCard.WHEAT.toString());
         
 	    if (locationNode != null && locationNode.hasSettlement() &&
 	        numOre >= 3 && numWheat >= 2) {
