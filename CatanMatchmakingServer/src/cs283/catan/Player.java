@@ -65,6 +65,11 @@ public class Player implements Serializable
 		this.username = username;
 		this.colorIndex = colorIndex;
 		this.numKnightsPlayed = 0;
+		this.resCards[0] = 0;
+		this.resCards[1] = 0;
+		this.resCards[2] = 0;
+		this.resCards[3] = 0;
+		this.resCards[4] = 0;
 	}
 	
 	public String getUsername()
@@ -80,12 +85,107 @@ public class Player implements Serializable
 	    return colorIndex;
 	}
 	
-	
-	public void giveResCard(int diceRoll) 
+	public int getNumCards(String type)
 	{
+		
+		if (type == "ore")
+		{
+			return resCards[2];
+		}else if (type == "wool")
+		{
+			return resCards[4];
+		}else if (type == "wheat")
+		{
+			return resCards[3];
+		}else if (type == "lumber")
+		{
+			return resCards[1];
+		}else if (type == "brick")
+		{
+			return resCards[0];
+		}else
+		{
+			return -1;
+		}
+		
 		
 	}
 	
+	public int getNumCards()
+	{
+		int total = 0;
+		for (int i = 0; i < 5; i++)
+		{
+			total += resCards[i];
+		}
+		return total;
+	}
+	
+	public boolean addCards(String type, int number)
+	{
+		if (type == "ore")
+		{
+			resCards[2] = resCards[2] + number;
+		}else if (type == "wool")
+		{
+			resCards[4] = resCards[4] + number;
+		}else if (type == "wheat")
+		{
+			resCards[3] = resCards[3] + number;
+		}else if (type == "lumber")
+		{
+			resCards[1] = resCards[1] + number;	
+		}else if (type == "brick")
+		{
+			resCards[0] = resCards[0] + number;
+		}else
+		{
+			return false;
+		}
+		return true;
+	}
+	
+	public boolean removeCards(String type, int number)
+	{
+		if (type == "ore")
+		{
+			if (resCards[2] <= number)
+			{
+				resCards[2] = resCards[2] - number;
+				return true;
+			}
+		}else if (type == "wool")
+		{
+			if (resCards[4] <= number)
+			{
+				resCards[4] = resCards[4] - number;
+				return true;
+			}
+		}else if (type == "wheat")
+		{
+			if (resCards[3] <= number)
+			{
+				resCards[3] = resCards[3] - number;
+				return true;
+			}
+		}else if (type == "lumber")
+		{
+			if (resCards[1] <= number)
+			{
+				resCards[1] = resCards[1] - number;
+				return true;
+			}
+		}else if (type == "brick")
+		{
+			if (resCards[0] <= number)
+			{
+				resCards[0] = resCards[0] - number;
+				return true;
+			}
+		}
+		
+		return false;
+	}
 	/**
 	 * Returns the number of knights played.
 	 * @return the number of knights played.
