@@ -1132,22 +1132,68 @@ public class ServerMain {
                 
             }else if(message.indexOf("trade") != -1)
             {
+            	//Written by Kevin Zeillmann
+            	//Uses regular expressions because they're wonderful
             	message = message.toLowerCase();
             	String offerString = 
-            			"^(trade offer ) (wool|ore|wheat|brick|lumber)+ ( for )  " +
+            			"^trade offer (wool|ore|wheat|brick|lumber)+ for " +
             			"(wool|ore|wheat|brick|lumber)+";
             	String acceptString = "^(trade accept)";
             	
-            	Pattern pattern = Pattern.compile(offerString);
+            	Pattern offerPattern = Pattern.compile(offerString);
+            	Pattern acceptPattern = Pattern.compile(acceptString);
+            	Matcher acceptMatcher = acceptPattern.matcher(message);
+            	Matcher offerMatcher = offerPattern.matcher(message);
             	
-            	Matcher matcher = pattern.matcher(message);
-            	boolean found = false;
-            	if(matcher.find()) {
-                    printServerMsg("trade - " + matcher.group());
-                    found = true;
+            	if(offerMatcher.find()) {
+            		//then we know we have a valid offer syntax
+            		//first need to determine the offer and 
+            		//place that in an intArray
+            		
+            		//then we determine whether the player has the cards
+            		//necessary to complete the trade
+            		
+            		//if so, we make the offer public and announce it
+            		// store it somehow (make an active-trade variable?)
+            		
+            		//if not, we tell the player that he/she doesn't have
+            		//the resources to complete the trade
+            		
+            		//DEBUG
+                    //System.out.println("trade - " + offerMatcher.group());
+                    
                 }
-            	if(!found){
-                    printServerMsg("No match found.");
+            	else if(acceptMatcher.find())
+            	{
+            		
+            		//we have a valid accept command
+            		//we determine whether there is an active offer
+            		//if there isn't, we inform the user
+            		
+            		//if there is, then ask whether player
+            		//has resources to complete trade
+            		
+            		//if not, then we inform the user
+            		
+            		//if so, we complete the trade as follows:
+            		//remove the cards from offering player's hand
+            		//(use two resCard arrays)
+            		
+            		//put cards in accepting player's hand
+            		
+            		//remove cards from accepting player's hand
+            		
+            		
+            		//put cards in offering player's hand
+            		
+            		//announce successful trade
+            		
+            		System.out.println("accept trade - " + acceptMatcher.group());
+            		
+            		
+            	}
+            	else{
+                    System.out.println("No match found.");
                 }
             	
             	

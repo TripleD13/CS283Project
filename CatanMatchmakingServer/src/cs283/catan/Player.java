@@ -14,8 +14,17 @@ public class Player implements Serializable
     
     /**
      * List of resource cards owned by the player
+     * Changed on 4/19 to be an int array
+     * 
+     * BRICK
+     * LUMBER
+     * ORE
+     * WHEAT
+     * WOOL
+     * in that order
      */
-    public List<ResourceCard> resCards = new LinkedList<ResourceCard>();
+    
+    public int[] resCards = new int[5];
     
     /**
      * List of development cards
