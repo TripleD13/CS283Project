@@ -27,6 +27,18 @@ public class Player implements Serializable
 	 */
 	public int points;
 	
+	/*
+	 * Boolean values for trade points
+	 */
+	
+	public boolean has3To1Port = false;
+	public boolean has2WoolPort = false;
+	public boolean has2WheatPort = false;
+	public boolean has2OrePort = false;
+	public boolean has2LumberPort = false;
+	public boolean has2BrickPort = false;
+	
+	
 	/**
 	 * Color index used when drawing the board in the GUI.
 	 */
