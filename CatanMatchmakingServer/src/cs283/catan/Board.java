@@ -75,11 +75,11 @@ public static void main(String args[]) {
     System.out.println(b.moveRobber(1, -1));
     System.out.println(b.moveRobber(2, 0));
     
-    System.out.println(b.whoHasLongestRoad());
+   // System.out.println(b.whoHasLongestRoad());
     
     System.out.println(b.addSettlement(new Coordinate(-2,1,3), joe, false, false));
 
-    System.out.println(b.whoHasLongestRoad());
+   // System.out.println(b.whoHasLongestRoad());
     
     while (true) {
      // Extract the coordinate of the node from the node name
@@ -186,16 +186,6 @@ public static void main(String args[]) {
      */
 	private final Robber robber = new Robber();
 	
-	
-	/**
-	 * Name of the player with the current longest road
-	 */
-	private String longestRoadOwner = null;
-	
-	/**
-	 * Length of the current longest road
-	 */
-	private int longestRoadLength = 0;
 	
 	
 	/*
@@ -658,64 +648,6 @@ public static void main(String args[]) {
 	    return adjacentPlayers;
 	}
 	
-	/**
-	 * Returns the name of the player who has the longest road. If no one
-	 * has the longest road, return null.
-	 * @return the name of the player with the longest road, or null if no
-	 *         one has the longest road.
-	 */
-	public String whoHasLongestRoad() {
-	    //if (roadSet.containsKey("John")) {
-	    //    longestRoadOwner = "John";
-	    //}
-	    
-	    // The current owner of the road keeps the road in the event of a tie
-	    String defendingOwner = this.longestRoadOwner;
-	    int defendingOwnerLength = this.longestRoadLength;
-	    
-	    
-	    String updatedLongestRoadPlayer = null;
-	    int updatedLongestRoadLength = 0;
-	    
-	    for (String playerName : roadSet.keySet()) {
-	        int playersLongestRoad = getPlayersLongestRoad(playerName);
-	        
-	        // If the player is the defending owner, store the length of the
-	        // defending owner's road
-	        if (playerName.equals(defendingOwner)) {
-	            defendingOwnerLength = playersLongestRoad;
-	        }
-	        
-	        // If this player has the longest road so far, set the road length
-	        // as the longest length and the player as the owner of the longest
-	        // road so far
-	        if (playersLongestRoad > updatedLongestRoadLength) {
-	            updatedLongestRoadLength = playersLongestRoad;
-	            
-	            updatedLongestRoadPlayer = playerName;
-	        }
-	        
-	        // DEBUG MESSAGE
-	        System.out.println(playerName + "'s longest road: " + 
-	                           playersLongestRoad);
-	    }
-	    
-        this.longestRoadLength = updatedLongestRoadLength;
-	    
-	    // If all of the roads have length less than 5, no one has longest road
-	    if (updatedLongestRoadLength < 5) {
-	        this.longestRoadOwner = null;
-	    } else {
-	        // If the defending owner still has the longest road length, keep
-	        // the defending owner (even in the event of a tie). Otherwise,
-	        // choose the player with the greatest longest road.
-	        if (defendingOwnerLength != updatedLongestRoadLength) {
-	            this.longestRoadOwner = updatedLongestRoadPlayer;
-	        }
-	    }
-	    
-	    return longestRoadOwner;
-	}
 	
 	/**
 	 * Calculates the longest road for a specific player. Returns 0 if the

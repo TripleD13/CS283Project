@@ -27,6 +27,11 @@ public class Player implements Serializable
 	 */
 	public int points;
 	
+	/**
+	 * Number of knights played
+	 */
+	private int numKnightsPlayed;
+	
 	/*
 	 * Boolean values for trade points
 	 */
@@ -50,6 +55,7 @@ public class Player implements Serializable
 	{
 		this.username = username;
 		this.colorIndex = colorIndex;
+		this.numKnightsPlayed = 0;
 	}
 	
 	public String getUsername()
@@ -69,6 +75,14 @@ public class Player implements Serializable
 	public void giveResCard(int diceRoll) 
 	{
 		
+	}
+	
+	/**
+	 * Returns the number of knights played.
+	 * @return the number of knights played.
+	 */
+	public int getNumKnightsPlayed() {
+	    return numKnightsPlayed;
 	}
 	
 	/*private void addResCard(ResourceCard.CardType type)
@@ -118,6 +132,32 @@ public class Player implements Serializable
         resCards.remove(new ResourceCard(ResourceCard.CardType.WHEAT));
         resCards.remove(new ResourceCard(ResourceCard.CardType.WOOL));
 	}
+	
+	
+	/**
+	 * Plays a knight if one is available.
+	 * @return whether or not a knight was successfully played.
+	 */
+	public boolean playKnight() {
+	    boolean isKnightPlayed = false;
+	    
+	    // Find a knight card and play it
+	    for (DevelopmentCard devCard : devCards) {
+	        if (devCard.getDevCardType() == 
+	            DevelopmentCard.DevCardType.KNIGHT) {
+	            
+	            devCards.remove(devCard);
+	            isKnightPlayed = true;
+	            
+	            numKnightsPlayed++;
+	            
+	            break;
+	        }
+	    }
+	    
+	    return isKnightPlayed;
+	}
+	
 	
 	/**
 	 * Overrides the toString method, so that when a Player is converted to

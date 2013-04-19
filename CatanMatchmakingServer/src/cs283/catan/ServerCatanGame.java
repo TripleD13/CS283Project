@@ -59,6 +59,27 @@ public class ServerCatanGame implements Serializable
 	private LinkedList<DevelopmentCard> cardDeck = 
 	                                          new LinkedList<DevelopmentCard>();
 	
+	/**
+     * Name of the player with the current longest road
+     */
+    private String longestRoadOwner = null;
+    
+    /**
+     * Length of the current longest road
+     */
+    private int longestRoadLength = 0;
+    
+    /**
+     * Name of the player with the current largest army
+     */
+    private String largestArmyOwner = null;
+    
+    /**
+     * Size of the current largest army
+     */
+    private int largestArmySize = 0;
+    
+	
 	//alternate constructor = we will use this to construct the game
 	public ServerCatanGame(Player playerArray[])
 	{
@@ -420,4 +441,129 @@ public class ServerCatanGame implements Serializable
 	public boolean isVictory() {
 	    return this.victory;
 	}
+	
+	
+	/**
+     * Returns the name of the player who has the longest road. If no one
+     * has the longest road, return null.
+     * @return the name of the player with the longest road, or null if no
+     *         one has the longest road.
+     */
+    public String whoHasLongestRoad() {
+        //if (roadSet.containsKey("John")) {
+        //    longestRoadOwner = "John";
+        //}
+        
+        // The current owner of the road keeps the road in the event of a tie
+        String defendingOwner = this.longestRoadOwner;
+        int defendingOwnerLength = this.longestRoadLength;
+        
+        
+        String updatedLongestRoadPlayer = null;
+        int updatedLongestRoadLength = 0;
+        
+        for (Player player: userArray) {
+            int playersLongestRoad = 
+                            myBoard.getPlayersLongestRoad(player.getUsername());
+            
+            // If the player is the defending owner, store the length of the
+            // defending owner's road
+            if (player.getUsername().equals(defendingOwner)) {
+                defendingOwnerLength = playersLongestRoad;
+            }
+            
+            // If this player has the longest road so far, set the road length
+            // as the longest length and the player as the owner of the longest
+            // road so far
+            if (playersLongestRoad > updatedLongestRoadLength) {
+                updatedLongestRoadLength = playersLongestRoad;
+                
+                updatedLongestRoadPlayer = player.getUsername();
+            }
+            
+            // DEBUG MESSAGE
+            System.out.println(player.getUsername() + "'s longest road: " + 
+                               playersLongestRoad);
+        }
+        
+        this.longestRoadLength = updatedLongestRoadLength;
+        
+        // If all of the roads have length less than 5, no one has longest road
+        if (updatedLongestRoadLength < 5) {
+            this.longestRoadOwner = null;
+        } else {
+            // If the defending owner still has the longest road length, keep
+            // the defending owner (even in the event of a tie). Otherwise,
+            // choose the player with the greatest longest road.
+            if (defendingOwnerLength != updatedLongestRoadLength) {
+                this.longestRoadOwner = updatedLongestRoadPlayer;
+            }
+        }
+        
+        return longestRoadOwner;
+    }
+    
+    /**
+     * Returns the name of the player who has the largest army. If no one
+     * has the largest army, return null.
+     * @return the name of the player with the largest army, or null if no
+     *         one has the largest army.
+     */
+    public String whoHasLargestArmy() {
+        // The current owner of the road keeps the road in the event of a tie
+        String defendingOwner = this.largestArmyOwner;
+        int defendingOwnerLength = this.largestArmySize;
+        
+        
+        String updatedLargestArmyPlayer = null;
+        int updatedLargestArmySize = 0;
+
+        for (Player player: userArray) {
+            int playersArmySize = 0;
+            
+            // Determine the number 
+            for (DevelopmentCard devCard : player.devCards) {
+                if (devCard.getDevCardType() == 
+                    DevelopmentCard.DevCardType.KNIGHT) {
+                    
+                    playersArmySize++;
+                }
+            }
+            
+            // If the player is the defending owner, store the length of the
+            // defending owner's road
+            if (player.getUsername().equals(defendingOwner)) {
+                defendingOwnerLength = playersLongestRoad;
+            }
+            
+            // If this player has the longest road so far, set the road length
+            // as the longest length and the player as the owner of the longest
+            // road so far
+            if (playersLongestRoad > updatedLongestRoadLength) {
+                updatedLongestRoadLength = playersLongestRoad;
+                
+                updatedLongestRoadPlayer = player.getUsername();
+            }
+            
+            // DEBUG MESSAGE
+            System.out.println(player.getUsername() + "'s longest road: " + 
+                               playersLongestRoad);
+        }
+        
+        this.longestRoadLength = updatedLongestRoadLength;
+        
+        // If all of the roads have length less than 5, no one has longest road
+        if (updatedLongestRoadLength < 5) {
+            this.longestRoadOwner = null;
+        } else {
+            // If the defending owner still has the longest road length, keep
+            // the defending owner (even in the event of a tie). Otherwise,
+            // choose the player with the greatest longest road.
+            if (defendingOwnerLength != updatedLongestRoadLength) {
+                this.longestRoadOwner = updatedLongestRoadPlayer;
+            }
+        }
+        
+        return longestRoadOwner;
+    }
 }
