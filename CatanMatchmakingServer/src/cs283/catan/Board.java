@@ -903,5 +903,81 @@ public static void main(String args[]) {
 	public List<Road> getRoadList() {
 	    return roadList;
 	}
+
+
+	public String tradeport(int tradeNumber, String resourceOne,
+			String resourceTwo, Player player) {
+		if (tradeNumber == 3)
+		{
+			if (player.has3To1Port)
+			{
+				//execute code
+			}else
+			{
+				return new String("chat* Server: you don't have a 3 to 1 port");
+			}
+		}else if (tradeNumber == 2)
+		{
+			if (resourceOne == "ore")
+			{
+				if(player.has2OrePort)
+				{
+					//execute code
+				}else
+				{
+					return new String("chat* Server: you don't have that 2 to one port");
+				}
+			}
+			if (resourceOne == "lumber")
+			{
+				if(player.has2LumberPort)
+				{
+					//execute code
+				}else
+				{
+					return new String("chat* Server: you don't have that 2 to one port");
+				}
+			}
+			if (resourceOne == "wheat")
+			{
+				if(player.has2WheatPort)
+				{
+					//execute code
+				}else
+				{
+					return new String("chat* Server: you don't have that 2 to one port");
+				}
+			}else if (resourceOne == "brick")
+			{
+				if(player.has2BrickPort)
+				{
+					//execute code
+				}else
+				{
+					return new String("chat* Server: you don't have that 2 to one port");
+				}
+			}else if (resourceOne == "wool")
+			{
+				if(player.has2WoolPort)
+				{
+					//execute code
+				}else
+				{
+					return new String("chat* Server: you don't have that 2 to one port");
+				}
+			}else
+			{
+				return new String ("chat* Server: spell your resources correctly");
+			}
+		}else if (tradeNumber == 4)
+		{
+			//execute code
+		}else
+		{
+			return new String ("chat* Wrong amount to trade.");
+		}
+		
+		return null;
+	}
 	
 }
