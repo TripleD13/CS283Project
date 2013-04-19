@@ -805,7 +805,13 @@ public static void main(String args[]) {
 		{
 			if (player.has3To1Port)
 			{
-				//execute code
+				if (player.removeCards(resourceOne, 3))
+				{
+					player.addCards(resourceTwo, 1);
+				}else
+				{
+					return new String ("chat* Server: you don't have the right number of cards");
+				}
 			}else
 			{
 				return new String("chat* Server: you don't have a 3 to 1 port");
@@ -816,7 +822,13 @@ public static void main(String args[]) {
 			{
 				if(player.has2OrePort)
 				{
-					//execute code
+					if (player.removeCards(resourceOne, 2))
+					{
+						player.addCards(resourceTwo, 1);
+					}else
+					{
+						return new String ("chat* Server: you don't have the right number of cards");
+					}
 				}else
 				{
 					return new String("chat* Server: you don't have that 2 to one port");
@@ -826,7 +838,13 @@ public static void main(String args[]) {
 			{
 				if(player.has2LumberPort)
 				{
-					//execute code
+					if (player.removeCards(resourceOne, 2))
+					{
+						player.addCards(resourceTwo, 1);
+					}else
+					{
+						return new String ("chat* Server: you don't have the right number of cards");
+					}
 				}else
 				{
 					return new String("chat* Server: you don't have that 2 to one port");
@@ -836,7 +854,13 @@ public static void main(String args[]) {
 			{
 				if(player.has2WheatPort)
 				{
-					//execute code
+					if (player.removeCards(resourceOne, 2))
+					{
+						player.addCards(resourceTwo, 1);
+					}else
+					{
+						return new String ("chat* Server: you don't have the right number of cards");
+					}
 				}else
 				{
 					return new String("chat* Server: you don't have that 2 to one port");
@@ -845,7 +869,13 @@ public static void main(String args[]) {
 			{
 				if(player.has2BrickPort)
 				{
-					//execute code
+					if (player.removeCards(resourceOne, 2))
+					{
+						player.addCards(resourceTwo, 1);
+					}else
+					{
+						return new String ("chat* Server: you don't have the right number of cards");
+					}
 				}else
 				{
 					return new String("chat* Server: you don't have that 2 to one port");
@@ -854,7 +884,13 @@ public static void main(String args[]) {
 			{
 				if(player.has2WoolPort)
 				{
-					//execute code
+					if (player.removeCards(resourceOne, 2))
+					{
+						player.addCards(resourceTwo, 1);
+					}else
+					{
+						return new String ("chat* Server: you don't have the right number of cards");
+					}
 				}else
 				{
 					return new String("chat* Server: you don't have that 2 to one port");
@@ -865,7 +901,13 @@ public static void main(String args[]) {
 			}
 		}else if (tradeNumber == 4)
 		{
-			//execute code
+			if (player.removeCards(resourceOne, 4))
+			{
+				player.addCards(resourceTwo, 1);
+			}else
+			{
+				return new String ("chat* Server: you don't have the right number of cards");
+			}
 		}else
 		{
 			return new String ("chat* Wrong amount to trade.");
