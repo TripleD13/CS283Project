@@ -7,6 +7,7 @@ package cs283.catan;
 
 import java.io.*;
 import java.util.*;
+import java.util.regex.*;
 import java.net.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -1131,7 +1132,26 @@ public class ServerMain {
                 
             }else if(message.indexOf("trade") != -1)
             {
-                int andIndex1 = message.indexOf("and");
+            	message = message.toLowerCase();
+            	String offerString = 
+            			"^(trade offer ) (wool|ore|wheat|brick|lumber)+ ( for )  " +
+            			"(wool|ore|wheat|brick|lumber)+";
+            	String acceptString = "^(trade accept)";
+            	
+            	Pattern pattern = Pattern.compile(offerString);
+            	
+            	Matcher matcher = pattern.matcher(message);
+            	boolean found = false;
+            	if(matcher.find()) {
+                    printServerMsg("trade - " + matcher.group());
+                    found = true;
+                }
+            	if(!found){
+                    printServerMsg("No match found.");
+                }
+            	
+            	
+                /*int andIndex1 = message.indexOf("and");
                 int andIndex2 = message.indexOf("and", andIndex1 +1);
                 int forIndex = message.indexOf("for");
                 
@@ -1260,8 +1280,8 @@ public class ServerMain {
                     {
                         sendChatMessage("chat*SERVER: Invalid command, " +
                                 "you dummy!");
-                    }
-                }
+                   }
+                }*/
             }else if(message.indexOf("play") != -1)
             {
                 if(message.indexOf("year of plenty") != -1)
@@ -1302,7 +1322,7 @@ public class ServerMain {
                     String resourceToMonopolize = message.substring(message.indexOf("monopoly")+9);
                 }else
                 {
-                    sendChatMessage("SERVER: Invalid command, " + "you dummy!");
+                    sendChatMessage("chat*SERVER: Invalid command, " + "you dummy!");
                 }
                 
             }else if(message.indexOf("steal") != -1)
