@@ -510,60 +510,52 @@ public class ServerCatanGame implements Serializable
      *         one has the largest army.
      */
     public String whoHasLargestArmy() {
-        // The current owner of the road keeps the road in the event of a tie
+        // The current owner of the largest army keeps the largest army
+        // in the event of a tie
         String defendingOwner = this.largestArmyOwner;
-        int defendingOwnerLength = this.largestArmySize;
+        int defendingOwnerSize = this.largestArmySize;
         
         
         String updatedLargestArmyPlayer = null;
         int updatedLargestArmySize = 0;
 
         for (Player player: userArray) {
-            int playersArmySize = 0;
+            int playersLargestArmySize = player.getNumKnightsPlayed();
             
-            // Determine the number 
-            for (DevelopmentCard devCard : player.devCards) {
-                if (devCard.getDevCardType() == 
-                    DevelopmentCard.DevCardType.KNIGHT) {
-                    
-                    playersArmySize++;
-                }
-            }
-            
-            // If the player is the defending owner, store the length of the
-            // defending owner's road
+            // If the player is the defending owner, store the size of the
+            // defending owner's army
             if (player.getUsername().equals(defendingOwner)) {
-                defendingOwnerLength = playersLongestRoad;
+                defendingOwnerSize = playersLargestArmySize;
             }
             
-            // If this player has the longest road so far, set the road length
-            // as the longest length and the player as the owner of the longest
-            // road so far
-            if (playersLongestRoad > updatedLongestRoadLength) {
-                updatedLongestRoadLength = playersLongestRoad;
+            // If this player has the largest army so far, set the largest army
+            // size as this size and the player as the owner of the 
+            // largest army so far
+            if (playersLargestArmySize > updatedLargestArmySize) {
+                updatedLargestArmySize = playersLargestArmySize;
                 
-                updatedLongestRoadPlayer = player.getUsername();
+                updatedLargestArmyPlayer = player.getUsername();
             }
             
             // DEBUG MESSAGE
-            System.out.println(player.getUsername() + "'s longest road: " + 
-                               playersLongestRoad);
+            System.out.println(player.getUsername() + "'s army size: " + 
+                               playersLargestArmySize);
         }
         
-        this.longestRoadLength = updatedLongestRoadLength;
+        this.largestArmySize = updatedLargestArmySize;
         
         // If all of the roads have length less than 5, no one has longest road
-        if (updatedLongestRoadLength < 5) {
-            this.longestRoadOwner = null;
+        if (updatedLargestArmySize < 3) {
+            this.largestArmyOwner = null;
         } else {
-            // If the defending owner still has the longest road length, keep
+            // If the defending owner still has the largest army, keep
             // the defending owner (even in the event of a tie). Otherwise,
             // choose the player with the greatest longest road.
-            if (defendingOwnerLength != updatedLongestRoadLength) {
-                this.longestRoadOwner = updatedLongestRoadPlayer;
+            if (defendingOwnerSize != updatedLargestArmySize) {
+                this.largestArmyOwner = updatedLargestArmyPlayer;
             }
         }
         
-        return longestRoadOwner;
+        return this.largestArmyOwner;
     }
 }
