@@ -245,7 +245,10 @@ public class CatanGUI {
 	        /*drawSettlement(settlement.getLocation(), 
 	                       settlement.getOwner().getColorIndex(), 
 	                       settlement.isCity());*/
-	        gamePanel.drawsettle(settlement.getLocation().getPixel(), 
+	        System.out.println("LOCATION");
+	        System.out.println(settlement.getLocation());
+	        System.out.println(board.getPixel(settlement.getLocation()));
+	        gamePanel.drawsettle(board.getPixel(settlement.getLocation()), 
 	                             settlement.isCity(),
 	                             settlement.getOwner().getColorIndex());
 	        
@@ -260,8 +263,8 @@ public class CatanGUI {
 	    for (Road road : roads) {
 	        //drawRoad(road.getStart(), road.getFinish(), 
 	        //         road.getOwner().getColorIndex());
-	        gamePanel.addroad(road.getStart().getPixel(),
-	                          road.getFinish().getPixel(),
+	        gamePanel.addroad(board.getPixel(road.getStart()),
+	                          board.getPixel(road.getFinish()),
 	                          road.getOwner().getColorIndex());
 	        
 	        System.out.format("Drawing road:\nStart: %s\nFinish: %s\n" +
