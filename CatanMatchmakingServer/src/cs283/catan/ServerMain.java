@@ -998,9 +998,214 @@ public class ServerMain {
                 }
             }
             
-            if (owner.roadBuilderMode != 0)
+            if (owner.settlementPlacementMode == 2)
             {
-            	
+            	if (message.indexOf("buy") != -1)	
+                {
+                    /*
+                    buy
+                        settlement (coord)
+                        city (coord)
+                        road (coord) to (coord)
+                        devcard
+                    */
+                    if (message.indexOf("settlement") != -1)
+                    {
+                        try{
+                            message = message.substring(message.indexOf("settlement") + 10);
+                            Scanner scanMessage = new Scanner(message);
+                            int coordinate1 = scanMessage.nextInt();
+                            int coordinate2 = scanMessage.nextInt();
+                            int coordinate3 = scanMessage.nextInt();
+                            
+                            	if (!board.freeAddSettlement(new Coordinate(coordinate1,
+                                                               coordinate2,
+                                                               coordinate3),
+                                                               owner)) {
+                            		sendChatMessage("chat*SERVER: Unable to add " +
+                            				"settlement.");
+                            	} else {
+                            		isGameChanged = true;
+                            		owner.settlementPlacementMode--;
+                            	}
+                            
+                            	scanMessage.close();
+                            
+                            }catch (Exception InputMismatchException)
+                            {
+                                sendChatMessage("chat*SERVER: Invalid command, " +
+                                                     "you dummy!");
+                            }
+                        
+                    }else
+                    {
+                    	sendChatMessage("chat*Server: wrong command.  You must buy a settlement");
+                    }
+                }else
+                {
+                	sendChatMessage("chat*Server: wrong command.  You must buy a settlement");
+                }
+            }else if (owner.roadBuilderMode == 2)
+            {
+            	if (message.indexOf("buy") != -1)	
+                {
+                    /*
+                    buy
+                        settlement (coord)
+                        city (coord)
+                        road (coord) to (coord)
+                        devcard
+                    */
+                    if (message.indexOf("road") != -1)
+                    {
+                    try{
+                        message = message.substring(message.indexOf("road") + 4);
+                        Scanner scanMessage = new Scanner(message);
+                        int coordinate1 = scanMessage.nextInt();
+                        int coordinate2 = scanMessage.nextInt();
+                        int coordinate3 = scanMessage.nextInt();
+                        message = message.substring(message.indexOf(',') +1);
+                        scanMessage.close();
+                        
+                        scanMessage = new Scanner(message);
+                        int coordinate4 = scanMessage.nextInt();
+                        int coordinate5 = scanMessage.nextInt();
+                        int coordinate6 = scanMessage.nextInt();
+                        
+                        if (!board.freeAddRoad(new Coordinate(coordinate1,
+                                                          coordinate2,
+                                                          coordinate3),
+                                           new Coordinate(coordinate4,
+                                                          coordinate5,
+                                                          coordinate6),
+                                           owner)) {
+                            sendChatMessage("chat*SERVER: Unable to add " +
+                                            "road.");
+                        } else {
+                            isGameChanged = true;
+                            owner.roadBuilderMode--;
+                        }
+                        
+                        scanMessage.close();
+                        //command
+                        }catch (Exception InputMismatchException)
+                        {
+                            sendChatMessage("chat*SERVER: Invalid command, " +
+                            		"you dummy!");
+                        }
+                    
+                    }else
+                	{
+                	sendChatMessage("chat*SERVER: You must build roads right now");
+                	}
+                }else
+            	{
+            	sendChatMessage("chat*SERVER: You must build roads right now");
+            	}
+            }else if (owner.settlementPlacementMode == 1)
+            {
+            	if (message.indexOf("buy") != -1)	
+                {
+                    /*
+                    buy
+                        settlement (coord)
+                        city (coord)
+                        road (coord) to (coord)
+                        devcard
+                    */
+                    if (message.indexOf("settlement") != -1)
+                    {
+                        try{
+                            message = message.substring(message.indexOf("settlement") + 10);
+                            Scanner scanMessage = new Scanner(message);
+                            int coordinate1 = scanMessage.nextInt();
+                            int coordinate2 = scanMessage.nextInt();
+                            int coordinate3 = scanMessage.nextInt();
+                            
+                            if (!board.freeAddSettlement(new Coordinate(coordinate1,
+                                                               coordinate2,
+                                                               coordinate3),
+                                                    owner)) {
+                                sendChatMessage("chat*SERVER: Unable to add " +
+                                                "settlement.");
+                            } else {
+                                isGameChanged = true;
+                                owner.settlementPlacementMode--;
+                            }
+                            
+                            scanMessage.close();
+                            
+                            }catch (Exception InputMismatchException)
+                            {
+                                sendChatMessage("chat*SERVER: Invalid command, " +
+                                                     "you dummy!");
+                            }
+                        
+                    }else
+                    {
+                    	sendChatMessage("chat*Server: wrong command.  You must buy a settlement");
+                    }
+                }else
+                {
+                	sendChatMessage("chat*Server: wrong command.  You must buy a settlement");
+                }
+            }else if (owner.roadBuilderMode == 1)
+            {
+            	if (message.indexOf("buy") != -1)	
+                {
+                    /*
+                    buy
+                        settlement (coord)
+                        city (coord)
+                        road (coord) to (coord)
+                        devcard
+                    */
+                    if (message.indexOf("road") != -1)
+                    {
+                    try{
+                        message = message.substring(message.indexOf("road") + 4);
+                        Scanner scanMessage = new Scanner(message);
+                        int coordinate1 = scanMessage.nextInt();
+                        int coordinate2 = scanMessage.nextInt();
+                        int coordinate3 = scanMessage.nextInt();
+                        message = message.substring(message.indexOf(',') +1);
+                        scanMessage.close();
+                        
+                        scanMessage = new Scanner(message);
+                        int coordinate4 = scanMessage.nextInt();
+                        int coordinate5 = scanMessage.nextInt();
+                        int coordinate6 = scanMessage.nextInt();
+                        
+                        if (!board.freeAddRoad(new Coordinate(coordinate1,
+                                                          coordinate2,
+                                                          coordinate3),
+                                           new Coordinate(coordinate4,
+                                                          coordinate5,
+                                                          coordinate6),
+                                           owner)) {
+                            sendChatMessage("chat*SERVER: Unable to add " +
+                                            "road.");
+                        } else {
+                            isGameChanged = true;
+                            owner.roadBuilderMode--;
+                        }
+                        
+                        scanMessage.close();
+                        //command
+                        }catch (Exception InputMismatchException)
+                        {
+                            sendChatMessage("chat*SERVER: Invalid command, " +
+                            		"you dummy!");
+                        }
+                    
+                    }else
+                	{
+                	sendChatMessage("chat*SERVER: You must build roads right now");
+                	}
+                }else
+            	{
+            	sendChatMessage("chat*SERVER: You must build roads right now");
+            	}
             }else if (owner.yearOfPlentyMode != 0)
             {
             	if (message.equals("WOOL"))
