@@ -1428,7 +1428,10 @@ public class ServerMain {
                     
                 }else if (message.indexOf("knight") != -1)
                 {
-                    owner.robberMode = true;
+                	if (owner.playKnight())
+                	{
+                		owner.robberMode = true;
+                	}
                 }else if (message.indexOf("road builder") != -1)
                 {
                     //command
