@@ -73,6 +73,7 @@ public class CatanGUI {
 	private JButton sendMessageButton;
 	private JButton sendCommandButton;
 	private JButton endTurnButton;
+	private GamePanel gamePanel;
 	
 	private JButton btnCreateGame;
     private JButton btnJoinGame;
@@ -238,10 +239,15 @@ public class CatanGUI {
 	    // Draw all of the settlements
 	    List<Settlement> settlements = board.getSettlementList();
 	    
+	    gamePanel.clearboard();
+	    
 	    for (Settlement settlement : settlements) {
 	        /*drawSettlement(settlement.getLocation(), 
 	                       settlement.getOwner().getColorIndex(), 
 	                       settlement.isCity());*/
+	        gamePanel.drawsettle(settlement.getLocation().getPixel(), 
+	                             settlement.isCity(),
+	                             settlement.getOwner().getColorIndex());
 	        
 	        System.out.format("Drawing settlement:\nLocation: %s\nOwner: " +
 	                          "%s\nIs City %s\n", settlement.getLocation(), 
@@ -254,6 +260,10 @@ public class CatanGUI {
 	    for (Road road : roads) {
 	        //drawRoad(road.getStart(), road.getFinish(), 
 	        //         road.getOwner().getColorIndex());
+	        gamePanel.addroad(road.getStart().getPixel(),
+	                          road.getFinish().getPixel(),
+	                          road.getOwner().getColorIndex());
+	        
 	        System.out.format("Drawing road:\nStart: %s\nFinish: %s\n" +
 	                          "Owner: %s\n", road.getStart(), road.getFinish(),
 	                          road.getOwner());
@@ -552,18 +562,10 @@ public class CatanGUI {
 		JPanel gameplay = new JPanel();
 		gameAndMatch.addTab("Game", null, gameplay, null);
 		gameAndMatch.setEnabledAt(1, false);
-				
-		BufferedImage myPicture;
-		try {
-			myPicture = ImageIO.read(Thread.currentThread()
-			                        .getContextClassLoader()
-			                .getResourceAsStream("cs283/catan/catanBoard.jpg"));
-			JLabel boardLabel = new JLabel(new ImageIcon( myPicture ));
-			gameplay.add(boardLabel);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		
+		
+		gamePanel = new GamePanel();
+		gameplay.add(gamePanel.view());
 		
 		JLabel lblNewLabel_7 = new JLabel("Smack-talkin");
 		GridBagConstraints gbc_lblNewLabel_7 = new GridBagConstraints();

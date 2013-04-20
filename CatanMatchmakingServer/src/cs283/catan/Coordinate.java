@@ -5,7 +5,12 @@
  */
 package cs283.catan;
 
+import java.io.InputStream;
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
+import java.awt.Point;
 
 
 public final class Coordinate implements Serializable {
@@ -13,6 +18,10 @@ public final class Coordinate implements Serializable {
      * 
      */
     private static final long serialVersionUID = 7210895717537168897L;
+    
+    private static final Map<Coordinate, Point> pixelMap= 
+                                               new HashMap<Coordinate, Point>();
+    
     public final int x;
     public final int y;
     public final int z;
@@ -104,6 +113,70 @@ public final class Coordinate implements Serializable {
         }
         
         return newCoordinate;
+    }
+    
+    /**
+     * Returns the pixel coordinate associated with the coordinate.
+     * @return a point representing the pixel coordinate, or null if no such
+     *         pixel mapping exists.
+     */
+    public Point getPixel() {
+        return pixelMap.get(this);
+    }
+    
+    /**
+     * Loads a pixel mapping.
+     * @parameter coordinate
+     * @parameter pixel
+     */
+    public static boolean loadPixelMappingsFromResource(String resourceName) {
+        boolean isSuccessful = false;
+        
+        // Attempt to read the data from the file
+        InputStream resourceStream = Thread.currentThread().
+                                     getContextClassLoader().
+                                     getResourceAsStream(resourceName);
+        
+        if (resourceStream != null) {
+            try {
+                Scanner fileInput = new Scanner(resourceStream);
+                
+                // Read each line of the file. Each line represents a vertex
+                // and its associated pixel
+                String line;
+                while (fileInput.hasNextLine()) {
+                
+                    line = fileInput.nextLine();
+                    
+                    String split[] = line.split(",");
+                    
+                    // Create a new point
+                    Point point = new Point();
+                    
+                    // Create the list of neighbors of the node if the node
+                    // has neighbors
+                    if (split.length == 3) {
+                        point.x = Integer.parseInt(split[1]);
+                        point.y = Integer.parseInt(split[2]);
+                    }
+                    
+                    // Extract the coordinate of the node from the node name
+                    // and add the node to the set of nodes
+                    Coordinate coord = new Coordinate(split[0]);
+                    pixelMap.put(coord.normalizeCoordinate(), point);
+                }
+                
+                fileInput.close();
+                
+                
+                isSuccessful = true;
+                
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        
+        return isSuccessful;
     }
     
     /**
