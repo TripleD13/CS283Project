@@ -428,7 +428,7 @@ public static void main(String args[]) {
 	    boolean hasWheat = owner.getNumCards(ResourceCard.WHEAT.toString()) > 0;
 	    
 	    if (locationNode != null && ((hasSheep && hasLumber && hasBrick &&
-            hasWheat) || !checkCards)) {
+            hasWheat) || !checkCards) && !locationNode.hasSettlement()) {
 	        
 	        boolean safeToAdd = true;
 	        List<Coordinate> neighbors = locationNode.getNeighbors();
@@ -562,7 +562,7 @@ public boolean freeAddSettlement(Coordinate location, Player owner) {
 	// Add the settlement if there are not settlements directly adjacent
 	// to the location (and if performing a road check, there is a road
 	// adjacent to the settlement)
-	if (safeToAdd) {
+	if (safeToAdd && !locationNode.hasSettlement()) {
 		Settlement newSettlement = new Settlement(location, owner);
 
 		locationNode.setSettlement(newSettlement);
