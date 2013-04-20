@@ -1495,24 +1495,58 @@ public class ServerMain {
             	            DevelopmentCard.DevCardType.MONOPOLY) {
             	            
             	            if (message.equals("WOOL"))
-                        	{            	            
+                        	{
+            	            	int bonusResources = 0;
+            	        		for(int i=0; i<4; i++){
+            	        			if(i != catanGame.getTurn()){
+            	        				catanGame.getPlayerArray()[i].removeCards(resourceToMonopolize, catanGame.getPlayerArray()[i].getNumCards(resourceToMonopolize));
+            	        				bonusResources+=catanGame.getPlayerArray()[i].getNumCards(resourceToMonopolize);
+            	        			}
+            	        		}
             	            owner.devCards.remove(devCard);
             	            monopolized = true;
                         	}else if(message.equals("BRICK"))
-                        	{            	           
+                        	{         
+                        		int bonusResources = 0;
+            	        		for(int i=0; i<4; i++){
+            	        			if(i != catanGame.getTurn()){
+            	        				catanGame.getPlayerArray()[i].removeCards(resourceToMonopolize, catanGame.getPlayerArray()[i].getNumCards(resourceToMonopolize));
+            	        				bonusResources+=catanGame.getPlayerArray()[i].getNumCards(resourceToMonopolize);
+            	        			}
+            	        		}
                         	owner.devCards.remove(devCard);
             	            monopolized = true;
                         	}else if(message.equals("LUMBER"))
-                        	{            	            
+                        	{         
+                        		int bonusResources = 0;
+            	        		for(int i=0; i<4; i++){
+            	        			if(i != catanGame.getTurn()){
+            	        				catanGame.getPlayerArray()[i].removeCards(resourceToMonopolize, catanGame.getPlayerArray()[i].getNumCards(resourceToMonopolize));
+            	        				bonusResources+=catanGame.getPlayerArray()[i].getNumCards(resourceToMonopolize);
+            	        			}
+            	        		}
                         	owner.devCards.remove(devCard);
             	            monopolized = true;
                         	}else if(message.equals("WHEAT"))
-                        	{            	            
+                        	{          
+                        		int bonusResources = 0;
+            	        		for(int i=0; i<4; i++){
+            	        			if(i != catanGame.getTurn()){
+            	        				catanGame.getPlayerArray()[i].removeCards(resourceToMonopolize, catanGame.getPlayerArray()[i].getNumCards(resourceToMonopolize));
+            	        				bonusResources+=catanGame.getPlayerArray()[i].getNumCards(resourceToMonopolize);
+            	        			}
+            	        		}
                         	owner.devCards.remove(devCard);
             	            monopolized = true;
                         	}else if(message.equals("ORE"))
                         	{
-                        		
+                        		int bonusResources = 0;
+            	        		for(int i=0; i<4; i++){
+            	        			if(i != catanGame.getTurn()){
+            	        				catanGame.getPlayerArray()[i].removeCards(resourceToMonopolize, catanGame.getPlayerArray()[i].getNumCards(resourceToMonopolize));
+            	        				bonusResources+=catanGame.getPlayerArray()[i].getNumCards(resourceToMonopolize);
+            	        			}
+            	        		}
                 	            owner.devCards.remove(devCard);
                 	            monopolized = true;
                 	        }else 
