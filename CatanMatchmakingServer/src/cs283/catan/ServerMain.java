@@ -945,30 +945,34 @@ public class ServerMain {
                     
                 } else if (msg.equals("End Turn")) {
                     // Notify the game that a player's turn has ended
+                    boolean advanced = false;
+                    
                     synchronized (catanGame) {
-                        catanGame.advanceTurn(username);
+                        advanced = catanGame.advanceTurn(username);
                     }
                     
-                    // Notify each player of the new turn
-                    Player playerArray[] = catanGame.getPlayerArray();
-                    
-                    if (playerArray != null) {
-                        for (int i = 0; i < playerArray.length; i++) {
-                            
-                            ServerConnectionHandler handler;
-                            synchronized (userList) {
-                                handler = 
-                                     userList.get(playerArray[i].getUsername());
-                            }
-                            
-                            // Notify each user of the roll
-                            if (handler != null) {
-                                try {
-                                    handler.sendRollMessage(
-                                            catanGame.getDiceRoll(),
-                                            catanGame.getTurn());
-                                } catch (Exception e) {
-                                    e.printStackTrace();
+                    if (advanced) {
+                        // Notify each player of the new turn
+                        Player playerArray[] = catanGame.getPlayerArray();
+                        
+                        if (playerArray != null) {
+                            for (int i = 0; i < playerArray.length; i++) {
+                                
+                                ServerConnectionHandler handler;
+                                synchronized (userList) {
+                                    handler = 
+                                         userList.get(playerArray[i].getUsername());
+                                }
+                                
+                                // Notify each user of the roll
+                                if (handler != null) {
+                                    try {
+                                        handler.sendRollMessage(
+                                                catanGame.getDiceRoll(),
+                                                catanGame.getTurn());
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
                                 }
                             }
                         }
@@ -1106,7 +1110,8 @@ public class ServerMain {
             	}
             }else if (owner.settlementPlacementMode == 1)
             {
-            	if (message.indexOf("buy") != -1)	
+            	if (message.indexOf("buy") != -1 
+            	    && catanGame.isSecondSettlementPlacing())	
                 {
                     /*
                     buy

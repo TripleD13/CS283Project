@@ -177,7 +177,7 @@ public class ServerCatanGame implements Serializable
         
         
         // For debugging, set up an initial configuration
-        myBoard.addSettlement(new Coordinate(0,2,0), userArray[0], false, 
+       /* myBoard.addSettlement(new Coordinate(0,2,0), userArray[0], false, 
                               false);
         myBoard.addRoad(new Coordinate(0,2,0), new Coordinate(-1,1,1),
                         userArray[0], false);
@@ -228,7 +228,7 @@ public class ServerCatanGame implements Serializable
         
         
         // Make the first roll
-        rollDice();
+        rollDice();*/
 	}
 	
 	/**
@@ -238,6 +238,14 @@ public class ServerCatanGame implements Serializable
 	 */
 	public boolean isSettlementPlacingMode() {
 	    return turnNumber < 9;
+	}
+	
+	/**
+	 * Returns whether or not it is the second round of settlement placings.
+	 * @return
+	 */
+	public boolean isSecondSettlementPlacing() {
+	    return turnNumber >= numUsers && turnNumber <= numUsers * 2;
 	}
 	
 	
@@ -371,51 +379,72 @@ public class ServerCatanGame implements Serializable
 	    return userArray[turn].getUsername().equals(username);
 	}
 	
-	public void advanceTurn(String username)
+	public boolean advanceTurn(String username)
 	{
+	    boolean advanced = true;
+	    
 	    // Make sure user advancing the turn is the user currently with control
 	    if (userArray[turn].getUsername().equals(username)) {
-	        turnNumber++;
+	        if (isSettlementPlacingMode() && !isSecondSettlementPlacing()) {
+	            if (userArray[turn].settlementPlacementMode != 1 
+	                || userArray[turn].roadBuilderMode != 1) {
+	                advanced = false;
+	            }
+	        } else if (isSettlementPlacingMode() 
+	                   && isSecondSettlementPlacing()) {
+	            if (userArray[turn].settlementPlacementMode != 0
+	                || userArray[turn].roadBuilderMode != 0) {
+	                advanced = false;
+	            }
+	        }
 	        
-	        if (turnNumber < numUsers) { // First round of settlment placement
-	            turn++;
-	        } else if (turnNumber == numUsers) {
-	            turn = numUsers -1;
-	        } else if (turnNumber < numUsers * 2) {
-	            turn--;
-	        } else if (turnNumber == numUsers * 2) {
-	            turn = 0;
-	        } else {
-	            turn = (turn+1)%numUsers;
+	        if (advanced) {
+    	        turnNumber++;
+    	        
+    	        if (turnNumber < numUsers) { 
+    	            // First round of settlement placement
+    	            turn++;
+    	        } else if (turnNumber == numUsers) {
+    	            turn = numUsers -1;
+    	        } else if (turnNumber < numUsers * 2) {
+    	            turn--;
+    	        } else if (turnNumber == numUsers * 2) {
+    	            turn = 0;
+    	        } else {
+    	            turn = (turn+1)%numUsers;
+    	        }
+	        
+    	        // Update the longest road and largest army for so that 
+    	        // victory point counts will be accurate
+    	        whoHasLongestRoad();
+    	        whoHasLargestArmy();
+    	        
+    	        for (Player player : userArray) {
+    	            if (player.getUsername().equals(longestRoadOwner)) {
+    	                player.setLongestRoad(true);
+    	            } else {
+    	                player.setLongestRoad(false);
+    	            }
+    	            
+    	            if (player.getUsername().equals(largestArmyOwner)) {
+    	                player.setLargestArmy(true);
+    	            } else {
+    	                player.setLargestArmy(false);
+    	            }
+    	            
+    	            if (player.getVictoryPoints() >= 10) {
+    	                winner = player;
+    	                victory = true;
+    	            }
+    	        }
+    	        
+    	        if (!isSettlementPlacingMode()) {
+    	            rollDice();
+    	        }
 	        }
 	    }
 	    
-	    // Update the longest road and largest army for so that 
-	    // victory point counts will be accurate
-	    whoHasLongestRoad();
-	    whoHasLargestArmy();
-	    
-	    for (Player player : userArray) {
-	        if (player.getUsername().equals(longestRoadOwner)) {
-	            player.setLongestRoad(true);
-	        } else {
-	            player.setLongestRoad(false);
-	        }
-	        
-	        if (player.getUsername().equals(largestArmyOwner)) {
-	            player.setLargestArmy(true);
-	        } else {
-	            player.setLargestArmy(false);
-	        }
-	        
-	        if (player.getVictoryPoints() >= 10) {
-	            winner = player;
-	            victory = true;
-	        }
-	    }
-	    
-	    
-	    rollDice();
+	    return advanced;
 	}
 	
 	public boolean drawDevelopmentCard(Player owner)
