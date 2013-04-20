@@ -53,7 +53,7 @@ public class ServerCatanGame implements Serializable
 	
 	private Player winner;
 	
-	private int turnNumber; //for debugging purposes
+	private int turnNumber;
 	
 	/**
 	 * Deck of development cards
@@ -231,7 +231,14 @@ public class ServerCatanGame implements Serializable
         rollDice();
 	}
 	
-	
+	/**
+	 * Returns whether or not the game is in settlement placing mode based on
+	 * whether or not 8 turns have been played
+	 * @return
+	 */
+	public boolean isSettlementPlacingMode() {
+	    return turnNumber < 9;
+	}
 	
 	
 	/**
@@ -368,8 +375,19 @@ public class ServerCatanGame implements Serializable
 	{
 	    // Make sure user advancing the turn is the user currently with control
 	    if (userArray[turn].getUsername().equals(username)) {
-	        turn = (turn+1)%numUsers;
 	        turnNumber++;
+	        
+	        if (turnNumber < numUsers) { // First round of settlment placement
+	            turn++;
+	        } else if (turnNumber == numUsers) {
+	            turn = numUsers -1;
+	        } else if (turnNumber < numUsers * 2) {
+	            turn--;
+	        } else if (turnNumber == numUsers * 2) {
+	            turn = 0;
+	        } else {
+	            turn = (turn+1)%numUsers;
+	        }
 	    }
 	    
 	    // Update the longest road and largest army for so that 
