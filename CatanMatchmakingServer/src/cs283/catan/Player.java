@@ -61,8 +61,9 @@ public class Player implements Serializable
 	
 	public boolean robberMode = false;
 	public boolean stealMode = false;
-	public int roadBuilderMode = 0;
+	public int roadBuilderMode = 2;
 	public int yearOfPlentyMode = 0;
+	public int settlementPlacementMode = 2;
 	
 	/**
 	 * Color index used when drawing the board in the GUI.

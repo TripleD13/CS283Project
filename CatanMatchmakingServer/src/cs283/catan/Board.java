@@ -537,6 +537,113 @@ public static void main(String args[]) {
 	    return isSettlementAdded;
 	}
 	
+public boolean freeAddSettlement(Coordinate location, Player owner) {
+	boolean isSettlementAdded = false;
+
+	location = location.normalizeCoordinate();
+	Node locationNode = nodeSet.get(location);
+
+
+	boolean safeToAdd = true;
+	List<Coordinate> neighbors = locationNode.getNeighbors();
+
+	// Make sure that there are no settlements directly adjacent to the
+	// location
+	for (Coordinate neighborCoordinate : neighbors) {
+		Node neighbor = nodeSet.get(neighborCoordinate);
+
+		if (neighbor.hasSettlement()) {
+			safeToAdd = false;
+			break;
+		}
+	}
+
+
+	// Add the settlement if there are not settlements directly adjacent
+	// to the location (and if performing a road check, there is a road
+	// adjacent to the settlement)
+	if (safeToAdd) {
+		Settlement newSettlement = new Settlement(location, owner);
+
+		locationNode.setSettlement(newSettlement);
+
+		// Add the settlement to the settlement list for GUI drawing
+		// purposes
+		settlementList.add(newSettlement);
+
+		isSettlementAdded = true;
+
+		//makes new coordinates for tradeports
+
+		Coordinate wheatPort1 = new Coordinate(1, -2, 5);
+		Coordinate wheatPort2 = new Coordinate(1, -2, 4);
+		Coordinate threePort1 = new Coordinate(2, -2, 0);
+		Coordinate threePort2 = new Coordinate(2, -2, 5);
+		Coordinate brickPort1 = new Coordinate(2, -1, 0);
+		Coordinate brickPort2 = new Coordinate(2, -1, 1);
+		Coordinate threePort3 = new Coordinate(1, 1, 0);
+		Coordinate threePort4 = new Coordinate(1, 1, 1);	
+		Coordinate orePort1 = new Coordinate(0, 2, 1);	
+		Coordinate orePort2 = new Coordinate(0, 2, 2);
+		Coordinate threePort5 = new Coordinate(-1, 2, 2);
+		Coordinate threePort6 = new Coordinate(-1, 2, 3);
+		Coordinate lumberPort1 = new Coordinate(-2, 1, 2);
+		Coordinate lumberPort2 = new Coordinate(-2, 1, 3);
+		Coordinate threePort7 = new Coordinate(-2, 0, 3);
+		Coordinate threePort8 = new Coordinate(-2, 0, 4);
+		Coordinate woolPort1 = new Coordinate(-1, -1, 5);
+		Coordinate woolPort2 = new Coordinate(-1, -1, 4);
+
+		wheatPort1 = wheatPort1.normalizeCoordinate();
+		wheatPort2 = wheatPort2.normalizeCoordinate();
+		threePort1 = threePort1.normalizeCoordinate();
+		threePort2 = threePort2.normalizeCoordinate();
+		brickPort1 = brickPort1.normalizeCoordinate();
+		brickPort2 = brickPort2.normalizeCoordinate();
+		threePort3 = threePort3.normalizeCoordinate();
+		threePort4 = threePort4.normalizeCoordinate();
+		orePort1 = orePort1.normalizeCoordinate();
+		orePort2 = orePort2.normalizeCoordinate();
+		threePort5 = threePort5.normalizeCoordinate();
+		threePort6 = threePort6.normalizeCoordinate();
+		lumberPort1 = lumberPort1.normalizeCoordinate();
+		lumberPort2 = lumberPort2.normalizeCoordinate();
+		threePort7 = threePort7.normalizeCoordinate();
+		threePort8 = threePort8.normalizeCoordinate();
+		woolPort1 = woolPort1.normalizeCoordinate();
+		woolPort2 = woolPort2.normalizeCoordinate();
+
+
+		
+		if (location.normalizeCoordinate().equals(wheatPort1) || location.normalizeCoordinate().equals(wheatPort2) )
+		{
+			owner.has2WheatPort = true;
+		}else if (location.normalizeCoordinate().equals(orePort1) || location.normalizeCoordinate().equals(orePort2) )
+		{
+			owner.has2OrePort = true;
+		}else if (location.normalizeCoordinate().equals(brickPort1) || location.normalizeCoordinate().equals(brickPort2) )
+		{
+			owner.has2BrickPort = true;
+		}else if (location.normalizeCoordinate().equals(lumberPort1) || location.normalizeCoordinate().equals(lumberPort2) )
+		{
+			owner.has2LumberPort = true;
+		}else if (location.normalizeCoordinate().equals(woolPort1) || location.normalizeCoordinate().equals(woolPort2) )
+		{
+			owner.has2WoolPort = true;
+		}else if (location.normalizeCoordinate().equals(threePort1) || location.normalizeCoordinate().equals(threePort2) 
+				|| location.normalizeCoordinate().equals(threePort3) || location.normalizeCoordinate().equals(threePort4) 
+				|| location.normalizeCoordinate().equals(threePort5) || location.normalizeCoordinate().equals(threePort6) 
+				|| location.normalizeCoordinate().equals(threePort7) || location.normalizeCoordinate().equals(threePort8) )
+		{
+			owner.has3To1Port = true;
+		}
+		
+	}
+
+
+return isSettlementAdded;
+}
+	
 	/**
 	 * Add the specified road to the board, assuming that the road is not
 	 * already taken. The road must be of length 1, as well as adjacent to
@@ -654,6 +761,103 @@ public static void main(String args[]) {
 	    return isRoadAdded;
 	}
 	
+	public boolean freeAddRoad(Coordinate start, Coordinate finish, Player owner)
+	{
+		  boolean isRoadAdded = false;
+		    
+		    // Normalize the coordinates
+		    start = start.normalizeCoordinate();
+		    finish = finish.normalizeCoordinate();
+		    
+		    boolean canAddRoad = false;
+		    
+		    // Make sure the start and finish points of the road are adjacent
+		    Node nodeStartFromBoard = nodeSet.get(start);
+		    Node nodeFinishFromBoard = nodeSet.get(finish);
+		    
+		    canAddRoad = nodeStartFromBoard.isAdjacent(finish); 
+		    
+		    // Make sure road does not already exist
+		    for (Map<Coordinate, Node> roadNodeSet : roadSet.values()) {
+		        if (!canAddRoad) {
+		            break;
+		        }
+		        
+		        Node possibleRoadNode = roadNodeSet.get(start);
+		        
+		        if (possibleRoadNode != null) {
+		            if (possibleRoadNode.isAdjacent(finish)) {
+		                // Road already exists!
+		                canAddRoad = false;
+		            }
+		        }
+		    }
+		    
+	        Map<Coordinate, Node> playerRoadNodeSet = 
+	                                              roadSet.get(owner.getUsername());
+		    
+	        
+	  
+	        
+		    // Make sure either road is adjacent to a settlement owned by the player
+		    // or adjacent to a road owned by the player
+		    if (canAddRoad && !((nodeStartFromBoard.hasSettlement() && 
+		        (nodeStartFromBoard.getSettlement().getOwner() == owner)) ||
+		        (nodeFinishFromBoard.hasSettlement() &&
+		        (nodeFinishFromBoard.getSettlement().getOwner() == owner)))) {
+		        
+		        canAddRoad = false;
+		        
+		        // Because the road is not adjacent to any settlements owned by
+		        // the owner, it must be adjacent to another road owned by the user
+		        if (playerRoadNodeSet != null) {
+		            if (playerRoadNodeSet.get(start) != null ||
+		                playerRoadNodeSet.get(finish) != null) {
+		                
+		                canAddRoad = true;
+		            }
+		        }
+		        
+		    }
+		    
+		    
+		    if (canAddRoad) {
+		        // Add the road to the player's set of roads. Create a new set for
+		        // the player if the player currently has no roads.
+		        
+		        if (playerRoadNodeSet == null) {
+		            playerRoadNodeSet = new HashMap<Coordinate, Node>();
+		            
+		            roadSet.put(owner.getUsername(), playerRoadNodeSet);
+		        }
+		        
+		        // Add the nodes if they do not exist
+		        Node startNode = playerRoadNodeSet.get(start);
+		        if (startNode == null) {
+		            startNode = new Node();
+		            playerRoadNodeSet.put(start, startNode);
+		        }
+		        
+		        Node finishNode = playerRoadNodeSet.get(finish);
+		        if (finishNode == null) {
+		            finishNode = new Node();
+		            playerRoadNodeSet.put(finish, finishNode);
+		        }
+		        
+		        // Add the edge
+		        startNode.addNeighbor(finish);
+		        finishNode.addNeighbor(start);
+		        
+		        // Add a road object to the list for GUI drawing purposes
+		        roadList.add(new Road(start,finish, owner));
+		        
+		        isRoadAdded = true;
+		        
+		        
+		    }
+		    
+		    return isRoadAdded;
+	}
 	/**
 	 * Adds a tile to the board if it does not already exist.
 	 * @param x
