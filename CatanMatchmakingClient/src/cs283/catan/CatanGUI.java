@@ -242,12 +242,6 @@ public class CatanGUI {
 	    gamePanel.clearboard();
 	    
 	    for (Settlement settlement : settlements) {
-	        /*drawSettlement(settlement.getLocation(), 
-	                       settlement.getOwner().getColorIndex(), 
-	                       settlement.isCity());*/
-	        System.out.println("LOCATION");
-	        System.out.println(settlement.getLocation());
-	        System.out.println(board.getPixel(settlement.getLocation()));
 	        gamePanel.drawsettle(board.getPixel(settlement.getLocation()), 
 	                             settlement.isCity(),
 	                             settlement.getOwner().getColorIndex());
@@ -261,8 +255,6 @@ public class CatanGUI {
 	    List<Road> roads = board.getRoadList();
 	    
 	    for (Road road : roads) {
-	        //drawRoad(road.getStart(), road.getFinish(), 
-	        //         road.getOwner().getColorIndex());
 	        gamePanel.addroad(board.getPixel(road.getStart()),
 	                          board.getPixel(road.getFinish()),
 	                          road.getOwner().getColorIndex());
@@ -296,6 +288,8 @@ public class CatanGUI {
 	    }
 	    
 	    largestArmyField.setText(largestArmyOwner);
+	    
+	    gamePanel.view().repaint();
 	}
 	
 	/**
