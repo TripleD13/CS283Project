@@ -24,17 +24,19 @@ public class Player implements Serializable
      * in that order
      */
     
-    public int[] resCards = new int[5];
+    private int[] resCards = new int[5];
     
     /**
      * List of development cards
      */
-	public List<DevelopmentCard> devCards = new LinkedList<DevelopmentCard>();
+	private List<DevelopmentCard> devCards = new LinkedList<DevelopmentCard>();
 	
 	/**
-	 * Number of victory points
+	 * Number of victory points by category
 	 */
-	public int points;
+	private int permanentPoints;
+	private int longestRoadPoints;
+	private int largestArmyPoints;
 	
 	/**
 	 * Number of knights played
@@ -70,6 +72,42 @@ public class Player implements Serializable
 		this.resCards[2] = 0;
 		this.resCards[3] = 0;
 		this.resCards[4] = 0;
+		this.permanentPoints = this.longestRoadPoints = 
+		                       this.largestArmyPoints = 0;
+	}
+	
+	/**
+	 * Returns the total number of victory points.
+	 * @return the total number of victory points.
+	 */
+	public int getVictoryPoints() {
+	    return this.permanentPoints + this.longestRoadPoints 
+	           + this.largestArmyPoints;
+	}
+	
+	/**
+	 * Increment the number of permanent victory points (settlements or
+	 * victory point dev cards)
+	 */
+	public void incrementPermanentPoints() {
+	    this.permanentPoints++;
+	}
+	
+	/**
+	 * Indicates whether or not the player has the longest road and sets the
+	 * victory points appropriately
+	 * @param hasLongestRoad
+	 */
+	public void setLongestRoad(boolean hasLongestRoad) {
+	    longestRoadPoints = hasLongestRoad ? 2 : 0;
+	}
+	
+	/**
+	 * Indicates whether or not the player has the largest army and sets the
+	 * victory points appropriately
+	 */
+	public void setLargestArmy(boolean hasLargestArmy) {
+	    largestArmyPoints = hasLargestArmy ? 2 : 0;
 	}
 	
 	public String getUsername()
@@ -243,6 +281,20 @@ public class Player implements Serializable
 	
 	public void addDevCard(DevelopmentCard card) {
 	    devCards.add(card);
+	    
+	    if (card.getDevCardType() == 
+	        DevelopmentCard.DevCardType.VICTORY_POINTS) {
+	        
+	        incrementPermanentPoints();
+	    }
+	}
+	
+	/**
+	 * Returns the list of development cards.
+	 * @return the list of development cards.
+	 */
+	public List<DevelopmentCard> getDevelopmentCards() {
+	    return this.devCards;
 	}
 	
 	/**

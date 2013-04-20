@@ -51,6 +51,8 @@ public class ServerCatanGame implements Serializable
 	
 	private boolean victory;
 	
+	private Player winner;
+	
 	private int turnNumber; //for debugging purposes
 	
 	/**
@@ -88,6 +90,7 @@ public class ServerCatanGame implements Serializable
 		numUsers = 4;
 		turn = 0;
 		turnNumber = 0; // zero indexed
+		winner = null;
 		victory = false; // nobody has declared victory yet 
 		                 // - it's the start of the game
 		//set up user array - using objects John gives us
@@ -364,6 +367,31 @@ public class ServerCatanGame implements Serializable
 	        turnNumber++;
 	    }
 	    
+	    // Update the longest road and largest army for so that 
+	    // victory point counts will be accurate
+	    whoHasLongestRoad();
+	    whoHasLargestArmy();
+	    
+	    for (Player player : userArray) {
+	        if (player.getUsername().equals(longestRoadOwner)) {
+	            player.setLongestRoad(true);
+	        } else {
+	            player.setLongestRoad(false);
+	        }
+	        
+	        if (player.getUsername().equals(largestArmyOwner)) {
+	            player.setLargestArmy(true);
+	        } else {
+	            player.setLargestArmy(false);
+	        }
+	        
+	        if (player.getVictoryPoints() >= 10) {
+	            winner = player;
+	            victory = true;
+	        }
+	    }
+	    
+	    
 	    rollDice();
 	}
 	
@@ -427,6 +455,14 @@ public class ServerCatanGame implements Serializable
 	    return this.victory;
 	}
 	
+	/**
+	 * Returns the winner.
+	 * @return the Player object representing the winner, or null if no one has
+	 *         won yet.
+	 */
+	public Player getWinner() {
+	    return this.winner;
+	}
 	
 	/**
      * Returns the name of the player who has the longest road. If no one

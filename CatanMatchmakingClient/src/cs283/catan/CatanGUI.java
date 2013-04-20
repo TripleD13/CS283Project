@@ -54,7 +54,7 @@ public class CatanGUI {
 	private JTabbedPane gameAndMatch;
 	private JTextField textField;
 	private JTextField textField_1;
-	private JTextField textField_2;
+	private JTextField largestArmyField;
 	private JTextField longestRoadField;
 	private JTextField victoryPointTotalField;
 	private JTextField wheatField;
@@ -259,24 +259,30 @@ public class CatanGUI {
 	                          road.getOwner());
 	    }
 	    
-	    // Update the counts for the cards and the victory point count
+	    // Update the counts for the cards
 	    Player playerArray[] = game.getPlayerArray();
 	    for (int i = 0; i < playerArray.length; i++) {
 	        if (playerArray[i].getUsername().equals(username)) {
 	            updateCardCount(playerArray[i]);
-	            victoryPointTotalField.setText(String
-	                                           .valueOf(playerArray[i].points));
 	            break;
 	        }
 	    }
 	    
 	    // Update the owner of the longest road
-	    String longestRoadOwner = board.whoHasLongestRoad();
+	    String longestRoadOwner = game.whoHasLongestRoad();
 	    if (longestRoadOwner == null) {
 	        longestRoadOwner = "N/A";
 	    }
 	    
 	    longestRoadField.setText(longestRoadOwner);
+	    
+	    // Update the owner of the largest army
+	    String largestArmyOwner = game.whoHasLargestArmy();
+	    if (largestArmyOwner == null) {
+	        largestArmyOwner = "N/A";
+	    }
+	    
+	    largestArmyField.setText(largestArmyOwner);
 	}
 	
 	/**
@@ -305,6 +311,10 @@ public class CatanGUI {
 	            // Update the counts for the cards
 	            updateCardCount(playerArray[i]);
 	            
+	            // Update the victory point counts
+               victoryPointTotalField.setText(String
+                                   .valueOf(playerArray[i].getVictoryPoints()));
+	            
 	            break;
 	        }
 	    }
@@ -315,32 +325,11 @@ public class CatanGUI {
 	 * @param player
 	 */
 	private void updateCardCount(Player player) {
-	    int woolCount = 0;
-	    int lumberCount = 0;
-	    int brickCount = 0;
-	    int wheatCount = 0;
-	    int oreCount = 0;
-	    
-	    for (ResourceCard card : player.resCards) {
-	        switch (card.getCardType()) {
-	        case WOOL:
-	            woolCount++;
-	            break;
-	        case LUMBER:
-	            lumberCount++;
-	            break;
-	        case BRICK:
-	            brickCount++;
-	            break;
-	        case WHEAT:
-	            wheatCount++;
-	            break;
-	        case ORE:
-	            oreCount++;
-	            break;
-	        case DESERT:
-	        }
-	    }
+	    int woolCount = player.getNumCards(ResourceCard.WOOL.toString());;
+	    int lumberCount = player.getNumCards(ResourceCard.LUMBER.toString());
+	    int brickCount = player.getNumCards(ResourceCard.BRICK.toString());
+	    int wheatCount = player.getNumCards(ResourceCard.WHEAT.toString());
+	    int oreCount = player.getNumCards(ResourceCard.ORE.toString());
 	    
 	    // Set the resource card counts
 	    woolField.setText(String.valueOf(woolCount));
@@ -355,7 +344,7 @@ public class CatanGUI {
 	    int victoryCount = 0;
 	    int roadBuildCount = 0;
 	    
-	    for (DevelopmentCard card : player.devCards) {
+	    for (DevelopmentCard card : player.getDevelopmentCards()) {
 	        switch (card.getDevCardType()) {
 	        case MONOPOLY:
 	            monCount++;
@@ -636,15 +625,15 @@ public class CatanGUI {
 		gbc_lblCities.gridy = 0;
 		gameInfoTop.add(lblCities, gbc_lblCities);
 		
-		textField_2 = new JTextField();
-		textField_2.setEditable(false);
-		textField_2.setColumns(10);
-		GridBagConstraints gbc_textField_2 = new GridBagConstraints();
-		gbc_textField_2.insets = new Insets(0, 0, 5, 5);
-		gbc_textField_2.fill = GridBagConstraints.HORIZONTAL;
-		gbc_textField_2.gridx = 3;
-		gbc_textField_2.gridy = 0;
-		gameInfoTop.add(textField_2, gbc_textField_2);
+		largestArmyField = new JTextField();
+		largestArmyField.setEditable(false);
+		largestArmyField.setColumns(10);
+		GridBagConstraints gbc_largestArmyField = new GridBagConstraints();
+		gbc_largestArmyField.insets = new Insets(0, 0, 5, 5);
+		gbc_largestArmyField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_largestArmyField.gridx = 3;
+		gbc_largestArmyField.gridy = 0;
+		gameInfoTop.add(largestArmyField, gbc_largestArmyField);
 		
 		JLabel lblBiggestArmy = new JLabel("Victory Points");
 		GridBagConstraints gbc_lblBiggestArmy = new GridBagConstraints();

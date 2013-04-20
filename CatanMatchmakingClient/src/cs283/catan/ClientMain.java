@@ -434,8 +434,19 @@ public class ClientMain {
                         EventQueue.invokeAndWait(new Runnable() {
                             public void run() {
                                 gui.drawBoard(game);
+                                
+                                if (game.isVictory()) {
+                                    JOptionPane.showMessageDialog(
+                                            gui.getFrame(),
+                                            game.getWinner().toString()
+                                         + "won the game! Good bye!");
+                                }
                             }
                         });
+                        
+                        if (game.isVictory()) {
+                            break;
+                        }
                         
                     } else if (message.startsWith("chat*")) {
                        
