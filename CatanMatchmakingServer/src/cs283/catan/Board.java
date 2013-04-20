@@ -389,8 +389,72 @@ public static void main(String args[]) {
                 
                 isSettlementAdded = true;
                 
+                //makes new coordinates for tradeports
+                
+                Coordinate wheatPort1 = new Coordinate(1, -2, 1);
+                Coordinate wheatPort2 = new Coordinate(1, -2, 2);
+                Coordinate threePort1 = new Coordinate(2, -2, 0);
+                Coordinate threePort2 = new Coordinate(2, -2, 1);
+                Coordinate brickPort1 = new Coordinate(2, -1, 0);
+                Coordinate brickPort2 = new Coordinate(2, -1, 5);
+                Coordinate threePort3 = new Coordinate(1, 1, 0);
+                Coordinate threePort4 = new Coordinate(1, 1, 5);
+                Coordinate orePort1 = new Coordinate(0, 2, 5);
+                Coordinate orePort2 = new Coordinate(0, 2, 4);
+                Coordinate threePort5 = new Coordinate(-1, 2, 4);
+                Coordinate threePort6 = new Coordinate(-1, 2, 3);
+                Coordinate lumberPort1 = new Coordinate(-2, 1, 4);
+                Coordinate lumberPort2 = new Coordinate(-2, 1, 3);
+                Coordinate threePort7 = new Coordinate(-2, 0, 3);
+                Coordinate threePort8 = new Coordinate(-2, 0, 2);
+                Coordinate woolPort1 = new Coordinate(-1, -1, 1);
+                Coordinate woolPort2 = new Coordinate(-1, -1, 2);
+                
+                wheatPort1 = wheatPort1.normalizeCoordinate();
+                wheatPort2 = wheatPort2.normalizeCoordinate();
+                threePort1 = threePort1.normalizeCoordinate();
+                threePort2 = threePort2.normalizeCoordinate();
+                brickPort1 = brickPort1.normalizeCoordinate();
+                brickPort2 = brickPort2.normalizeCoordinate();
+                threePort3 = threePort3.normalizeCoordinate();
+                threePort4 = threePort4.normalizeCoordinate();
+                orePort1 = orePort1.normalizeCoordinate();
+                orePort2 = orePort2.normalizeCoordinate();
+                threePort5 = threePort5.normalizeCoordinate();
+                threePort6 = threePort6.normalizeCoordinate();
+                lumberPort1 = lumberPort1.normalizeCoordinate();
+                lumberPort2 = lumberPort2.normalizeCoordinate();
+                threePort7 = threePort7.normalizeCoordinate();
+                threePort8 = threePort8.normalizeCoordinate();
+                woolPort1 = woolPort1.normalizeCoordinate();
+                woolPort2 = woolPort2.normalizeCoordinate();
+                
+                
                 if (checkCards) {
                     owner.doSettlementPurchase();
+                    if (location.normalizeCoordinate().equals(wheatPort1) || location.normalizeCoordinate().equals(wheatPort2) )
+                    {
+                    	owner.has2WheatPort = true;
+                    }else if (location.normalizeCoordinate().equals(orePort1) || location.normalizeCoordinate().equals(orePort2) )
+                    {
+                    	owner.has2OrePort = true;
+                    }else if (location.normalizeCoordinate().equals(brickPort1) || location.normalizeCoordinate().equals(brickPort2) )
+                    {
+                    	owner.has2BrickPort = true;
+                    }else if (location.normalizeCoordinate().equals(lumberPort1) || location.normalizeCoordinate().equals(lumberPort2) )
+                    {
+                    	owner.has2LumberPort = true;
+                    }else if (location.normalizeCoordinate().equals(woolPort1) || location.normalizeCoordinate().equals(woolPort2) )
+                    {
+                    	owner.has2WoolPort = true;
+                    }else if (location.normalizeCoordinate().equals(threePort1) || location.normalizeCoordinate().equals(threePort2) 
+                    		|| location.normalizeCoordinate().equals(threePort3) || location.normalizeCoordinate().equals(threePort4) 
+                    		|| location.normalizeCoordinate().equals(threePort5) || location.normalizeCoordinate().equals(threePort6) 
+                    		|| location.normalizeCoordinate().equals(threePort7) || location.normalizeCoordinate().equals(threePort8) )
+                    {
+                    	owner.has3To1Port = true;
+                    }
+                    
                 }
             }
 	    }
