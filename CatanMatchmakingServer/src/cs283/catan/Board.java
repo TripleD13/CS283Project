@@ -882,7 +882,7 @@ public static void main(String args[]) {
 			}
 		}else if (tradeNumber == 2)
 		{
-			if (resourceOne == "ore")
+			if (resourceOne == "ORE")
 			{
 				if(player.has2OrePort)
 				{
@@ -898,7 +898,7 @@ public static void main(String args[]) {
 					return new String("chat* Server: you don't have that 2 to one port");
 				}
 			}
-			if (resourceOne == "lumber")
+			if (resourceOne == "LUMBER")
 			{
 				if(player.has2LumberPort)
 				{
@@ -914,7 +914,7 @@ public static void main(String args[]) {
 					return new String("chat* Server: you don't have that 2 to one port");
 				}
 			}
-			if (resourceOne == "wheat")
+			if (resourceOne == "WHEAT")
 			{
 				if(player.has2WheatPort)
 				{
@@ -929,7 +929,7 @@ public static void main(String args[]) {
 				{
 					return new String("chat* Server: you don't have that 2 to one port");
 				}
-			}else if (resourceOne == "brick")
+			}else if (resourceOne == "BRICK")
 			{
 				if(player.has2BrickPort)
 				{
@@ -944,7 +944,7 @@ public static void main(String args[]) {
 				{
 					return new String("chat* Server: you don't have that 2 to one port");
 				}
-			}else if (resourceOne == "wool")
+			}else if (resourceOne == "WOOL")
 			{
 				if(player.has2WoolPort)
 				{

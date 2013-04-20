@@ -997,7 +997,37 @@ public class ServerMain {
                     break;
                 }
             }
-            if (owner.robberMode)
+            
+            if (owner.roadBuilderMode != 0)
+            {
+            	
+            }else if (owner.yearOfPlentyMode != 0)
+            {
+            	if (message.equals("WOOL"))
+            	{
+            		owner.addCards(message, 1);
+            		owner.yearOfPlentyMode--;
+            	}else if(message.equals("BRICK"))
+            	{
+            		owner.addCards(message, 1);
+            		owner.yearOfPlentyMode--;
+            	}else if(message.equals("LUMBER"))
+            	{
+            		owner.addCards(message, 1);
+            		owner.yearOfPlentyMode--;
+            	}else if(message.equals("WHEAT"))
+            	{
+            		owner.addCards(message, 1);
+            		owner.yearOfPlentyMode--;
+            	}else if(message.equals("ORE"))
+            	{
+            		owner.addCards(message, 1);
+            		owner.yearOfPlentyMode--;
+            	}else 
+            	{
+            		sendChatMessage("chat*Server: Wrong resource");
+            	}
+            }else if (owner.robberMode)
             {
             	if(message.indexOf("robber")!= -1)
                 {
@@ -1049,22 +1079,22 @@ public class ServerMain {
             					String cardType = null;
             					if (card == 0)
             					{
-            						cardType = new String("brick");
+            						cardType = new String("BRICK");
 
             					}else if (card == 1)
             					{
-            						cardType = new String("wool");
+            						cardType = new String("WOOL");
             					}else if (card == 1)
             					{
-            						cardType = new String("lumber");
+            						cardType = new String("LUMBER");
             					}
             					else if (card == 1)
             					{
-            						cardType = new String("ore");
+            						cardType = new String("ORE");
             					}
             					else 
             					{
-            						cardType = new String("wheat");
+            						cardType = new String("WHEAT");
 
             					}
             					notStolen = !a.removeCards(cardType, 1);
@@ -1419,12 +1449,20 @@ public class ServerMain {
             {
                 if(message.indexOf("year of plenty") != -1)
                 {
-                    //play year of plenty resource; resource
-                    message = message.substring(15);
-                    int semiIndex = message.indexOf(';');
-                    String resourceOne = message.substring(0, semiIndex);
-                    String resourceTwo = message.substring(semiIndex+1);
-                    
+                	for (DevelopmentCard devCard : owner.devCards) {
+            	        if (devCard.getDevCardType() == 
+            	            DevelopmentCard.DevCardType.YEAR_OF_PLENTY) {
+            	            
+            	            owner.devCards.remove(devCard);
+            	            
+                        	owner.yearOfPlentyMode = 2;
+            	            break;
+            	        }
+            	    }
+                	if (owner.yearOfPlentyMode == 0)
+                	{
+                		sendChatMessage("chat*SERVER: You don't have a year of plenty");
+                	}
                     
                 }else if (message.indexOf("knight") != -1)
                 {
@@ -1434,10 +1472,62 @@ public class ServerMain {
                 	}
                 }else if (message.indexOf("road builder") != -1)
                 {
-                    //command
+                	for (DevelopmentCard devCard : owner.devCards) {
+            	        if (devCard.getDevCardType() == 
+            	            DevelopmentCard.DevCardType.ROAD_BUILDING) {
+            	            
+            	            owner.devCards.remove(devCard);
+            	            
+            	            owner.roadBuilderMode = 2;
+            	            break;
+            	        }
+            	    }
+                	if (owner.roadBuilderMode == 0)
+                	{
+                		sendChatMessage("chat*SERVER: You don't have a road builder");
+                	}
                 }else if (message.indexOf("monopoly") != -1)
                 {
+                	boolean monopolized = false;
                     String resourceToMonopolize = message.substring(message.indexOf("monopoly")+9);
+                    for (DevelopmentCard devCard : owner.devCards) {
+            	        if (devCard.getDevCardType() == 
+            	            DevelopmentCard.DevCardType.MONOPOLY) {
+            	            
+            	            if (message.equals("WOOL"))
+                        	{            	            
+            	            owner.devCards.remove(devCard);
+            	            monopolized = true;
+                        	}else if(message.equals("BRICK"))
+                        	{            	           
+                        	owner.devCards.remove(devCard);
+            	            monopolized = true;
+                        	}else if(message.equals("LUMBER"))
+                        	{            	            
+                        	owner.devCards.remove(devCard);
+            	            monopolized = true;
+                        	}else if(message.equals("WHEAT"))
+                        	{            	            
+                        	owner.devCards.remove(devCard);
+            	            monopolized = true;
+                        	}else if(message.equals("ORE"))
+                        	{
+                        		
+                	            owner.devCards.remove(devCard);
+                	            monopolized = true;
+                	        }else 
+                        	{
+                        		sendChatMessage("chat*Server: Wrong resource");
+                        	}
+
+            	            break;
+            	        }
+            	    }
+                	if (!monopolized)
+                	{
+                		sendChatMessage("chat*SERVER: You don't have a monopoly");
+                	}
+                    
                 }else
                 {
                     sendChatMessage("chat*SERVER: Invalid command, " + "you dummy!");
@@ -1445,7 +1535,7 @@ public class ServerMain {
                 
             }else if(message.indexOf("Get Ye Flask") != -1)
             {
-                System.out.println("You Can't Get Ye Flask");
+                sendChatMessage("chat*Server: You Can't Get Ye Flask");
               //debug mode  
             }else
             {
