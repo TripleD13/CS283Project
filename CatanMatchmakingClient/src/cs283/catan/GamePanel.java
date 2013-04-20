@@ -98,6 +98,8 @@ public class GamePanel {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
+		        	
+		        	clear = false;
 		        }		        
 		        else if(addsettle){
 					System.out.print("drawing city");
@@ -126,6 +128,8 @@ public class GamePanel {
 					drawrobber=false;
 				}
 				g2d.dispose();
+				
+				view.invalidate();
 			}
 		    
 			//returns the internal JLabel display for use in GUIs

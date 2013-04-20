@@ -170,8 +170,8 @@ public class ServerCatanGame implements Serializable
             System.out.println("Unable to load tiles from file!");
         }
         
-        if (!Coordinate.loadPixelMappingsFromResource(
-                                   "cs283/catan/resources/pixelmappings.csv")) {
+        if (!myBoard.loadPixelMappingsFromResource(
+                                   "cs283/catan/resources/pixcoords.csv")) {
             System.out.println("Unable to load pixel mappings from file!");
         }
         

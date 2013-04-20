@@ -9,6 +9,7 @@
  */
 package cs283.catan;
 
+import java.awt.Point;
 import java.io.*;
 import java.util.*;
 
@@ -179,7 +180,14 @@ public static void main(String args[]) {
      * of the tile (Coordinate object, but the z coordinate is always 0) and the
      * value is the Tile object representing the tile.
      */
-    private final Map<Coordinate, Tile> tileSet = new HashMap<Coordinate, Tile>();
+    private final Map<Coordinate, Tile> tileSet = 
+                                                new HashMap<Coordinate, Tile>();
+    
+    /**
+     * Map of coordinates to pixels
+     */
+    private final Map<Coordinate, Point> pixelMap= 
+                                               new HashMap<Coordinate, Point>();
     
     /**
      * Object representing the robber
@@ -326,6 +334,74 @@ public static void main(String args[]) {
 	    return isSuccessful;
 	}
 	
+	/**
+     * Loads a pixel mapping.
+     * @parameter coordinate
+     * @parameter pixel
+     */
+    public boolean loadPixelMappingsFromResource(String resourceName) {
+        boolean isSuccessful = false;
+        
+        if (pixelMap.size() == 0) {
+            // Attempt to read the data from the file
+            InputStream resourceStream = Thread.currentThread().
+                                         getContextClassLoader().
+                                         getResourceAsStream(resourceName);
+            
+            if (resourceStream != null) {
+                try {
+                    Scanner fileInput = new Scanner(resourceStream);
+                    
+                    // Read each line of the file. Each line represents a vertex
+                    // and its associated pixel
+                    String line;
+                    while (fileInput.hasNextLine()) {
+                    
+                        line = fileInput.nextLine();
+                        
+                        String split[] = line.split(",");
+                        
+                        // Create a new point
+                        Point point = new Point();
+                        
+                        // Create the list of neighbors of the node if the node
+                        // has neighbors
+                        if (split.length == 3) {
+                            point.x = Integer.parseInt(split[1]);
+                            point.y = Integer.parseInt(split[2]);
+                        }
+                        
+                        // Extract the coordinate of the node from the node name
+                        // and add the node to the set of nodes
+                        Coordinate coord = new Coordinate(split[0]);
+                        pixelMap.put(coord.normalizeCoordinate(), point);
+                        System.out.println("Loading" + coord.normalizeCoordinate() + " Point " + point);
+                    }
+                    
+                    fileInput.close();
+                    
+                    
+                    isSuccessful = true;
+                    
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        } else {
+            isSuccessful = true;
+        }
+        
+        return isSuccessful;
+    }
+    
+    /**
+     * Returns the pixel coordinate associated with the coordinate.
+     * @return a point representing the pixel coordinate, or null if no such
+     *         pixel mapping exists.
+     */
+    public Point getPixel(Coordinate coord) {
+        return pixelMap.get(coord.normalizeCoordinate());
+    }
 	
 	/**
 	 * Add the specified settlement to the board, assuming that there is not
