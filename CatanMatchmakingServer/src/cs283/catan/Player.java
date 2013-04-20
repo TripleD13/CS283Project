@@ -88,21 +88,21 @@ public class Player implements Serializable
 	public int getNumCards(String type)
 	{
 		
-		if (type == "ore")
+		if (type.equals("ORE"))
 		{
-			return resCards[2];
-		}else if (type == "wool")
+			return resCards[ResourceCard.ORE.getIndex()];
+		}else if (type.equals("WOOL"))
 		{
-			return resCards[4];
-		}else if (type == "wheat")
+			return resCards[ResourceCard.WOOL.getIndex()];
+		}else if (type.equals("WHEAT"))
 		{
-			return resCards[3];
-		}else if (type == "lumber")
+			return resCards[ResourceCard.WHEAT.getIndex()];
+		}else if (type.equals("LUMBER"))
 		{
-			return resCards[1];
-		}else if (type == "brick")
+			return resCards[ResourceCard.LUMBER.getIndex()];
+		}else if (type.equals("BRICK"))
 		{
-			return resCards[0];
+			return resCards[ResourceCard.BRICK.getIndex()];
 		}else
 		{
 			return -1;
@@ -123,21 +123,26 @@ public class Player implements Serializable
 	
 	public boolean addCards(String type, int number)
 	{
-		if (type == "ore")
+		if (type.equals("ORE"))
 		{
-			resCards[2] = resCards[2] + number;
-		}else if (type == "wool")
+			resCards[ResourceCard.ORE.getIndex()] = 
+			                     resCards[ResourceCard.ORE.getIndex()] + number;
+		}else if (type.equals("WOOL"))
 		{
-			resCards[4] = resCards[4] + number;
-		}else if (type == "wheat")
+			resCards[ResourceCard.WOOL.getIndex()] = 
+			                    resCards[ResourceCard.WOOL.getIndex()] + number;
+		}else if (type.equals("WHEAT"))
 		{
-			resCards[3] = resCards[3] + number;
-		}else if (type == "lumber")
+			resCards[ResourceCard.WHEAT.getIndex()] = 
+			                   resCards[ResourceCard.WHEAT.getIndex()] + number;
+		}else if (type.equals("LUMBER"))
 		{
-			resCards[1] = resCards[1] + number;	
-		}else if (type == "brick")
+			resCards[ResourceCard.LUMBER.getIndex()] = 
+			                  resCards[ResourceCard.LUMBER.getIndex()] + number;	
+		}else if (type.equals("BRICK"))
 		{
-			resCards[0] = resCards[0] + number;
+			resCards[ResourceCard.BRICK.getIndex()] = 
+			                   resCards[ResourceCard.BRICK.getIndex()] + number;
 		}else
 		{
 			return false;
@@ -147,44 +152,81 @@ public class Player implements Serializable
 	
 	public boolean removeCards(String type, int number)
 	{
-		if (type == "ore")
+		if (type.equals("ORE"))
 		{
-			if (resCards[2] <= number)
+			if (resCards[ResourceCard.ORE.getIndex()] <= number)
 			{
-				resCards[2] = resCards[2] - number;
+				resCards[ResourceCard.ORE.getIndex()] = 
+				                 resCards[ResourceCard.ORE.getIndex()] - number;
 				return true;
 			}
-		}else if (type == "wool")
+		}else if (type.equals("WOOL"))
 		{
-			if (resCards[4] <= number)
+			if (resCards[ResourceCard.WOOL.getIndex()] <= number)
 			{
-				resCards[4] = resCards[4] - number;
+				resCards[ResourceCard.WOOL.getIndex()] = 
+				                resCards[ResourceCard.WOOL.getIndex()] - number;
 				return true;
 			}
-		}else if (type == "wheat")
+		}else if (type.equals("WHEAT"))
 		{
-			if (resCards[3] <= number)
+			if (resCards[ResourceCard.WHEAT.getIndex()] <= number)
 			{
-				resCards[3] = resCards[3] - number;
+				resCards[ResourceCard.WHEAT.getIndex()] = 
+				               resCards[ResourceCard.WHEAT.getIndex()] - number;
 				return true;
 			}
-		}else if (type == "lumber")
+		}else if (type.equals("LUMBER"))
 		{
-			if (resCards[1] <= number)
+			if (resCards[ResourceCard.LUMBER.getIndex()] <= number)
 			{
-				resCards[1] = resCards[1] - number;
+				resCards[ResourceCard.LUMBER.getIndex()] = 
+				              resCards[ResourceCard.LUMBER.getIndex()] - number;
 				return true;
 			}
-		}else if (type == "brick")
+		}else if (type.equals("BRICK"))
 		{
-			if (resCards[0] <= number)
+			if (resCards[ResourceCard.BRICK.getIndex()] <= number)
 			{
-				resCards[0] = resCards[0] - number;
+				resCards[ResourceCard.BRICK.getIndex()] = 
+				               resCards[ResourceCard.BRICK.getIndex()] - number;
 				return true;
 			}
 		}
 		
 		return false;
+	}
+	
+	/**
+	 * Adds an array of cards. Returns whether or not the add was successful,
+	 * which is based on whether or not the array is size 5 and has all nonzero
+	 * elements.
+	 * @param cards
+	 * @return whether or not the array was valid.
+	 */
+	public boolean addArrayOfCards(int cards[]) {
+	    boolean isArrayAdded = true;
+	    
+	    if (cards != null && cards.length == 5) {
+            // Make sure all values are nonzero
+            for (int card : cards) {
+                if (card < 0) {
+                    isArrayAdded = false;
+                    break;
+                }
+            }
+	    } else {
+	        isArrayAdded = false;
+	    }
+	    
+        // Add the cards
+        if (isArrayAdded) {
+            for (int i = 0; i < cards.length; i++) {
+                resCards[i] += cards[i];
+            }
+        }
+        
+        return isArrayAdded;
 	}
 	/**
 	 * Returns the number of knights played.
@@ -208,35 +250,35 @@ public class Player implements Serializable
 	 * hand.
 	 */
 	public void doSettlementPurchase() {
-	    removeCards("wool", 1);
-	    removeCards("lumber", 1);
-	    removeCards("brick", 1);
-	    removeCards("wheat", 1);
+	    removeCards("WOOL", 1);
+	    removeCards("LUMBER", 1);
+	    removeCards("BRICK", 1);
+	    removeCards("WHEAT", 1);
 	}
 	
 	/**
 	 * Removes one brick and one lumber from the player's hand.
 	 */
 	public void doRoadPurchase() {
-		removeCards("lumber", 1);
-		removeCards("brick", 1);
+		removeCards("LUMBER", 1);
+		removeCards("BRICK", 1);
 	}
 	
 	/**
 	 * Removes three ore and two wheat from the player's hand.
 	 */
 	public void doCityPurchase() {
-		removeCards("ore", 3);
-		removeCards("wheat", 2);
+		removeCards("ORE", 3);
+		removeCards("WHEAT", 2);
 	}
 	
 	/**
 	 * Removes one ore, one wheat, and one wool from the player's hand.
 	 */
 	public void doDevCardPurchase() {
-		removeCards("wool", 1);
-		removeCards("ore", 1);
-		removeCards("wheat", 1);
+		removeCards("WOOL", 1);
+		removeCards("ORE", 1);
+		removeCards("WHEAT", 1);
 	}
 	
 	

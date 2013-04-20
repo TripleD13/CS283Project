@@ -179,7 +179,7 @@ public class ServerCatanGame implements Serializable
         myBoard.addRoad(new Coordinate(-1,-1,0), new Coordinate(-1,-1,1),
                         userArray[0], false);
         
-        userArray[0].resCards.addAll(
+        userArray[0].addArrayOfCards(
                     myBoard.getPlacementResourceCards(new Coordinate(-1,-1,0)));
         
         myBoard.addSettlement(new Coordinate(-2,2,0), userArray[1], false,
@@ -191,7 +191,7 @@ public class ServerCatanGame implements Serializable
         myBoard.addRoad(new Coordinate(1,-2,0), new Coordinate(1,-2,5),
                         userArray[1], false);
         
-        userArray[1].resCards.addAll(
+        userArray[1].addArrayOfCards(
                      myBoard.getPlacementResourceCards(new Coordinate(1,-2,0)));
         
         myBoard.addSettlement(new Coordinate(0,0,0), userArray[2], false,
@@ -203,7 +203,7 @@ public class ServerCatanGame implements Serializable
         myBoard.addRoad(new Coordinate(-2,0,0), new Coordinate(-2,0,1),
                         userArray[2], false);
         
-        userArray[2].resCards.addAll(
+        userArray[2].addArrayOfCards(
                      myBoard.getPlacementResourceCards(new Coordinate(-2,0,0)));
         
         myBoard.addSettlement(new Coordinate(2,-1,0), userArray[3], false,
@@ -215,7 +215,7 @@ public class ServerCatanGame implements Serializable
         myBoard.addRoad(new Coordinate(1,1,0), new Coordinate(1,1,5),
                         userArray[3], false);
         
-        userArray[3].resCards.addAll(
+        userArray[3].addArrayOfCards(
                 myBoard.getPlacementResourceCards(new Coordinate(1,1,0)));
         
         
@@ -336,7 +336,7 @@ public class ServerCatanGame implements Serializable
 		
 		// Give the appropriate resources to the players
 		for (int i = 0 ; i < userArray.length; i++) {
-		    userArray[i].resCards.addAll(myBoard
+		    userArray[i].addArrayOfCards(myBoard
 		                                 .getResourceCardsEarned(diceRoll, 
 		                                                         userArray[i]));
 		}
@@ -378,24 +378,9 @@ public class ServerCatanGame implements Serializable
 
 		
 		// Make sure user has proper hand
-        boolean hasSheep = false;
-        boolean hasOre = false;
-        boolean hasWheat = false;
-        
-        for (ResourceCard card : owner.resCards) {
-            switch (card.getCardType()) {
-            case WOOL:
-                hasSheep = true;
-                break;
-            case ORE:
-                hasOre = true;
-                break;
-            case WHEAT:
-                hasWheat = true;
-                break;
-            default:
-            }
-        }
+        boolean hasSheep = owner.getNumCards(ResourceCard.WOOL.toString()) > 0;
+        boolean hasOre = owner.getNumCards(ResourceCard.ORE.toString()) > 0;
+        boolean hasWheat = owner.getNumCards(ResourceCard.WHEAT.toString()) > 0;
 		
         if (hasSheep && hasOre && hasWheat && cardDeck.size() > 0) {
             
