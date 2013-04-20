@@ -391,24 +391,24 @@ public static void main(String args[]) {
                 
                 //makes new coordinates for tradeports
                 
-                Coordinate wheatPort1 = new Coordinate(1, -2, 1);
-                Coordinate wheatPort2 = new Coordinate(1, -2, 2);
+                Coordinate wheatPort1 = new Coordinate(1, -2, 5);
+                Coordinate wheatPort2 = new Coordinate(1, -2, 4);
                 Coordinate threePort1 = new Coordinate(2, -2, 0);
-                Coordinate threePort2 = new Coordinate(2, -2, 1);
+                Coordinate threePort2 = new Coordinate(2, -2, 5);
                 Coordinate brickPort1 = new Coordinate(2, -1, 0);
-                Coordinate brickPort2 = new Coordinate(2, -1, 5);
+                Coordinate brickPort2 = new Coordinate(2, -1, 1);
                 Coordinate threePort3 = new Coordinate(1, 1, 0);
-                Coordinate threePort4 = new Coordinate(1, 1, 5);
-                Coordinate orePort1 = new Coordinate(0, 2, 5);
-                Coordinate orePort2 = new Coordinate(0, 2, 4);
-                Coordinate threePort5 = new Coordinate(-1, 2, 4);
+                Coordinate threePort4 = new Coordinate(1, 1, 1);
+                Coordinate orePort1 = new Coordinate(0, 2, 1);
+                Coordinate orePort2 = new Coordinate(0, 2, 2);
+                Coordinate threePort5 = new Coordinate(-1, 2, 2);
                 Coordinate threePort6 = new Coordinate(-1, 2, 3);
-                Coordinate lumberPort1 = new Coordinate(-2, 1, 4);
+                Coordinate lumberPort1 = new Coordinate(-2, 1, 2);
                 Coordinate lumberPort2 = new Coordinate(-2, 1, 3);
                 Coordinate threePort7 = new Coordinate(-2, 0, 3);
-                Coordinate threePort8 = new Coordinate(-2, 0, 2);
-                Coordinate woolPort1 = new Coordinate(-1, -1, 1);
-                Coordinate woolPort2 = new Coordinate(-1, -1, 2);
+                Coordinate threePort8 = new Coordinate(-2, 0, 4);
+                Coordinate woolPort1 = new Coordinate(-1, -1, 5);
+                Coordinate woolPort2 = new Coordinate(-1, -1, 6);
                 
                 wheatPort1 = wheatPort1.normalizeCoordinate();
                 wheatPort2 = wheatPort2.normalizeCoordinate();
