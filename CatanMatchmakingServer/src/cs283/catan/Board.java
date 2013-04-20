@@ -375,7 +375,6 @@ public static void main(String args[]) {
                         // and add the node to the set of nodes
                         Coordinate coord = new Coordinate(split[0]);
                         pixelMap.put(coord.normalizeCoordinate(), point);
-                        System.out.println("Loading" + coord.normalizeCoordinate() + " Point " + point);
                     }
                     
                     fileInput.close();
