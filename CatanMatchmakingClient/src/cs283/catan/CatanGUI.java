@@ -296,6 +296,8 @@ public class CatanGUI {
 	    }
 	    
 	    largestArmyField.setText(largestArmyOwner);
+	    
+	    gamePanel.view().repaint();
 	}
 	
 	/**

@@ -484,7 +484,7 @@ public static void main(String args[]) {
                 Coordinate threePort7 = new Coordinate(-2, 0, 3);
                 Coordinate threePort8 = new Coordinate(-2, 0, 4);
                 Coordinate woolPort1 = new Coordinate(-1, -1, 5);
-                Coordinate woolPort2 = new Coordinate(-1, -1, 6);
+                Coordinate woolPort2 = new Coordinate(-1, -1, 4);
                 
                 wheatPort1 = wheatPort1.normalizeCoordinate();
                 wheatPort2 = wheatPort2.normalizeCoordinate();

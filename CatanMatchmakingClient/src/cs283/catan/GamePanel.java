@@ -128,8 +128,6 @@ public class GamePanel {
 					drawrobber=false;
 				}
 				g2d.dispose();
-				
-				view.invalidate();
 			}
 		    
 			//returns the internal JLabel display for use in GUIs

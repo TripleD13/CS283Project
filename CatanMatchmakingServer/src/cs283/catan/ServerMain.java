@@ -632,6 +632,8 @@ public class ServerMain {
                 printServerMsg("Connection problem with '" + username + 
                                    "': " + e.getMessage());
                 
+                e.printStackTrace();
+                
                 if (lobbyPushThread != null && lobbyPushThread.isAlive()) {
                     lobbyPushThread.interrupt();
                 }
