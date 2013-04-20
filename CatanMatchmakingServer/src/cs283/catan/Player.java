@@ -55,6 +55,14 @@ public class Player implements Serializable
 	public boolean has2BrickPort = false;
 	
 	
+	/*
+	 * Boolean value for robberMode
+	 */
+	
+	public boolean robberMode = false;
+	public boolean stealMode = false;
+	
+	
 	/**
 	 * Color index used when drawing the board in the GUI.
 	 */

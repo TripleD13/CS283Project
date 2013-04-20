@@ -982,6 +982,7 @@ public class ServerMain {
         private void parseGameCommand(String message) throws Exception {
             Board board = catanGame.getBoard();
             
+            Set<Player> playerSet = null;
             // Indicates whether the state of the game has changed because of
             // a command
             boolean isGameChanged = false;
@@ -996,8 +997,88 @@ public class ServerMain {
                     break;
                 }
             }
-            
-            if (message.indexOf("buy") != -1)
+            if (owner.robberMode)
+            {
+            	if(message.indexOf("robber")!= -1)
+                {
+                    //robber i i 
+            		 int robberIndex = message.indexOf("robber");
+                     
+                     try{
+                         message = message.substring(robberIndex + 7);
+                        
+                         
+                         Scanner scanMessage = new Scanner(message);
+                         int coordinate1 = scanMessage.nextInt();
+                         int coordinate2 = scanMessage.nextInt();
+                         
+                         scanMessage.close();
+                         playerSet = board.moveRobber(coordinate1, coordinate2);
+                         if (playerSet != null)
+                         {
+                        	 owner.robberMode = false;
+                        	 owner.stealMode = true;
+                         }
+                         
+                         }catch (Exception InputMismatchException)
+                         {
+                             sendChatMessage("chat*SERVER: Invalid command, " +
+                                              "you dummy!");
+                         }
+                    
+                }
+            }else if (owner.stealMode)
+            {
+            	if (message.indexOf("steal") != -1)
+            	{
+            		message = message.substring(6);
+            		for(Player a: playerSet)
+            		{
+            			if (a.toString().equals(message))
+            			{
+            				if(a.getNumCards() == 0)
+            				{
+            					owner.stealMode = false;
+            				}else
+            				{
+            					boolean notStolen = true;
+            					while (notStolen)
+            					{
+            					Random randomCard = new Random();
+            					int card = randomCard.nextInt(4);
+            					String cardType = null;
+            					if (card == 0)
+            					{
+            						cardType = new String("brick");
+
+            					}else if (card == 1)
+            					{
+            						cardType = new String("wool");
+            					}else if (card == 1)
+            					{
+            						cardType = new String("lumber");
+            					}
+            					else if (card == 1)
+            					{
+            						cardType = new String("ore");
+            					}
+            					else 
+            					{
+            						cardType = new String("wheat");
+
+            					}
+            					notStolen = !a.removeCards(cardType, 1);
+            					if (!notStolen)
+            					{
+            						owner.addCards(cardType, 1);
+            					}
+            					
+            				}
+            			}
+            		}
+            	}
+            	
+            }else if (message.indexOf("buy") != -1)	
             {
                 /*
                 buy
@@ -1333,7 +1414,7 @@ public class ServerMain {
                         sendChatMessage("chat*SERVER: Invalid command, " +
                                 "you dummy!");
                    }
-                }*/
+                */}
             }else if(message.indexOf("play") != -1)
             {
                 if(message.indexOf("year of plenty") != -1)
@@ -1347,25 +1428,7 @@ public class ServerMain {
                     
                 }else if (message.indexOf("knight") != -1)
                 {
-                    // play knight robber i i i steal player
-                    int robberIndex = message.indexOf("robber");
-                    
-                    try{
-                        message = message.substring(robberIndex + 7);
-                        String playerToStealFrom = message.substring(12);
-                        
-                        Scanner scanMessage = new Scanner(message);
-                        int coordinate1 = scanMessage.nextInt();
-                        int coordinate2 = scanMessage.nextInt();
-                        int coordinate3 = scanMessage.nextInt();
-                        
-                        scanMessage.close();
-                        }catch (Exception InputMismatchException)
-                        {
-                            sendChatMessage("chat*SERVER: Invalid command, " +
-                                             "you dummy!");
-                        }
-                    //command
+                    owner.robberMode = true;
                 }else if (message.indexOf("road builder") != -1)
                 {
                     //command
@@ -1376,28 +1439,6 @@ public class ServerMain {
                 {
                     sendChatMessage("chat*SERVER: Invalid command, " + "you dummy!");
                 }
-                
-            }else if(message.indexOf("steal") != -1)
-            {
-                String toStealFrom = message.substring(6);
-                //command
-                
-            }else if(message.indexOf("robber")!= -1)
-            {
-                //robber i i i steal player
-                try{
-                    message = message.substring(7);
-                    String playerToStealFrom = message.substring(12);
-                    Scanner scanMessage = new Scanner(message);
-                    int coordinate1 = scanMessage.nextInt();
-                    int coordinate2 = scanMessage.nextInt();
-                    int coordinate3 = scanMessage.nextInt();
-                    scanMessage.close();
-                    }catch (Exception InputMismatchException)
-                    {
-                        sendChatMessage("chat*SERVER: Invalid command, " +
-                                         "you dummy!");
-                    }
                 
             }else if(message.indexOf("Get Ye Flask") != -1)
             {
