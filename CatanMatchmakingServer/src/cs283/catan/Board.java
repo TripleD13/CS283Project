@@ -9,6 +9,7 @@
  */
 package cs283.catan;
 
+import java.awt.Point;
 import java.io.*;
 import java.util.*;
 
@@ -179,7 +180,14 @@ public static void main(String args[]) {
      * of the tile (Coordinate object, but the z coordinate is always 0) and the
      * value is the Tile object representing the tile.
      */
-    private final Map<Coordinate, Tile> tileSet = new HashMap<Coordinate, Tile>();
+    private final Map<Coordinate, Tile> tileSet = 
+                                                new HashMap<Coordinate, Tile>();
+    
+    /**
+     * Map of coordinates to pixels
+     */
+    private final Map<Coordinate, Point> pixelMap= 
+                                               new HashMap<Coordinate, Point>();
     
     /**
      * Object representing the robber
@@ -283,28 +291,28 @@ public static void main(String args[]) {
                     int y = fileInput.nextInt();
                     int rollNumber = fileInput.nextInt();
                     String cardTypeString = fileInput.next();
-                    ResourceCard.CardType cardType;
+                    ResourceCard cardType;
                     
                     switch (cardTypeString.toLowerCase()) {
                     case "lumber":
-                        cardType = ResourceCard.CardType.LUMBER;
+                        cardType = ResourceCard.LUMBER;
                         break;
                     case "wool":
-                        cardType = ResourceCard.CardType.WOOL;
+                        cardType = ResourceCard.WOOL;
                         break;
                     case "wheat":
-                        cardType = ResourceCard.CardType.WHEAT;
+                        cardType = ResourceCard.WHEAT;
                         break;
                     case "brick":
-                        cardType = ResourceCard.CardType.BRICK;
+                        cardType = ResourceCard.BRICK;
                         break;
                     case "ore":
-                        cardType = ResourceCard.CardType.ORE;
+                        cardType = ResourceCard.ORE;
                         break;
                     case "desert":
-                        cardType = ResourceCard.CardType.DESERT;
+                        cardType = ResourceCard.DESERT;
                     default:
-                        cardType = ResourceCard.CardType.DESERT;
+                        cardType = ResourceCard.DESERT;
                     }
                     
                     // Add the tile to the set of tiles. Note that a tile
@@ -326,6 +334,73 @@ public static void main(String args[]) {
 	    return isSuccessful;
 	}
 	
+	/**
+     * Loads a pixel mapping.
+     * @parameter coordinate
+     * @parameter pixel
+     */
+    public boolean loadPixelMappingsFromResource(String resourceName) {
+        boolean isSuccessful = false;
+        
+        if (pixelMap.size() == 0) {
+            // Attempt to read the data from the file
+            InputStream resourceStream = Thread.currentThread().
+                                         getContextClassLoader().
+                                         getResourceAsStream(resourceName);
+            
+            if (resourceStream != null) {
+                try {
+                    Scanner fileInput = new Scanner(resourceStream);
+                    
+                    // Read each line of the file. Each line represents a vertex
+                    // and its associated pixel
+                    String line;
+                    while (fileInput.hasNextLine()) {
+                    
+                        line = fileInput.nextLine();
+                        
+                        String split[] = line.split(",");
+                        
+                        // Create a new point
+                        Point point = new Point();
+                        
+                        // Create the list of neighbors of the node if the node
+                        // has neighbors
+                        if (split.length == 3) {
+                            point.x = Integer.parseInt(split[1]);
+                            point.y = Integer.parseInt(split[2]);
+                        }
+                        
+                        // Extract the coordinate of the node from the node name
+                        // and add the node to the set of nodes
+                        Coordinate coord = new Coordinate(split[0]);
+                        pixelMap.put(coord.normalizeCoordinate(), point);
+                    }
+                    
+                    fileInput.close();
+                    
+                    
+                    isSuccessful = true;
+                    
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        } else {
+            isSuccessful = true;
+        }
+        
+        return isSuccessful;
+    }
+    
+    /**
+     * Returns the pixel coordinate associated with the coordinate.
+     * @return a point representing the pixel coordinate, or null if no such
+     *         pixel mapping exists.
+     */
+    public Point getPixel(Coordinate coord) {
+        return pixelMap.get(coord.normalizeCoordinate());
+    }
 	
 	/**
 	 * Add the specified settlement to the board, assuming that there is not
@@ -346,31 +421,14 @@ public static void main(String args[]) {
 	    Node locationNode = nodeSet.get(location);
 	    
 	    // Make sure user has proper hand
-	    boolean hasSheep = false;
-	    boolean hasLumber = false;
-	    boolean hasBrick = false;
-	    boolean hasWheat = false;
-	    
-	    for (ResourceCard card : owner.resCards) {
-	        switch (card.getCardType()) {
-	        case WOOL:
-	            hasSheep = true;
-	            break;
-	        case LUMBER:
-	            hasLumber = true;
-	            break;
-	        case BRICK:
-	            hasBrick = true;
-	            break;
-	        case WHEAT:
-	            hasWheat = true;
-	            break;
-            default:
-	        }
-	    }
+	    boolean hasSheep = owner.getNumCards(ResourceCard.WOOL.toString()) > 0;
+	    boolean hasLumber = 
+	                      owner.getNumCards(ResourceCard.LUMBER.toString()) > 0;
+	    boolean hasBrick = owner.getNumCards(ResourceCard.BRICK.toString()) > 0;
+	    boolean hasWheat = owner.getNumCards(ResourceCard.WHEAT.toString()) > 0;
 	    
 	    if (locationNode != null && ((hasSheep && hasLumber && hasBrick &&
-            hasWheat) || !checkCards)) {
+            hasWheat) || !checkCards) && !locationNode.hasSettlement()) {
 	        
 	        boolean safeToAdd = true;
 	        List<Coordinate> neighbors = locationNode.getNeighbors();
@@ -406,14 +464,185 @@ public static void main(String args[]) {
                 
                 isSettlementAdded = true;
                 
+                //makes new coordinates for tradeports
+                
+                Coordinate wheatPort1 = new Coordinate(1, -2, 5);
+                Coordinate wheatPort2 = new Coordinate(1, -2, 4);
+                Coordinate threePort1 = new Coordinate(2, -2, 0);
+                Coordinate threePort2 = new Coordinate(2, -2, 5);
+                Coordinate brickPort1 = new Coordinate(2, -1, 0);
+                Coordinate brickPort2 = new Coordinate(2, -1, 1);
+                Coordinate threePort3 = new Coordinate(1, 1, 0);
+                Coordinate threePort4 = new Coordinate(1, 1, 1);
+                Coordinate orePort1 = new Coordinate(0, 2, 1);
+                Coordinate orePort2 = new Coordinate(0, 2, 2);
+                Coordinate threePort5 = new Coordinate(-1, 2, 2);
+                Coordinate threePort6 = new Coordinate(-1, 2, 3);
+                Coordinate lumberPort1 = new Coordinate(-2, 1, 2);
+                Coordinate lumberPort2 = new Coordinate(-2, 1, 3);
+                Coordinate threePort7 = new Coordinate(-2, 0, 3);
+                Coordinate threePort8 = new Coordinate(-2, 0, 4);
+                Coordinate woolPort1 = new Coordinate(-1, -1, 5);
+                Coordinate woolPort2 = new Coordinate(-1, -1, 4);
+                
+                wheatPort1 = wheatPort1.normalizeCoordinate();
+                wheatPort2 = wheatPort2.normalizeCoordinate();
+                threePort1 = threePort1.normalizeCoordinate();
+                threePort2 = threePort2.normalizeCoordinate();
+                brickPort1 = brickPort1.normalizeCoordinate();
+                brickPort2 = brickPort2.normalizeCoordinate();
+                threePort3 = threePort3.normalizeCoordinate();
+                threePort4 = threePort4.normalizeCoordinate();
+                orePort1 = orePort1.normalizeCoordinate();
+                orePort2 = orePort2.normalizeCoordinate();
+                threePort5 = threePort5.normalizeCoordinate();
+                threePort6 = threePort6.normalizeCoordinate();
+                lumberPort1 = lumberPort1.normalizeCoordinate();
+                lumberPort2 = lumberPort2.normalizeCoordinate();
+                threePort7 = threePort7.normalizeCoordinate();
+                threePort8 = threePort8.normalizeCoordinate();
+                woolPort1 = woolPort1.normalizeCoordinate();
+                woolPort2 = woolPort2.normalizeCoordinate();
+                
+                
                 if (checkCards) {
                     owner.doSettlementPurchase();
+                    if (location.normalizeCoordinate().equals(wheatPort1) || location.normalizeCoordinate().equals(wheatPort2) )
+                    {
+                    	owner.has2WheatPort = true;
+                    }else if (location.normalizeCoordinate().equals(orePort1) || location.normalizeCoordinate().equals(orePort2) )
+                    {
+                    	owner.has2OrePort = true;
+                    }else if (location.normalizeCoordinate().equals(brickPort1) || location.normalizeCoordinate().equals(brickPort2) )
+                    {
+                    	owner.has2BrickPort = true;
+                    }else if (location.normalizeCoordinate().equals(lumberPort1) || location.normalizeCoordinate().equals(lumberPort2) )
+                    {
+                    	owner.has2LumberPort = true;
+                    }else if (location.normalizeCoordinate().equals(woolPort1) || location.normalizeCoordinate().equals(woolPort2) )
+                    {
+                    	owner.has2WoolPort = true;
+                    }else if (location.normalizeCoordinate().equals(threePort1) || location.normalizeCoordinate().equals(threePort2) 
+                    		|| location.normalizeCoordinate().equals(threePort3) || location.normalizeCoordinate().equals(threePort4) 
+                    		|| location.normalizeCoordinate().equals(threePort5) || location.normalizeCoordinate().equals(threePort6) 
+                    		|| location.normalizeCoordinate().equals(threePort7) || location.normalizeCoordinate().equals(threePort8) )
+                    {
+                    	owner.has3To1Port = true;
+                    }
+                    
                 }
             }
 	    }
 	    
 	    return isSettlementAdded;
 	}
+	
+public boolean freeAddSettlement(Coordinate location, Player owner) {
+	boolean isSettlementAdded = false;
+
+	location = location.normalizeCoordinate();
+	Node locationNode = nodeSet.get(location);
+
+
+	boolean safeToAdd = true;
+	List<Coordinate> neighbors = locationNode.getNeighbors();
+
+	// Make sure that there are no settlements directly adjacent to the
+	// location
+	for (Coordinate neighborCoordinate : neighbors) {
+		Node neighbor = nodeSet.get(neighborCoordinate);
+
+		if (neighbor.hasSettlement()) {
+			safeToAdd = false;
+			break;
+		}
+	}
+
+
+	// Add the settlement if there are not settlements directly adjacent
+	// to the location (and if performing a road check, there is a road
+	// adjacent to the settlement)
+	if (safeToAdd && !locationNode.hasSettlement()) {
+		Settlement newSettlement = new Settlement(location, owner);
+
+		locationNode.setSettlement(newSettlement);
+
+		// Add the settlement to the settlement list for GUI drawing
+		// purposes
+		settlementList.add(newSettlement);
+
+		isSettlementAdded = true;
+
+		//makes new coordinates for tradeports
+
+		Coordinate wheatPort1 = new Coordinate(1, -2, 5);
+		Coordinate wheatPort2 = new Coordinate(1, -2, 4);
+		Coordinate threePort1 = new Coordinate(2, -2, 0);
+		Coordinate threePort2 = new Coordinate(2, -2, 5);
+		Coordinate brickPort1 = new Coordinate(2, -1, 0);
+		Coordinate brickPort2 = new Coordinate(2, -1, 1);
+		Coordinate threePort3 = new Coordinate(1, 1, 0);
+		Coordinate threePort4 = new Coordinate(1, 1, 1);	
+		Coordinate orePort1 = new Coordinate(0, 2, 1);	
+		Coordinate orePort2 = new Coordinate(0, 2, 2);
+		Coordinate threePort5 = new Coordinate(-1, 2, 2);
+		Coordinate threePort6 = new Coordinate(-1, 2, 3);
+		Coordinate lumberPort1 = new Coordinate(-2, 1, 2);
+		Coordinate lumberPort2 = new Coordinate(-2, 1, 3);
+		Coordinate threePort7 = new Coordinate(-2, 0, 3);
+		Coordinate threePort8 = new Coordinate(-2, 0, 4);
+		Coordinate woolPort1 = new Coordinate(-1, -1, 5);
+		Coordinate woolPort2 = new Coordinate(-1, -1, 4);
+
+		wheatPort1 = wheatPort1.normalizeCoordinate();
+		wheatPort2 = wheatPort2.normalizeCoordinate();
+		threePort1 = threePort1.normalizeCoordinate();
+		threePort2 = threePort2.normalizeCoordinate();
+		brickPort1 = brickPort1.normalizeCoordinate();
+		brickPort2 = brickPort2.normalizeCoordinate();
+		threePort3 = threePort3.normalizeCoordinate();
+		threePort4 = threePort4.normalizeCoordinate();
+		orePort1 = orePort1.normalizeCoordinate();
+		orePort2 = orePort2.normalizeCoordinate();
+		threePort5 = threePort5.normalizeCoordinate();
+		threePort6 = threePort6.normalizeCoordinate();
+		lumberPort1 = lumberPort1.normalizeCoordinate();
+		lumberPort2 = lumberPort2.normalizeCoordinate();
+		threePort7 = threePort7.normalizeCoordinate();
+		threePort8 = threePort8.normalizeCoordinate();
+		woolPort1 = woolPort1.normalizeCoordinate();
+		woolPort2 = woolPort2.normalizeCoordinate();
+
+
+		
+		if (location.normalizeCoordinate().equals(wheatPort1) || location.normalizeCoordinate().equals(wheatPort2) )
+		{
+			owner.has2WheatPort = true;
+		}else if (location.normalizeCoordinate().equals(orePort1) || location.normalizeCoordinate().equals(orePort2) )
+		{
+			owner.has2OrePort = true;
+		}else if (location.normalizeCoordinate().equals(brickPort1) || location.normalizeCoordinate().equals(brickPort2) )
+		{
+			owner.has2BrickPort = true;
+		}else if (location.normalizeCoordinate().equals(lumberPort1) || location.normalizeCoordinate().equals(lumberPort2) )
+		{
+			owner.has2LumberPort = true;
+		}else if (location.normalizeCoordinate().equals(woolPort1) || location.normalizeCoordinate().equals(woolPort2) )
+		{
+			owner.has2WoolPort = true;
+		}else if (location.normalizeCoordinate().equals(threePort1) || location.normalizeCoordinate().equals(threePort2) 
+				|| location.normalizeCoordinate().equals(threePort3) || location.normalizeCoordinate().equals(threePort4) 
+				|| location.normalizeCoordinate().equals(threePort5) || location.normalizeCoordinate().equals(threePort6) 
+				|| location.normalizeCoordinate().equals(threePort7) || location.normalizeCoordinate().equals(threePort8) )
+		{
+			owner.has3To1Port = true;
+		}
+		
+	}
+
+
+return isSettlementAdded;
+}
 	
 	/**
 	 * Add the specified road to the board, assuming that the road is not
@@ -463,20 +692,10 @@ public static void main(String args[]) {
 	    
         
         // Make sure user has proper hand
-        boolean hasLumber = false;
-        boolean hasBrick = false;
-        
-        for (ResourceCard card : owner.resCards) {
-            switch (card.getCardType()) {
-            case LUMBER:
-                hasLumber = true;
-                break;
-            case BRICK:
-                hasBrick = true;
-                break;
-            default:
-            }
-        }
+        boolean hasLumber = 
+                          owner.getNumCards(ResourceCard.LUMBER.toString()) > 0;
+        boolean hasBrick = 
+                           owner.getNumCards(ResourceCard.BRICK.toString()) > 0;
         
         canAddRoad = canAddRoad && ((hasLumber && hasBrick) || !checkCards);
         
@@ -542,6 +761,103 @@ public static void main(String args[]) {
 	    return isRoadAdded;
 	}
 	
+	public boolean freeAddRoad(Coordinate start, Coordinate finish, Player owner)
+	{
+		  boolean isRoadAdded = false;
+		    
+		    // Normalize the coordinates
+		    start = start.normalizeCoordinate();
+		    finish = finish.normalizeCoordinate();
+		    
+		    boolean canAddRoad = false;
+		    
+		    // Make sure the start and finish points of the road are adjacent
+		    Node nodeStartFromBoard = nodeSet.get(start);
+		    Node nodeFinishFromBoard = nodeSet.get(finish);
+		    
+		    canAddRoad = nodeStartFromBoard.isAdjacent(finish); 
+		    
+		    // Make sure road does not already exist
+		    for (Map<Coordinate, Node> roadNodeSet : roadSet.values()) {
+		        if (!canAddRoad) {
+		            break;
+		        }
+		        
+		        Node possibleRoadNode = roadNodeSet.get(start);
+		        
+		        if (possibleRoadNode != null) {
+		            if (possibleRoadNode.isAdjacent(finish)) {
+		                // Road already exists!
+		                canAddRoad = false;
+		            }
+		        }
+		    }
+		    
+	        Map<Coordinate, Node> playerRoadNodeSet = 
+	                                              roadSet.get(owner.getUsername());
+		    
+	        
+	  
+	        
+		    // Make sure either road is adjacent to a settlement owned by the player
+		    // or adjacent to a road owned by the player
+		    if (canAddRoad && !((nodeStartFromBoard.hasSettlement() && 
+		        (nodeStartFromBoard.getSettlement().getOwner() == owner)) ||
+		        (nodeFinishFromBoard.hasSettlement() &&
+		        (nodeFinishFromBoard.getSettlement().getOwner() == owner)))) {
+		        
+		        canAddRoad = false;
+		        
+		        // Because the road is not adjacent to any settlements owned by
+		        // the owner, it must be adjacent to another road owned by the user
+		        if (playerRoadNodeSet != null) {
+		            if (playerRoadNodeSet.get(start) != null ||
+		                playerRoadNodeSet.get(finish) != null) {
+		                
+		                canAddRoad = true;
+		            }
+		        }
+		        
+		    }
+		    
+		    
+		    if (canAddRoad) {
+		        // Add the road to the player's set of roads. Create a new set for
+		        // the player if the player currently has no roads.
+		        
+		        if (playerRoadNodeSet == null) {
+		            playerRoadNodeSet = new HashMap<Coordinate, Node>();
+		            
+		            roadSet.put(owner.getUsername(), playerRoadNodeSet);
+		        }
+		        
+		        // Add the nodes if they do not exist
+		        Node startNode = playerRoadNodeSet.get(start);
+		        if (startNode == null) {
+		            startNode = new Node();
+		            playerRoadNodeSet.put(start, startNode);
+		        }
+		        
+		        Node finishNode = playerRoadNodeSet.get(finish);
+		        if (finishNode == null) {
+		            finishNode = new Node();
+		            playerRoadNodeSet.put(finish, finishNode);
+		        }
+		        
+		        // Add the edge
+		        startNode.addNeighbor(finish);
+		        finishNode.addNeighbor(start);
+		        
+		        // Add a road object to the list for GUI drawing purposes
+		        roadList.add(new Road(start,finish, owner));
+		        
+		        isRoadAdded = true;
+		        
+		        
+		    }
+		    
+		    return isRoadAdded;
+	}
 	/**
 	 * Adds a tile to the board if it does not already exist.
 	 * @param x
@@ -551,7 +867,7 @@ public static void main(String args[]) {
 	 * @return whether or not the tile was added.
 	 */
 	public boolean addTile(int x, int y, int rollNumber,
-	                       ResourceCard.CardType tileType) {
+	                       ResourceCard tileType) {
 	    boolean isTileAdded = false;
 	    
 	    Coordinate tileCoordinate = new Coordinate(x, y, 0);
@@ -583,21 +899,9 @@ public static void main(String args[]) {
 	    Node locationNode = nodeSet.get(location);
 	    
 	    // Make sure user has proper hand
-        int numOre = 0;
-        int numWheat = 0;
+        int numOre = owner.getNumCards(ResourceCard.ORE.toString());
+        int numWheat = owner.getNumCards(ResourceCard.WHEAT.toString());
         
-        for (ResourceCard card : owner.resCards) {
-            switch (card.getCardType()) {
-            case ORE:
-                numOre++;
-                break;
-            case WHEAT:
-                numWheat++;
-                break;
-            default:
-            }
-        }
-	    
 	    if (locationNode != null && locationNode.hasSettlement() &&
 	        numOre >= 3 && numWheat >= 2) {
 	        
@@ -737,15 +1041,17 @@ public static void main(String args[]) {
 	}
 	
 	/**
-	 * Returns a list of the resource cards a player would earn if a certain 
+	 * Returns an array of the resource cards a player would earn if a certain 
 	 * number was rolled.
 	 * @param rollNumber
 	 * @param player
-	 * @return a list of the earned resource cards.
+	 * @return an array of the earned resource cards.
 	 */
-	public List<ResourceCard> getResourceCardsEarned(int rollNumber, 
-	                                                 Player player) {
-	    List<ResourceCard> cardsEarned = new LinkedList<ResourceCard>();
+	public int[] getResourceCardsEarned(int rollNumber, Player player) {
+	    int cardsEarned[] = new int[5];
+	    for (int i = 0; i < cardsEarned.length; i++) {
+	        cardsEarned[i] = 0;
+	    }
 	    
 	    // For each tile that has the roll number, look at all of its nodes
 	    // and see if the player has a settlement on any of them
@@ -764,12 +1070,8 @@ public static void main(String args[]) {
 	                        
 	                        // If the settlement is a city, add 2 cards,
 	                        // otherwise add 1 card
-	                        for (int i = 0; i < (settlement.isCity() ? 2 : 1);
-	                             i++) {
-	                            
-	                            cardsEarned.add(
-	                                      new ResourceCard(tile.getTileType()));
-	                        }
+	                        cardsEarned[tile.getTileType().getIndex()] += 
+	                                                settlement.isCity() ? 2 : 1;
 	                    }
 	                }
 	            }
@@ -780,14 +1082,17 @@ public static void main(String args[]) {
 	}
 	
 	/**
-	 * Returns a list of the resource cards earned by placing a settlement.
+	 * Returns an array of the resource cards earned by placing a settlement.
 	 * @param coord
 	 * @return a list of resource cards.
 	 */
-	public List<ResourceCard> getPlacementResourceCards(Coordinate coord) {
+	public int[] getPlacementResourceCards(Coordinate coord) {
 	    coord = coord.normalizeCoordinate();
 	    
-	    List<ResourceCard> cardsEarned = new LinkedList<ResourceCard>();
+	    int cardsEarned[] = new int[5];
+	    for (int i = 0; i < cardsEarned.length; i++) {
+	        cardsEarned[i] = 0;
+	    }
 	    
 	    // Get the node at the coordinate
 	    Node settlementLocation = nodeSet.get(coord);
@@ -812,7 +1117,7 @@ public static void main(String args[]) {
                 
                 Tile tile = tileSet.get(tileCoord);
                 if (tile != null) {
-                    cardsEarned.add(new ResourceCard(tile.getTileType()));
+                    cardsEarned[tile.getTileType().getIndex()]++;
                 }
             }
 	    }
@@ -843,56 +1148,92 @@ public static void main(String args[]) {
 		{
 			if (player.has3To1Port)
 			{
-				//execute code
+				if (player.removeCards(resourceOne, 3))
+				{
+					player.addCards(resourceTwo, 1);
+				}else
+				{
+					return new String ("chat* Server: you don't have the right number of cards");
+				}
 			}else
 			{
 				return new String("chat* Server: you don't have a 3 to 1 port");
 			}
 		}else if (tradeNumber == 2)
 		{
-			if (resourceOne == "ore")
+			if (resourceOne == "ORE")
 			{
 				if(player.has2OrePort)
 				{
-					//execute code
+					if (player.removeCards(resourceOne, 2))
+					{
+						player.addCards(resourceTwo, 1);
+					}else
+					{
+						return new String ("chat* Server: you don't have the right number of cards");
+					}
 				}else
 				{
 					return new String("chat* Server: you don't have that 2 to one port");
 				}
 			}
-			if (resourceOne == "lumber")
+			if (resourceOne == "LUMBER")
 			{
 				if(player.has2LumberPort)
 				{
-					//execute code
+					if (player.removeCards(resourceOne, 2))
+					{
+						player.addCards(resourceTwo, 1);
+					}else
+					{
+						return new String ("chat* Server: you don't have the right number of cards");
+					}
 				}else
 				{
 					return new String("chat* Server: you don't have that 2 to one port");
 				}
 			}
-			if (resourceOne == "wheat")
+			if (resourceOne == "WHEAT")
 			{
 				if(player.has2WheatPort)
 				{
-					//execute code
+					if (player.removeCards(resourceOne, 2))
+					{
+						player.addCards(resourceTwo, 1);
+					}else
+					{
+						return new String ("chat* Server: you don't have the right number of cards");
+					}
 				}else
 				{
 					return new String("chat* Server: you don't have that 2 to one port");
 				}
-			}else if (resourceOne == "brick")
+			}else if (resourceOne == "BRICK")
 			{
 				if(player.has2BrickPort)
 				{
-					//execute code
+					if (player.removeCards(resourceOne, 2))
+					{
+						player.addCards(resourceTwo, 1);
+					}else
+					{
+						return new String ("chat* Server: you don't have the right number of cards");
+					}
 				}else
 				{
 					return new String("chat* Server: you don't have that 2 to one port");
 				}
-			}else if (resourceOne == "wool")
+			}else if (resourceOne == "WOOL")
 			{
 				if(player.has2WoolPort)
 				{
-					//execute code
+					if (player.removeCards(resourceOne, 2))
+					{
+						player.addCards(resourceTwo, 1);
+					}else
+					{
+						return new String ("chat* Server: you don't have the right number of cards");
+					}
 				}else
 				{
 					return new String("chat* Server: you don't have that 2 to one port");
@@ -903,7 +1244,13 @@ public static void main(String args[]) {
 			}
 		}else if (tradeNumber == 4)
 		{
-			//execute code
+			if (player.removeCards(resourceOne, 4))
+			{
+				player.addCards(resourceTwo, 1);
+			}else
+			{
+				return new String ("chat* Server: you don't have the right number of cards");
+			}
 		}else
 		{
 			return new String ("chat* Wrong amount to trade.");

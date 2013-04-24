@@ -51,7 +51,9 @@ public class ServerCatanGame implements Serializable
 	
 	private boolean victory;
 	
-	private int turnNumber; //for debugging purposes
+	private Player winner;
+	
+	private int turnNumber;
 	
 	/**
 	 * Deck of development cards
@@ -88,6 +90,7 @@ public class ServerCatanGame implements Serializable
 		numUsers = 4;
 		turn = 0;
 		turnNumber = 0; // zero indexed
+		winner = null;
 		victory = false; // nobody has declared victory yet 
 		                 // - it's the start of the game
 		//set up user array - using objects John gives us
@@ -167,9 +170,14 @@ public class ServerCatanGame implements Serializable
             System.out.println("Unable to load tiles from file!");
         }
         
+        if (!myBoard.loadPixelMappingsFromResource(
+                                   "cs283/catan/resources/pixcoords.csv")) {
+            System.out.println("Unable to load pixel mappings from file!");
+        }
+        
         
         // For debugging, set up an initial configuration
-        myBoard.addSettlement(new Coordinate(0,2,0), userArray[0], false, 
+       /* myBoard.addSettlement(new Coordinate(0,2,0), userArray[0], false, 
                               false);
         myBoard.addRoad(new Coordinate(0,2,0), new Coordinate(-1,1,1),
                         userArray[0], false);
@@ -179,7 +187,7 @@ public class ServerCatanGame implements Serializable
         myBoard.addRoad(new Coordinate(-1,-1,0), new Coordinate(-1,-1,1),
                         userArray[0], false);
         
-        userArray[0].resCards.addAll(
+        userArray[0].addArrayOfCards(
                     myBoard.getPlacementResourceCards(new Coordinate(-1,-1,0)));
         
         myBoard.addSettlement(new Coordinate(-2,2,0), userArray[1], false,
@@ -191,7 +199,7 @@ public class ServerCatanGame implements Serializable
         myBoard.addRoad(new Coordinate(1,-2,0), new Coordinate(1,-2,5),
                         userArray[1], false);
         
-        userArray[1].resCards.addAll(
+        userArray[1].addArrayOfCards(
                      myBoard.getPlacementResourceCards(new Coordinate(1,-2,0)));
         
         myBoard.addSettlement(new Coordinate(0,0,0), userArray[2], false,
@@ -203,7 +211,7 @@ public class ServerCatanGame implements Serializable
         myBoard.addRoad(new Coordinate(-2,0,0), new Coordinate(-2,0,1),
                         userArray[2], false);
         
-        userArray[2].resCards.addAll(
+        userArray[2].addArrayOfCards(
                      myBoard.getPlacementResourceCards(new Coordinate(-2,0,0)));
         
         myBoard.addSettlement(new Coordinate(2,-1,0), userArray[3], false,
@@ -215,15 +223,30 @@ public class ServerCatanGame implements Serializable
         myBoard.addRoad(new Coordinate(1,1,0), new Coordinate(1,1,5),
                         userArray[3], false);
         
-        userArray[3].resCards.addAll(
+        userArray[3].addArrayOfCards(
                 myBoard.getPlacementResourceCards(new Coordinate(1,1,0)));
         
         
         // Make the first roll
-        rollDice();
+        rollDice();*/
 	}
 	
+	/**
+	 * Returns whether or not the game is in settlement placing mode based on
+	 * whether or not 8 turns have been played
+	 * @return
+	 */
+	public boolean isSettlementPlacingMode() {
+	    return turnNumber < 9;
+	}
 	
+	/**
+	 * Returns whether or not it is the second round of settlement placings.
+	 * @return
+	 */
+	public boolean isSecondSettlementPlacing() {
+	    return turnNumber >= numUsers && turnNumber <= numUsers * 2;
+	}
 	
 	
 	/**
@@ -336,7 +359,7 @@ public class ServerCatanGame implements Serializable
 		
 		// Give the appropriate resources to the players
 		for (int i = 0 ; i < userArray.length; i++) {
-		    userArray[i].resCards.addAll(myBoard
+		    userArray[i].addArrayOfCards(myBoard
 		                                 .getResourceCardsEarned(diceRoll, 
 		                                                         userArray[i]));
 		}
@@ -356,15 +379,72 @@ public class ServerCatanGame implements Serializable
 	    return userArray[turn].getUsername().equals(username);
 	}
 	
-	public void advanceTurn(String username)
+	public boolean advanceTurn(String username)
 	{
+	    boolean advanced = true;
+	    
 	    // Make sure user advancing the turn is the user currently with control
 	    if (userArray[turn].getUsername().equals(username)) {
-	        turn = (turn+1)%numUsers;
-	        turnNumber++;
+	        if (isSettlementPlacingMode() && !isSecondSettlementPlacing()) {
+	            if (userArray[turn].settlementPlacementMode != 1 
+	                || userArray[turn].roadBuilderMode != 1) {
+	                advanced = false;
+	            }
+	        } else if (isSettlementPlacingMode() 
+	                   && isSecondSettlementPlacing()) {
+	            if (userArray[turn].settlementPlacementMode != 0
+	                || userArray[turn].roadBuilderMode != 0) {
+	                advanced = false;
+	            }
+	        }
+	        
+	        if (advanced) {
+    	        turnNumber++;
+    	        
+    	        if (turnNumber < numUsers) { 
+    	            // First round of settlement placement
+    	            turn++;
+    	        } else if (turnNumber == numUsers) {
+    	            turn = numUsers -1;
+    	        } else if (turnNumber < numUsers * 2) {
+    	            turn--;
+    	        } else if (turnNumber == numUsers * 2) {
+    	            turn = 0;
+    	        } else {
+    	            turn = (turn+1)%numUsers;
+    	        }
+	        
+    	        // Update the longest road and largest army for so that 
+    	        // victory point counts will be accurate
+    	        whoHasLongestRoad();
+    	        whoHasLargestArmy();
+    	        
+    	        for (Player player : userArray) {
+    	            if (player.getUsername().equals(longestRoadOwner)) {
+    	                player.setLongestRoad(true);
+    	            } else {
+    	                player.setLongestRoad(false);
+    	            }
+    	            
+    	            if (player.getUsername().equals(largestArmyOwner)) {
+    	                player.setLargestArmy(true);
+    	            } else {
+    	                player.setLargestArmy(false);
+    	            }
+    	            
+    	            if (player.getVictoryPoints() >= 10) {
+    	                winner = player;
+    	                victory = true;
+    	            }
+    	        }
+    	        
+    	        if (!isSettlementPlacingMode()) {
+    	            rollDice();
+    	        }
+	        }
 	    }
 	    
-	    rollDice();
+	    return advanced;
 	}
 	
 	public boolean drawDevelopmentCard(Player owner)
@@ -378,24 +458,9 @@ public class ServerCatanGame implements Serializable
 
 		
 		// Make sure user has proper hand
-        boolean hasSheep = false;
-        boolean hasOre = false;
-        boolean hasWheat = false;
-        
-        for (ResourceCard card : owner.resCards) {
-            switch (card.getCardType()) {
-            case WOOL:
-                hasSheep = true;
-                break;
-            case ORE:
-                hasOre = true;
-                break;
-            case WHEAT:
-                hasWheat = true;
-                break;
-            default:
-            }
-        }
+        boolean hasSheep = owner.getNumCards(ResourceCard.WOOL.toString()) > 0;
+        boolean hasOre = owner.getNumCards(ResourceCard.ORE.toString()) > 0;
+        boolean hasWheat = owner.getNumCards(ResourceCard.WHEAT.toString()) > 0;
 		
         if (hasSheep && hasOre && hasWheat && cardDeck.size() > 0) {
             
@@ -442,6 +507,14 @@ public class ServerCatanGame implements Serializable
 	    return this.victory;
 	}
 	
+	/**
+	 * Returns the winner.
+	 * @return the Player object representing the winner, or null if no one has
+	 *         won yet.
+	 */
+	public Player getWinner() {
+	    return this.winner;
+	}
 	
 	/**
      * Returns the name of the player who has the longest road. If no one

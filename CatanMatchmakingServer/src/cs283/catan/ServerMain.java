@@ -632,6 +632,8 @@ public class ServerMain {
                 printServerMsg("Connection problem with '" + username + 
                                    "': " + e.getMessage());
                 
+                e.printStackTrace();
+                
                 if (lobbyPushThread != null && lobbyPushThread.isAlive()) {
                     lobbyPushThread.interrupt();
                 }
@@ -943,30 +945,34 @@ public class ServerMain {
                     
                 } else if (msg.equals("End Turn")) {
                     // Notify the game that a player's turn has ended
+                    boolean advanced = false;
+                    
                     synchronized (catanGame) {
-                        catanGame.advanceTurn(username);
+                        advanced = catanGame.advanceTurn(username);
                     }
                     
-                    // Notify each player of the new turn
-                    Player playerArray[] = catanGame.getPlayerArray();
-                    
-                    if (playerArray != null) {
-                        for (int i = 0; i < playerArray.length; i++) {
-                            
-                            ServerConnectionHandler handler;
-                            synchronized (userList) {
-                                handler = 
-                                     userList.get(playerArray[i].getUsername());
-                            }
-                            
-                            // Notify each user of the roll
-                            if (handler != null) {
-                                try {
-                                    handler.sendRollMessage(
-                                            catanGame.getDiceRoll(),
-                                            catanGame.getTurn());
-                                } catch (Exception e) {
-                                    e.printStackTrace();
+                    if (advanced) {
+                        // Notify each player of the new turn
+                        Player playerArray[] = catanGame.getPlayerArray();
+                        
+                        if (playerArray != null) {
+                            for (int i = 0; i < playerArray.length; i++) {
+                                
+                                ServerConnectionHandler handler;
+                                synchronized (userList) {
+                                    handler = 
+                                         userList.get(playerArray[i].getUsername());
+                                }
+                                
+                                // Notify each user of the roll
+                                if (handler != null) {
+                                    try {
+                                        handler.sendRollMessage(
+                                                catanGame.getDiceRoll(),
+                                                catanGame.getTurn());
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
                                 }
                             }
                         }
@@ -982,6 +988,7 @@ public class ServerMain {
         private void parseGameCommand(String message) throws Exception {
             Board board = catanGame.getBoard();
             
+            Set<Player> playerSet = null;
             // Indicates whether the state of the game has changed because of
             // a command
             boolean isGameChanged = false;
@@ -997,7 +1004,323 @@ public class ServerMain {
                 }
             }
             
-            if (message.indexOf("buy") != -1)
+            if (owner.settlementPlacementMode == 2)
+            {
+            	if (message.indexOf("buy") != -1)	
+                {
+                    /*
+                    buy
+                        settlement (coord)
+                        city (coord)
+                        road (coord) to (coord)
+                        devcard
+                    */
+                    if (message.indexOf("settlement") != -1)
+                    {
+                        try{
+                            message = message.substring(message.indexOf("settlement") + 10);
+                            Scanner scanMessage = new Scanner(message);
+                            int coordinate1 = scanMessage.nextInt();
+                            int coordinate2 = scanMessage.nextInt();
+                            int coordinate3 = scanMessage.nextInt();
+                            
+                            	if (!board.freeAddSettlement(new Coordinate(coordinate1,
+                                                               coordinate2,
+                                                               coordinate3),
+                                                               owner)) {
+                            		sendChatMessage("chat*SERVER: Unable to add " +
+                            				"settlement.");
+                            	} else {
+                            		isGameChanged = true;
+                            		owner.settlementPlacementMode--;
+                            	}
+                            
+                            	scanMessage.close();
+                            
+                            }catch (Exception InputMismatchException)
+                            {
+                                sendChatMessage("chat*SERVER: Invalid command, " +
+                                                     "you dummy!");
+                            }
+                        
+                    }else
+                    {
+                    	sendChatMessage("chat*Server: wrong command.  You must buy a settlement");
+                    }
+                }else
+                {
+                	sendChatMessage("chat*Server: wrong command.  You must buy a settlement");
+                }
+            }else if (owner.roadBuilderMode == 2)
+            {
+            	if (message.indexOf("buy") != -1)	
+                {
+                    /*
+                    buy
+                        settlement (coord)
+                        city (coord)
+                        road (coord) to (coord)
+                        devcard
+                    */
+                    if (message.indexOf("road") != -1)
+                    {
+                    try{
+                        message = message.substring(message.indexOf("road") + 4);
+                        Scanner scanMessage = new Scanner(message);
+                        int coordinate1 = scanMessage.nextInt();
+                        int coordinate2 = scanMessage.nextInt();
+                        int coordinate3 = scanMessage.nextInt();
+                        message = message.substring(message.indexOf(',') +1);
+                        scanMessage.close();
+                        
+                        scanMessage = new Scanner(message);
+                        int coordinate4 = scanMessage.nextInt();
+                        int coordinate5 = scanMessage.nextInt();
+                        int coordinate6 = scanMessage.nextInt();
+                        
+                        if (!board.freeAddRoad(new Coordinate(coordinate1,
+                                                          coordinate2,
+                                                          coordinate3),
+                                           new Coordinate(coordinate4,
+                                                          coordinate5,
+                                                          coordinate6),
+                                           owner)) {
+                            sendChatMessage("chat*SERVER: Unable to add " +
+                                            "road.");
+                        } else {
+                            isGameChanged = true;
+                            owner.roadBuilderMode--;
+                        }
+                        
+                        scanMessage.close();
+                        //command
+                        }catch (Exception InputMismatchException)
+                        {
+                            sendChatMessage("chat*SERVER: Invalid command, " +
+                            		"you dummy!");
+                        }
+                    
+                    }else
+                	{
+                	sendChatMessage("chat*SERVER: You must build roads right now");
+                	}
+                }else
+            	{
+            	sendChatMessage("chat*SERVER: You must build roads right now");
+            	}
+            }else if (owner.settlementPlacementMode == 1)
+            {
+            	if (message.indexOf("buy") != -1 
+            	    && catanGame.isSecondSettlementPlacing())	
+                {
+                    /*
+                    buy
+                        settlement (coord)
+                        city (coord)
+                        road (coord) to (coord)
+                        devcard
+                    */
+                    if (message.indexOf("settlement") != -1)
+                    {
+                        try{
+                            message = message.substring(message.indexOf("settlement") + 10);
+                            Scanner scanMessage = new Scanner(message);
+                            int coordinate1 = scanMessage.nextInt();
+                            int coordinate2 = scanMessage.nextInt();
+                            int coordinate3 = scanMessage.nextInt();
+                            
+                            if (!board.freeAddSettlement(new Coordinate(coordinate1,
+                                                               coordinate2,
+                                                               coordinate3),
+                                                    owner)) {
+                                sendChatMessage("chat*SERVER: Unable to add " +
+                                                "settlement.");
+                            } else {
+                                isGameChanged = true;
+                                owner.settlementPlacementMode--;
+                            }
+                            
+                            scanMessage.close();
+                            
+                            }catch (Exception InputMismatchException)
+                            {
+                                sendChatMessage("chat*SERVER: Invalid command, " +
+                                                     "you dummy!");
+                            }
+                        
+                    }else
+                    {
+                    	sendChatMessage("chat*Server: wrong command.  You must buy a settlement");
+                    }
+                }else
+                {
+                	sendChatMessage("chat*Server: wrong command.  You must buy a settlement");
+                }
+            }else if (owner.roadBuilderMode == 1)
+            {
+            	if (message.indexOf("buy") != -1)	
+                {
+                    /*
+                    buy
+                        settlement (coord)
+                        city (coord)
+                        road (coord) to (coord)
+                        devcard
+                    */
+                    if (message.indexOf("road") != -1)
+                    {
+                    try{
+                        message = message.substring(message.indexOf("road") + 4);
+                        Scanner scanMessage = new Scanner(message);
+                        int coordinate1 = scanMessage.nextInt();
+                        int coordinate2 = scanMessage.nextInt();
+                        int coordinate3 = scanMessage.nextInt();
+                        message = message.substring(message.indexOf(',') +1);
+                        scanMessage.close();
+                        
+                        scanMessage = new Scanner(message);
+                        int coordinate4 = scanMessage.nextInt();
+                        int coordinate5 = scanMessage.nextInt();
+                        int coordinate6 = scanMessage.nextInt();
+                        
+                        if (!board.freeAddRoad(new Coordinate(coordinate1,
+                                                          coordinate2,
+                                                          coordinate3),
+                                           new Coordinate(coordinate4,
+                                                          coordinate5,
+                                                          coordinate6),
+                                           owner)) {
+                            sendChatMessage("chat*SERVER: Unable to add " +
+                                            "road.");
+                        } else {
+                            isGameChanged = true;
+                            owner.roadBuilderMode--;
+                        }
+                        
+                        scanMessage.close();
+                        //command
+                        }catch (Exception InputMismatchException)
+                        {
+                            sendChatMessage("chat*SERVER: Invalid command, " +
+                            		"you dummy!");
+                        }
+                    
+                    }else
+                	{
+                	sendChatMessage("chat*SERVER: You must build roads right now");
+                	}
+                }else
+            	{
+            	sendChatMessage("chat*SERVER: You must build roads right now");
+            	}
+            }else if (owner.yearOfPlentyMode != 0)
+            {
+            	if (message.equals("WOOL"))
+            	{
+            		owner.addCards(message, 1);
+            		owner.yearOfPlentyMode--;
+            	}else if(message.equals("BRICK"))
+            	{
+            		owner.addCards(message, 1);
+            		owner.yearOfPlentyMode--;
+            	}else if(message.equals("LUMBER"))
+            	{
+            		owner.addCards(message, 1);
+            		owner.yearOfPlentyMode--;
+            	}else if(message.equals("WHEAT"))
+            	{
+            		owner.addCards(message, 1);
+            		owner.yearOfPlentyMode--;
+            	}else if(message.equals("ORE"))
+            	{
+            		owner.addCards(message, 1);
+            		owner.yearOfPlentyMode--;
+            	}else 
+            	{
+            		sendChatMessage("chat*Server: Wrong resource");
+            	}
+            }else if (owner.robberMode)
+            {
+            	if(message.indexOf("robber")!= -1)
+                {
+                    //robber i i 
+            		 int robberIndex = message.indexOf("robber");
+                     
+                     try{
+                         message = message.substring(robberIndex + 7);
+                        
+                         
+                         Scanner scanMessage = new Scanner(message);
+                         int coordinate1 = scanMessage.nextInt();
+                         int coordinate2 = scanMessage.nextInt();
+                         
+                         scanMessage.close();
+                         playerSet = board.moveRobber(coordinate1, coordinate2);
+                         if (playerSet != null)
+                         {
+                        	 owner.robberMode = false;
+                        	 owner.stealMode = true;
+                         }
+                         
+                         }catch (Exception InputMismatchException)
+                         {
+                             sendChatMessage("chat*SERVER: Invalid command, " +
+                                              "you dummy!");
+                         }
+                    
+                }
+            }else if (owner.stealMode)
+            {
+            	if (message.indexOf("steal") != -1)
+            	{
+            		message = message.substring(6);
+            		for(Player a: playerSet)
+            		{
+            			if (a.toString().equals(message))
+            			{
+            				if(a.getNumCards() == 0)
+            				{
+            					owner.stealMode = false;
+            				}else
+            				{
+            					boolean notStolen = true;
+            					while (notStolen)
+            					{
+            					Random randomCard = new Random();
+            					int card = randomCard.nextInt(4);
+            					String cardType = null;
+            					if (card == 0)
+            					{
+            						cardType = new String("BRICK");
+
+            					}else if (card == 1)
+            					{
+            						cardType = new String("WOOL");
+            					}else if (card == 1)
+            					{
+            						cardType = new String("LUMBER");
+            					}
+            					else if (card == 1)
+            					{
+            						cardType = new String("ORE");
+            					}
+            					else 
+            					{
+            						cardType = new String("WHEAT");
+
+            					}
+            					notStolen = !a.removeCards(cardType, 1);
+            					if (!notStolen)
+            					{
+            						owner.addCards(cardType, 1);
+            					}
+            					
+            				}
+            			}
+            		}
+            	}
+            	
+            }else if (message.indexOf("buy") != -1)	
             {
                 /*
                 buy
@@ -1333,75 +1656,132 @@ public class ServerMain {
                         sendChatMessage("chat*SERVER: Invalid command, " +
                                 "you dummy!");
                    }
-                }*/
+                */}
             }else if(message.indexOf("play") != -1)
             {
                 if(message.indexOf("year of plenty") != -1)
                 {
-                    //play year of plenty resource; resource
-                    message = message.substring(15);
-                    int semiIndex = message.indexOf(';');
-                    String resourceOne = message.substring(0, semiIndex);
-                    String resourceTwo = message.substring(semiIndex+1);
-                    
+                	for (DevelopmentCard devCard : owner.devCards) {
+            	        if (devCard.getDevCardType() == 
+            	            DevelopmentCard.DevCardType.YEAR_OF_PLENTY) {
+            	            
+            	            owner.devCards.remove(devCard);
+            	            
+                        	owner.yearOfPlentyMode = 2;
+            	            break;
+            	        }
+            	    }
+                	if (owner.yearOfPlentyMode == 0)
+                	{
+                		sendChatMessage("chat*SERVER: You don't have a year of plenty");
+                	}
                     
                 }else if (message.indexOf("knight") != -1)
                 {
-                    // play knight robber i i i steal player
-                    int robberIndex = message.indexOf("robber");
-                    
-                    try{
-                        message = message.substring(robberIndex + 7);
-                        String playerToStealFrom = message.substring(12);
-                        
-                        Scanner scanMessage = new Scanner(message);
-                        int coordinate1 = scanMessage.nextInt();
-                        int coordinate2 = scanMessage.nextInt();
-                        int coordinate3 = scanMessage.nextInt();
-                        
-                        scanMessage.close();
-                        }catch (Exception InputMismatchException)
-                        {
-                            sendChatMessage("chat*SERVER: Invalid command, " +
-                                             "you dummy!");
-                        }
-                    //command
+                	if (owner.playKnight())
+                	{
+                		owner.robberMode = true;
+                	}
                 }else if (message.indexOf("road builder") != -1)
                 {
-                    //command
+                	for (DevelopmentCard devCard : owner.devCards) {
+            	        if (devCard.getDevCardType() == 
+            	            DevelopmentCard.DevCardType.ROAD_BUILDING) {
+            	            
+            	            owner.devCards.remove(devCard);
+            	            
+            	            owner.roadBuilderMode = 2;
+            	            break;
+            	        }
+            	    }
+                	if (owner.roadBuilderMode == 0)
+                	{
+                		sendChatMessage("chat*SERVER: You don't have a road builder");
+                	}
                 }else if (message.indexOf("monopoly") != -1)
                 {
+                	boolean monopolized = false;
                     String resourceToMonopolize = message.substring(message.indexOf("monopoly")+9);
+                    for (DevelopmentCard devCard : owner.devCards) {
+            	        if (devCard.getDevCardType() == 
+            	            DevelopmentCard.DevCardType.MONOPOLY) {
+            	            
+            	            if (message.equals("WOOL"))
+                        	{
+            	            	int bonusResources = 0;
+            	        		for(int i=0; i<4; i++){
+            	        			if(i != catanGame.getTurn()){
+            	        				catanGame.getPlayerArray()[i].removeCards(resourceToMonopolize, catanGame.getPlayerArray()[i].getNumCards(resourceToMonopolize));
+            	        				bonusResources+=catanGame.getPlayerArray()[i].getNumCards(resourceToMonopolize);
+            	        			}
+            	        		}
+            	            owner.devCards.remove(devCard);
+            	            monopolized = true;
+                        	}else if(message.equals("BRICK"))
+                        	{         
+                        		int bonusResources = 0;
+            	        		for(int i=0; i<4; i++){
+            	        			if(i != catanGame.getTurn()){
+            	        				catanGame.getPlayerArray()[i].removeCards(resourceToMonopolize, catanGame.getPlayerArray()[i].getNumCards(resourceToMonopolize));
+            	        				bonusResources+=catanGame.getPlayerArray()[i].getNumCards(resourceToMonopolize);
+            	        			}
+            	        		}
+                        	owner.devCards.remove(devCard);
+            	            monopolized = true;
+                        	}else if(message.equals("LUMBER"))
+                        	{         
+                        		int bonusResources = 0;
+            	        		for(int i=0; i<4; i++){
+            	        			if(i != catanGame.getTurn()){
+            	        				catanGame.getPlayerArray()[i].removeCards(resourceToMonopolize, catanGame.getPlayerArray()[i].getNumCards(resourceToMonopolize));
+            	        				bonusResources+=catanGame.getPlayerArray()[i].getNumCards(resourceToMonopolize);
+            	        			}
+            	        		}
+                        	owner.devCards.remove(devCard);
+            	            monopolized = true;
+                        	}else if(message.equals("WHEAT"))
+                        	{          
+                        		int bonusResources = 0;
+            	        		for(int i=0; i<4; i++){
+            	        			if(i != catanGame.getTurn()){
+            	        				catanGame.getPlayerArray()[i].removeCards(resourceToMonopolize, catanGame.getPlayerArray()[i].getNumCards(resourceToMonopolize));
+            	        				bonusResources+=catanGame.getPlayerArray()[i].getNumCards(resourceToMonopolize);
+            	        			}
+            	        		}
+                        	owner.devCards.remove(devCard);
+            	            monopolized = true;
+                        	}else if(message.equals("ORE"))
+                        	{
+                        		int bonusResources = 0;
+            	        		for(int i=0; i<4; i++){
+            	        			if(i != catanGame.getTurn()){
+            	        				catanGame.getPlayerArray()[i].removeCards(resourceToMonopolize, catanGame.getPlayerArray()[i].getNumCards(resourceToMonopolize));
+            	        				bonusResources+=catanGame.getPlayerArray()[i].getNumCards(resourceToMonopolize);
+            	        			}
+            	        		}
+                	            owner.devCards.remove(devCard);
+                	            monopolized = true;
+                	        }else 
+                        	{
+                        		sendChatMessage("chat*Server: Wrong resource");
+                        	}
+
+            	            break;
+            	        }
+            	    }
+                	if (!monopolized)
+                	{
+                		sendChatMessage("chat*SERVER: You don't have a monopoly");
+                	}
+                    
                 }else
                 {
                     sendChatMessage("chat*SERVER: Invalid command, " + "you dummy!");
                 }
                 
-            }else if(message.indexOf("steal") != -1)
-            {
-                String toStealFrom = message.substring(6);
-                //command
-                
-            }else if(message.indexOf("robber")!= -1)
-            {
-                //robber i i i steal player
-                try{
-                    message = message.substring(7);
-                    String playerToStealFrom = message.substring(12);
-                    Scanner scanMessage = new Scanner(message);
-                    int coordinate1 = scanMessage.nextInt();
-                    int coordinate2 = scanMessage.nextInt();
-                    int coordinate3 = scanMessage.nextInt();
-                    scanMessage.close();
-                    }catch (Exception InputMismatchException)
-                    {
-                        sendChatMessage("chat*SERVER: Invalid command, " +
-                                         "you dummy!");
-                    }
-                
             }else if(message.indexOf("Get Ye Flask") != -1)
             {
-                System.out.println("You Can't Get Ye Flask");
+                sendChatMessage("chat*Server: You Can't Get Ye Flask");
               //debug mode  
             }else
             {

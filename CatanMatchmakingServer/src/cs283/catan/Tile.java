@@ -31,7 +31,7 @@ public final class Tile implements Serializable {
     /**
      * Resource type of the tile
      */
-    private final ResourceCard.CardType tileType;    
+    private final ResourceCard tileType;    
     
     /**
      * List of coordinates of nodes adjacent to the tile
@@ -47,7 +47,7 @@ public final class Tile implements Serializable {
      * @param tileType
      */
     public Tile(int x, int y, int rollNumber,
-                ResourceCard.CardType tileType) {
+                ResourceCard tileType) {
         this.x = x;
         this.y = y;
         this.rollNumber = rollNumber;
@@ -101,7 +101,7 @@ public final class Tile implements Serializable {
      * check to make sure the tile is not a desert.
      * @return the tile type.
      */
-    public ResourceCard.CardType getTileType() {
+    public ResourceCard getTileType() {
         return tileType;
     }
     
@@ -110,7 +110,7 @@ public final class Tile implements Serializable {
      * @return whether or not the tile is a desert.
      */
     public boolean isDesert() {
-        return tileType == ResourceCard.CardType.DESERT;
+        return tileType == ResourceCard.DESERT;
     }
     
     /**

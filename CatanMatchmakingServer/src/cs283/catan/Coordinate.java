@@ -13,6 +13,8 @@ public final class Coordinate implements Serializable {
      * 
      */
     private static final long serialVersionUID = 7210895717537168897L;
+    
+    
     public final int x;
     public final int y;
     public final int z;
@@ -105,6 +107,7 @@ public final class Coordinate implements Serializable {
         
         return newCoordinate;
     }
+    
     
     /**
      * Prints out the coordinate in the form (x, y, z)
