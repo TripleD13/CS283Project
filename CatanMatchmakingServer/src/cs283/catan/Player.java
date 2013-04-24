@@ -108,7 +108,7 @@ public class Player implements Serializable
 	 * hand.
 	 */
 	public void doSettlementPurchase() {
-	    resCards.length;
+	    resCards.remove(new ResourceCard(ResourceCard.CardType.WHEAT));
 	    resCards.remove(new ResourceCard(ResourceCard.CardType.WOOL));
 	    resCards.remove(new ResourceCard(ResourceCard.CardType.BRICK));
 	    resCards.remove(new ResourceCard(ResourceCard.CardType.LUMBER));
