@@ -79,6 +79,7 @@ public class CatanGUI {
     private JButton btnJoinGame;
     private JButton btnLeaveGame;
     private String username;
+    private JTabbedPane tabbedPane;
     
 	/**
 	 * Launch the application.
@@ -583,170 +584,13 @@ public class CatanGUI {
 		chatOutputPane.setEditable(false);
 		scrollPane_1.setViewportView(chatOutputPane);
 		
-		JPanel gameInfoTop = new JPanel();
-		GridBagConstraints gbc_gameInfoTop = new GridBagConstraints();
-		gbc_gameInfoTop.anchor = GridBagConstraints.NORTH;
-		gbc_gameInfoTop.fill = GridBagConstraints.HORIZONTAL;
-		gbc_gameInfoTop.insets = new Insets(0, 0, 5, 5);
-		gbc_gameInfoTop.gridx = 0;
-		gbc_gameInfoTop.gridy = 2;
-		frame.getContentPane().add(gameInfoTop, gbc_gameInfoTop);
-		GridBagLayout gbl_gameInfoTop = new GridBagLayout();
-		gbl_gameInfoTop.columnWidths = new int[]{100, 100, 100, 100, 100, 100, 0};
-		gbl_gameInfoTop.rowHeights = new int[]{0, 0, 0};
-		gbl_gameInfoTop.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
-		gbl_gameInfoTop.rowWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
-		gameInfoTop.setLayout(gbl_gameInfoTop);
-		
-		JLabel lblNewLabel = new JLabel("Settlements");
-		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
-		gbc_lblNewLabel.anchor = GridBagConstraints.WEST;
-		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
-		gbc_lblNewLabel.gridx = 0;
-		gbc_lblNewLabel.gridy = 0;
-		gameInfoTop.add(lblNewLabel, gbc_lblNewLabel);
-		
-		textField = new JTextField();
-		textField.setEditable(false);
-		GridBagConstraints gbc_textField = new GridBagConstraints();
-		gbc_textField.insets = new Insets(0, 0, 5, 5);
-		gbc_textField.fill = GridBagConstraints.HORIZONTAL;
-		gbc_textField.gridx = 1;
-		gbc_textField.gridy = 0;
-		gameInfoTop.add(textField, gbc_textField);
-		textField.setColumns(10);
-		
-		JLabel lblCities = new JLabel("Biggest Army");
-		GridBagConstraints gbc_lblCities = new GridBagConstraints();
-		gbc_lblCities.anchor = GridBagConstraints.WEST;
-		gbc_lblCities.insets = new Insets(0, 0, 5, 5);
-		gbc_lblCities.gridx = 2;
-		gbc_lblCities.gridy = 0;
-		gameInfoTop.add(lblCities, gbc_lblCities);
-		
-		largestArmyField = new JTextField();
-		largestArmyField.setEditable(false);
-		largestArmyField.setColumns(10);
-		GridBagConstraints gbc_largestArmyField = new GridBagConstraints();
-		gbc_largestArmyField.insets = new Insets(0, 0, 5, 5);
-		gbc_largestArmyField.fill = GridBagConstraints.HORIZONTAL;
-		gbc_largestArmyField.gridx = 3;
-		gbc_largestArmyField.gridy = 0;
-		gameInfoTop.add(largestArmyField, gbc_largestArmyField);
-		
-		JLabel lblBiggestArmy = new JLabel("Victory Points");
-		GridBagConstraints gbc_lblBiggestArmy = new GridBagConstraints();
-		gbc_lblBiggestArmy.anchor = GridBagConstraints.WEST;
-		gbc_lblBiggestArmy.insets = new Insets(0, 0, 5, 5);
-		gbc_lblBiggestArmy.gridx = 4;
-		gbc_lblBiggestArmy.gridy = 0;
-		gameInfoTop.add(lblBiggestArmy, gbc_lblBiggestArmy);
-		
-		victoryPointTotalField = new JTextField();
-		victoryPointTotalField.setEditable(false);
-		victoryPointTotalField.setColumns(10);
-		GridBagConstraints gbc_victoryPointTotalField = new GridBagConstraints();
-		gbc_victoryPointTotalField.insets = new Insets(0, 0, 5, 0);
-		gbc_victoryPointTotalField.fill = GridBagConstraints.HORIZONTAL;
-		gbc_victoryPointTotalField.gridx = 5;
-		gbc_victoryPointTotalField.gridy = 0;
-		gameInfoTop.add(victoryPointTotalField, gbc_victoryPointTotalField);
-		
-		JLabel lblNewLabel_1 = new JLabel("Cities");
-		GridBagConstraints gbc_lblNewLabel_1 = new GridBagConstraints();
-		gbc_lblNewLabel_1.anchor = GridBagConstraints.WEST;
-		gbc_lblNewLabel_1.insets = new Insets(0, 0, 0, 5);
-		gbc_lblNewLabel_1.gridx = 0;
-		gbc_lblNewLabel_1.gridy = 1;
-		gameInfoTop.add(lblNewLabel_1, gbc_lblNewLabel_1);
-		
-		textField_1 = new JTextField();
-		textField_1.setEditable(false);
-		textField_1.setColumns(10);
-		GridBagConstraints gbc_textField_1 = new GridBagConstraints();
-		gbc_textField_1.insets = new Insets(0, 0, 0, 5);
-		gbc_textField_1.fill = GridBagConstraints.HORIZONTAL;
-		gbc_textField_1.gridx = 1;
-		gbc_textField_1.gridy = 1;
-		gameInfoTop.add(textField_1, gbc_textField_1);
-		
-		JLabel lblLongestRoad = new JLabel("Longest Road");
-		GridBagConstraints gbc_lblLongestRoad = new GridBagConstraints();
-		gbc_lblLongestRoad.anchor = GridBagConstraints.WEST;
-		gbc_lblLongestRoad.insets = new Insets(0, 0, 0, 5);
-		gbc_lblLongestRoad.gridx = 2;
-		gbc_lblLongestRoad.gridy = 1;
-		gameInfoTop.add(lblLongestRoad, gbc_lblLongestRoad);
-		
-		longestRoadField = new JTextField();
-		longestRoadField.setEditable(false);
-		longestRoadField.setColumns(10);
-		GridBagConstraints gbc_longestRoadField = new GridBagConstraints();
-		gbc_longestRoadField.insets = new Insets(0, 0, 0, 5);
-		gbc_longestRoadField.fill = GridBagConstraints.HORIZONTAL;
-		gbc_longestRoadField.gridx = 3;
-		gbc_longestRoadField.gridy = 1;
-		gameInfoTop.add(longestRoadField, gbc_longestRoadField);
-		
-		JPanel panel_2 = new JPanel();
-		GridBagConstraints gbc_panel_2 = new GridBagConstraints();
-		gbc_panel_2.gridheight = 2;
-		gbc_panel_2.insets = new Insets(0, 0, 5, 0);
-		gbc_panel_2.fill = GridBagConstraints.BOTH;
-		gbc_panel_2.gridx = 1;
-		gbc_panel_2.gridy = 2;
-		frame.getContentPane().add(panel_2, gbc_panel_2);
-		GridBagLayout gbl_panel_2 = new GridBagLayout();
-		gbl_panel_2.columnWidths = new int[]{143, 189, 0};
-		gbl_panel_2.rowHeights = new int[]{32, 43, 22, 0};
-		gbl_panel_2.columnWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
-		gbl_panel_2.rowWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
-		panel_2.setLayout(gbl_panel_2);
-		
-		JLabel lblNewLabel_8 = new JLabel("Chat Here!");
-		GridBagConstraints gbc_lblNewLabel_8 = new GridBagConstraints();
-		gbc_lblNewLabel_8.anchor = GridBagConstraints.WEST;
-		gbc_lblNewLabel_8.insets = new Insets(0, 0, 5, 5);
-		gbc_lblNewLabel_8.gridx = 0;
-		gbc_lblNewLabel_8.gridy = 0;
-		panel_2.add(lblNewLabel_8, gbc_lblNewLabel_8);
-		
-		chatInputField = new JTextField();
-		chatInputField.setEnabled(false);
-		chatInputField.addActionListener(new ActionListener() {
-		    public void actionPerformed(ActionEvent arg0) {
-		        sendChatMessage();
-		    }
-		});
-		chatInputField.setColumns(10);
-		GridBagConstraints gbc_chatInputField = new GridBagConstraints();
-		gbc_chatInputField.gridwidth = 2;
-		gbc_chatInputField.fill = GridBagConstraints.HORIZONTAL;
-		gbc_chatInputField.insets = new Insets(0, 0, 5, 0);
-		gbc_chatInputField.gridx = 0;
-		gbc_chatInputField.gridy = 1;
-		panel_2.add(chatInputField, gbc_chatInputField);
-		
-		sendMessageButton = new JButton("Send Message");
-		sendMessageButton.setEnabled(false);
-		sendMessageButton.addActionListener(new ActionListener() {
-		    public void actionPerformed(ActionEvent e) {
-		        sendChatMessage();
-		    }
-		});
-		GridBagConstraints gbc_sendMessageButton = new GridBagConstraints();
-		gbc_sendMessageButton.anchor = GridBagConstraints.EAST;
-		gbc_sendMessageButton.gridx = 1;
-		gbc_sendMessageButton.gridy = 2;
-		panel_2.add(sendMessageButton, gbc_sendMessageButton);
-		
 		JPanel commandPanel = new JPanel();
 		GridBagConstraints gbc_commandPanel = new GridBagConstraints();
 		gbc_commandPanel.insets = new Insets(0, 0, 5, 5);
 		gbc_commandPanel.anchor = GridBagConstraints.NORTH;
 		gbc_commandPanel.fill = GridBagConstraints.HORIZONTAL;
 		gbc_commandPanel.gridx = 0;
-		gbc_commandPanel.gridy = 3;
+		gbc_commandPanel.gridy = 2;
 		frame.getContentPane().add(commandPanel, gbc_commandPanel);
 		GridBagLayout gbl_commandPanel = new GridBagLayout();
 		gbl_commandPanel.columnWidths = new int[]{0, 0, 0};
@@ -800,13 +644,69 @@ public class CatanGUI {
 		gbc_sendCommandButton.gridy = 1;
 		commandPanel.add(sendCommandButton, gbc_sendCommandButton);
 		
+		JPanel panel_2 = new JPanel();
+		GridBagConstraints gbc_panel_2 = new GridBagConstraints();
+		gbc_panel_2.gridheight = 2;
+		gbc_panel_2.insets = new Insets(0, 0, 5, 0);
+		gbc_panel_2.fill = GridBagConstraints.BOTH;
+		gbc_panel_2.gridx = 1;
+		gbc_panel_2.gridy = 2;
+		frame.getContentPane().add(panel_2, gbc_panel_2);
+		GridBagLayout gbl_panel_2 = new GridBagLayout();
+		gbl_panel_2.columnWidths = new int[]{143, 189, 0};
+		gbl_panel_2.rowHeights = new int[]{32, 43, 22, 0};
+		gbl_panel_2.columnWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
+		gbl_panel_2.rowWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
+		panel_2.setLayout(gbl_panel_2);
+		
+		JLabel lblNewLabel_8 = new JLabel("Chat Here!");
+		GridBagConstraints gbc_lblNewLabel_8 = new GridBagConstraints();
+		gbc_lblNewLabel_8.anchor = GridBagConstraints.WEST;
+		gbc_lblNewLabel_8.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel_8.gridx = 0;
+		gbc_lblNewLabel_8.gridy = 0;
+		panel_2.add(lblNewLabel_8, gbc_lblNewLabel_8);
+		
+		chatInputField = new JTextField();
+		chatInputField.setEnabled(false);
+		chatInputField.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent arg0) {
+		        sendChatMessage();
+		    }
+		});
+		chatInputField.setColumns(10);
+		GridBagConstraints gbc_chatInputField = new GridBagConstraints();
+		gbc_chatInputField.gridwidth = 2;
+		gbc_chatInputField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_chatInputField.insets = new Insets(0, 0, 5, 0);
+		gbc_chatInputField.gridx = 0;
+		gbc_chatInputField.gridy = 1;
+		panel_2.add(chatInputField, gbc_chatInputField);
+		
+		sendMessageButton = new JButton("Send Message");
+		sendMessageButton.setEnabled(false);
+		sendMessageButton.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+		        sendChatMessage();
+		    }
+		});
+		GridBagConstraints gbc_sendMessageButton = new GridBagConstraints();
+		gbc_sendMessageButton.anchor = GridBagConstraints.EAST;
+		gbc_sendMessageButton.gridx = 1;
+		gbc_sendMessageButton.gridy = 2;
+		panel_2.add(sendMessageButton, gbc_sendMessageButton);
+		
+		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		GridBagConstraints gbc_tabbedPane = new GridBagConstraints();
+		gbc_tabbedPane.gridheight = 2;
+		gbc_tabbedPane.fill = GridBagConstraints.BOTH;
+		gbc_tabbedPane.insets = new Insets(0, 0, 0, 5);
+		gbc_tabbedPane.gridx = 0;
+		gbc_tabbedPane.gridy = 3;
+		frame.getContentPane().add(tabbedPane, gbc_tabbedPane);
+		
 		JPanel resourcePanel = new JPanel();
-		GridBagConstraints gbc_resourcePanel = new GridBagConstraints();
-		gbc_resourcePanel.fill = GridBagConstraints.BOTH;
-		gbc_resourcePanel.insets = new Insets(0, 0, 0, 5);
-		gbc_resourcePanel.gridx = 0;
-		gbc_resourcePanel.gridy = 4;
-		frame.getContentPane().add(resourcePanel, gbc_resourcePanel);
+		tabbedPane.addTab("Resources", null, resourcePanel, null);
 		GridBagLayout gbl_resourcePanel = new GridBagLayout();
 		gbl_resourcePanel.columnWidths = new int[]{100, 100, 100, 100, 200, 0};
 		gbl_resourcePanel.rowHeights = new int[]{0, 0, 0, 0, 0, 0};
@@ -1011,6 +911,105 @@ public class CatanGUI {
 		gbc_roadBuildField.gridx = 3;
 		gbc_roadBuildField.gridy = 4;
 		resourcePanel.add(roadBuildField, gbc_roadBuildField);
+		
+		JPanel gameInfoTop = new JPanel();
+		tabbedPane.addTab("Victory Conditions", null, gameInfoTop, null);
+		GridBagLayout gbl_gameInfoTop = new GridBagLayout();
+		gbl_gameInfoTop.columnWidths = new int[]{100, 100, 100, 100, 100, 100, 0};
+		gbl_gameInfoTop.rowHeights = new int[]{0, 0, 0};
+		gbl_gameInfoTop.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
+		gbl_gameInfoTop.rowWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
+		gameInfoTop.setLayout(gbl_gameInfoTop);
+		
+		JLabel lblNewLabel = new JLabel("Settlements");
+		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
+		gbc_lblNewLabel.anchor = GridBagConstraints.WEST;
+		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel.gridx = 0;
+		gbc_lblNewLabel.gridy = 0;
+		gameInfoTop.add(lblNewLabel, gbc_lblNewLabel);
+		
+		textField = new JTextField();
+		textField.setEditable(false);
+		GridBagConstraints gbc_textField = new GridBagConstraints();
+		gbc_textField.insets = new Insets(0, 0, 5, 5);
+		gbc_textField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_textField.gridx = 1;
+		gbc_textField.gridy = 0;
+		gameInfoTop.add(textField, gbc_textField);
+		textField.setColumns(10);
+		
+		JLabel lblCities = new JLabel("Biggest Army");
+		GridBagConstraints gbc_lblCities = new GridBagConstraints();
+		gbc_lblCities.anchor = GridBagConstraints.WEST;
+		gbc_lblCities.insets = new Insets(0, 0, 5, 5);
+		gbc_lblCities.gridx = 2;
+		gbc_lblCities.gridy = 0;
+		gameInfoTop.add(lblCities, gbc_lblCities);
+		
+		largestArmyField = new JTextField();
+		largestArmyField.setEditable(false);
+		largestArmyField.setColumns(10);
+		GridBagConstraints gbc_largestArmyField = new GridBagConstraints();
+		gbc_largestArmyField.insets = new Insets(0, 0, 5, 5);
+		gbc_largestArmyField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_largestArmyField.gridx = 3;
+		gbc_largestArmyField.gridy = 0;
+		gameInfoTop.add(largestArmyField, gbc_largestArmyField);
+		
+		JLabel lblBiggestArmy = new JLabel("Victory Points");
+		GridBagConstraints gbc_lblBiggestArmy = new GridBagConstraints();
+		gbc_lblBiggestArmy.anchor = GridBagConstraints.WEST;
+		gbc_lblBiggestArmy.insets = new Insets(0, 0, 5, 5);
+		gbc_lblBiggestArmy.gridx = 4;
+		gbc_lblBiggestArmy.gridy = 0;
+		gameInfoTop.add(lblBiggestArmy, gbc_lblBiggestArmy);
+		
+		victoryPointTotalField = new JTextField();
+		victoryPointTotalField.setEditable(false);
+		victoryPointTotalField.setColumns(10);
+		GridBagConstraints gbc_victoryPointTotalField = new GridBagConstraints();
+		gbc_victoryPointTotalField.insets = new Insets(0, 0, 5, 0);
+		gbc_victoryPointTotalField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_victoryPointTotalField.gridx = 5;
+		gbc_victoryPointTotalField.gridy = 0;
+		gameInfoTop.add(victoryPointTotalField, gbc_victoryPointTotalField);
+		
+		JLabel lblNewLabel_1 = new JLabel("Cities");
+		GridBagConstraints gbc_lblNewLabel_1 = new GridBagConstraints();
+		gbc_lblNewLabel_1.anchor = GridBagConstraints.WEST;
+		gbc_lblNewLabel_1.insets = new Insets(0, 0, 0, 5);
+		gbc_lblNewLabel_1.gridx = 0;
+		gbc_lblNewLabel_1.gridy = 1;
+		gameInfoTop.add(lblNewLabel_1, gbc_lblNewLabel_1);
+		
+		textField_1 = new JTextField();
+		textField_1.setEditable(false);
+		textField_1.setColumns(10);
+		GridBagConstraints gbc_textField_1 = new GridBagConstraints();
+		gbc_textField_1.insets = new Insets(0, 0, 0, 5);
+		gbc_textField_1.fill = GridBagConstraints.HORIZONTAL;
+		gbc_textField_1.gridx = 1;
+		gbc_textField_1.gridy = 1;
+		gameInfoTop.add(textField_1, gbc_textField_1);
+		
+		JLabel lblLongestRoad = new JLabel("Longest Road");
+		GridBagConstraints gbc_lblLongestRoad = new GridBagConstraints();
+		gbc_lblLongestRoad.anchor = GridBagConstraints.WEST;
+		gbc_lblLongestRoad.insets = new Insets(0, 0, 0, 5);
+		gbc_lblLongestRoad.gridx = 2;
+		gbc_lblLongestRoad.gridy = 1;
+		gameInfoTop.add(lblLongestRoad, gbc_lblLongestRoad);
+		
+		longestRoadField = new JTextField();
+		longestRoadField.setEditable(false);
+		longestRoadField.setColumns(10);
+		GridBagConstraints gbc_longestRoadField = new GridBagConstraints();
+		gbc_longestRoadField.insets = new Insets(0, 0, 0, 5);
+		gbc_longestRoadField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_longestRoadField.gridx = 3;
+		gbc_longestRoadField.gridy = 1;
+		gameInfoTop.add(longestRoadField, gbc_longestRoadField);
 	}
 
 }
