@@ -1027,7 +1027,7 @@ public class ServerMain {
                             	if (!board.freeAddSettlement(new Coordinate(coordinate1,
                                                                coordinate2,
                                                                coordinate3),
-                                                               owner)) {
+                                                               owner, false)) {
                             		sendChatMessage("chat*SERVER: Unable to add " +
                             				"settlement.");
                             	} else {
@@ -1132,7 +1132,7 @@ public class ServerMain {
                             if (!board.freeAddSettlement(new Coordinate(coordinate1,
                                                                coordinate2,
                                                                coordinate3),
-                                                    owner)) {
+                                                    owner, true)) {
                                 sendChatMessage("chat*SERVER: Unable to add " +
                                                 "settlement.");
                             } else {
