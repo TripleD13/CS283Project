@@ -465,6 +465,8 @@ public static void main(String args[]) {
                 
                 isSettlementAdded = true;
                 
+                owner.incrementPermanentPoints();
+                
                 //makes new coordinates for tradeports
                 
                 Coordinate wheatPort1 = new Coordinate(1, -2, 5);
@@ -574,6 +576,8 @@ public boolean freeAddSettlement(Coordinate location, Player owner,
 		settlementList.add(newSettlement);
 
 		isSettlementAdded = true;
+		
+		owner.incrementPermanentPoints();
 
 		//makes new coordinates for tradeports
 
@@ -918,6 +922,8 @@ return isSettlementAdded;
 	        if (settlement.getOwner() == owner) {
 	            settlement.upgradeToCity();
 	            isUpgraded = true;
+	            
+	            owner.incrementPermanentPoints();
 	            
 	            owner.doCityPurchase();
 	        }
