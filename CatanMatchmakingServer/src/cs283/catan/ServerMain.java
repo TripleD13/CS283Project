@@ -1552,263 +1552,274 @@ public class ServerMain {
                 
             }else if(message.indexOf("trade") != -1)
             {
-            	//Written by Kevin Zeillmann
-            	//Uses regular expressions because they're wonderful
-            	message = message.toLowerCase();
-            	String offerString = 
-            			"^trade offer (wool|ore|wheat|brick|lumber)+ for " +
-            			"(wool|ore|wheat|brick|lumber)+";
-            	
-            	
-            	Pattern offerPattern = Pattern.compile(offerString);
-            	
-            	Matcher offerMatcher = offerPattern.matcher(message);
-            	
-            	if(offerMatcher.find()) {
-            		//then we know we have a valid offer syntax
-            		//first need to determine the offer and 
-            		//place that in an intArray
-            		Scanner myScan = new Scanner(offerString);
-            		//first we consume the first two words
-            		myScan.next();
-            		myScan.next();
-            		String nextWord = myScan.next();
-            		//now we want to see what happens until we hit the "for" string
-            		//this is guaranteed to occur since we already checked with
-            		//regular expressions
-            		
-            		//create an array to store results
-            		//initialize everything to zero
-            		int offerArray[] = new int[5];
-            		for(int i = 0; i<5; ++i)
-            		{
-            			offerArray[i] = 0;
-            		}
-            		
-            		while(nextWord != "for")
-            		{
-            			if(nextWord == "brick")
-            			{
-            				offerArray[0]++;
-            				
-            			}
-            			else if(nextWord == "lumber")
-            			{
-            				offerArray[1]++;
-            			}
-            			else if(nextWord == "ore")
-            			{
-            				offerArray[2]++;            				
-            			}
-            			else if(nextWord == "wheat")
-            			{
-            				offerArray[3]++;
-            			}
-            			else if(nextWord == "wool")
-            			{
-            				offerArray[4]++;
-            			}
-            			else
-            			{
-            				System.out.println("Error: This should never happen.");
-            			}
-            			nextWord = myScan.next();
-            		}
-            		//ok we just scanned for - so now we scan for the other array
-            		int acceptArray[] = new int[5];
-            		for(int i = 0; i<5; ++i)
-            		{
-            			acceptArray[i] = 0;
-            		}
-            		while(myScan.hasNext())
-            		{
-            			nextWord = myScan.next();
-            			if(nextWord == "brick")
-            			{
-            				acceptArray[0]++;
-            				
-            			}
-            			else if(nextWord == "lumber")
-            			{
-            				acceptArray[1]++;
-            			}
-            			else if(nextWord == "ore")
-            			{
-            				acceptArray[2]++;            				
-            			}
-            			else if(nextWord == "wheat")
-            			{
-            				acceptArray[3]++;
-            			}
-            			else if(nextWord == "wool")
-            			{
-            				acceptArray[4]++;
-            			}
-            			else //never happens
-            			{
-            				System.out.println("Error: This should never happen.");
-            			}
-            			
-            			
-            		}
-            		//so we have two arrays with the info          		
-            		
-            		
-            		//then we determine whether the player has the cards
-            		//necessary to complete the trade
-            		if(owner.getNumCards(ResourceCard.BRICK.toString()) >= offerArray[0]
-            		&& owner.getNumCards(ResourceCard.LUMBER.toString()) >= offerArray[1]
-            		&& owner.getNumCards(ResourceCard.ORE.toString()) >= offerArray[2]
-            		&& owner.getNumCards(ResourceCard.WHEAT.toString()) >= offerArray[3]
-            		&& owner.getNumCards(ResourceCard.WOOL.toString()) >= offerArray[4])
-            		{
-            			//create the trade
-            			catanGame.setActiveTrade(offerArray, acceptArray);
-            		}
-            		else
-            		{
-            			sendChatMessage("chat*SERVER: You don't have the resources to " +
-            					"offer that trade");
-            		}
-            		                 
-                }
-           
-            	else{
-            		sendChatMessage("chat*SERVER: Invalid trade command");
-                }
-            	
-            	
-                /*int andIndex1 = message.indexOf("and");
-                int andIndex2 = message.indexOf("and", andIndex1 +1);
-                int forIndex = message.indexOf("for");
-                
-                if (forIndex != -1)
-                {
-                    try
-                    {
-                    message = message.substring(6);
-                //  System.out.println(message);
-                    if (andIndex1 == -1)
-                    {
-                        //single trade
-                        Scanner numberScan = new Scanner(message);
-                        int thisItemNumber = numberScan.nextInt();
-                        String thisItem = message.substring(2, message.indexOf("for")-1);
-                        message = message.substring(message.indexOf("for")+3);
-                        numberScan.close();
-                        numberScan = new Scanner(message);
-                        int thatItemNumber = numberScan.nextInt();
-                        String thatItem = message.substring(3);
-                        //command
-                        System.out.println(thisItemNumber);
-                        System.out.println(thisItem);
-                        System.out.println(thatItemNumber);
-                        System.out.println(thatItem);
-                        
-                        numberScan.close();
-                    }else if (andIndex2 == -1 && andIndex1 < forIndex)
-                    {
-                        //2 for 1 trade
-                    //  System.out.println(message);
-                        Scanner numberScan = new Scanner(message);
-                        int thisItemNumber = numberScan.nextInt();
-                        String thisItem = message.substring(2, message.indexOf("and")-1);
-                        message = message.substring(message.indexOf("and")+4);
-                        //System.out.println(message);
-                        numberScan.close();
-                        numberScan = new Scanner(message);
-                        int andThisItemNumber = numberScan.nextInt();
-                        String andThisItem = message.substring(2, message.indexOf("for")-1);
-                        
-                        message = message.substring(message.indexOf("for")+4);
-                    //  System.out.println(message);
-                        numberScan.close();
-                        numberScan = new Scanner(message);
-                        int thatItemNumber = numberScan.nextInt();
-                        String thatItem = message.substring(2);
-                        //command
-
-
-                        System.out.println(thisItemNumber);
-                        System.out.println(thisItem);
-                        System.out.println(andThisItemNumber);
-                        System.out.println(andThisItem);
-                        System.out.println(thatItemNumber);
-                        System.out.println(thatItem);
-                        
-                        numberScan.close();
-
-                    }else if (andIndex2 == -1 && andIndex1 > forIndex)
-                    {
-                        //1 for 2 trade
-                        //System.out.println(message);
-                        Scanner numberScan = new Scanner(message);
-                        int thisItemNumber = numberScan.nextInt();
-                        String thisItem = message.substring(2 ,message.indexOf("for")-1);
-                        message = message.substring(message.indexOf("for")+4);
-                    //  System.out.println(message);
-                        numberScan.close();
-                        numberScan = new Scanner(message);
-                        int thatItemNumber = numberScan.nextInt();
-                        String thatItem = message.substring(2, message.indexOf("and")-1);
-                        message = message.substring(message.indexOf("and")+4);
-                    //  System.out.println(message);
-                        numberScan.close();
-                        numberScan = new Scanner(message);
-                        int andThatItemNumber = numberScan.nextInt();
-                        String andThatItem = message.substring(2);
-                        //command
-                        
-                        System.out.println(thisItemNumber);
-                        System.out.println(thisItem);
-                        System.out.println(thatItemNumber);
-                        System.out.println(thatItem);
-                        System.out.println(andThatItemNumber);
-                        System.out.println(andThatItem);
-                        numberScan.close();
-
-                    }else
-                    {
-                        //2 for 2 trade 
-                        Scanner numberScan = new Scanner(message);
-                        int thisItemNumber = numberScan.nextInt();
-                        String thisItem = message.substring(2, message.indexOf("and")-1);
-                        message = message.substring(message.indexOf("and")+4);
-                        //System.out.println(message);
-                        numberScan.close();
-                        numberScan = new Scanner(message);
-                        int andThisItemNumber = numberScan.nextInt();
-                        String andThisItem = message.substring(2, message.indexOf("for")-1);
-                        message = message.substring(message.indexOf("for")+4);
-                        //System.out.println(message);
-                        numberScan.close();
-                        numberScan = new Scanner(message);
-                        int thatItemNumber = numberScan.nextInt();
-                        String thatItem = message.substring(2, message.indexOf("and")-1);
-                        message = message.substring(message.indexOf("and")+4);
-                        //System.out.println(message);
-                        numberScan.close();
-                        numberScan = new Scanner(message);
-                        int andThatItemNumber = numberScan.nextInt();
-                        String andThatItem = message.substring(2);
-                        //command
-                        //command
-                        System.out.println(thisItemNumber);
-                        System.out.println(thisItem);
-                        System.out.println(andThisItemNumber);
-                        System.out.println(andThisItem);
-                        System.out.println(thatItemNumber);
-                        System.out.println(thatItem);
-                        System.out.println(andThatItemNumber);
-                        System.out.println(andThatItem);
-                        numberScan.close();
+            	try
+            	{
+            		//Written by Kevin Zeillmann
+                	//Uses regular expressions because they're wonderful
+                	message = message.toLowerCase();
+                	String offerString = 
+                			"^trade offer (wool|ore|wheat|brick|lumber)+ for " +
+                			"(wool|ore|wheat|brick|lumber)+";
+                	
+                	
+                	Pattern offerPattern = Pattern.compile(offerString);
+                	
+                	Matcher offerMatcher = offerPattern.matcher(message);
+                	
+                	if(offerMatcher.find()) {
+                		
+                		//then we know we have a valid offer syntax
+                		//first need to determine the offer and 
+                		//place that in an intArray
+                		
+                		Scanner myScan = new Scanner(offerString);
+                		//first we consume the first two words
+                		myScan.next();
+                		myScan.next();
+                		String nextWord = myScan.next();
+                		//now we want to see what happens until we hit the "for" string
+                		//this is guaranteed to occur since we already checked with
+                		//regular expressions
+                		
+                		//create an array to store results
+                		//initialize everything to zero
+                		int offerArray[] = new int[5];
+                		for(int i = 0; i<5; ++i)
+                		{
+                			offerArray[i] = 0;
+                		}
+                		
+                		while(!nextWord.equals("for"))
+                		{
+                			if(nextWord.equals("brick"))
+                			{
+                				offerArray[0]++;
+                				
+                			}
+                			else if(nextWord.equals("lumber"))
+                			{
+                				offerArray[1]++;
+                			}
+                			else if(nextWord.equals("ore"))
+                			{
+                				offerArray[2]++;            				
+                			}
+                			else if(nextWord.equals("wheat"))
+                			{
+                				offerArray[3]++;
+                			}
+                			else if(nextWord.equals("wool"))
+                			{
+                				offerArray[4]++;
+                			}
+                			else
+                			{
+                				System.out.println("Error: This should never happen.");
+                			}
+                			nextWord = myScan.next();
+                		}
+                		//ok we just scanned for - so now we scan for the other array
+                		int acceptArray[] = new int[5];
+                		for(int i = 0; i<5; ++i)
+                		{
+                			acceptArray[i] = 0;
+                		}
+                		while(myScan.hasNext())
+                		{
+                			nextWord = myScan.next();
+                			if(nextWord.equals("brick"))
+                			{
+                				acceptArray[0]++;
+                				
+                			}
+                			else if(nextWord.equals("lumber"))
+                			{
+                				acceptArray[1]++;
+                			}
+                			else if(nextWord.equals("ore"))
+                			{
+                				acceptArray[2]++;            				
+                			}
+                			else if(nextWord.equals("wheat"))
+                			{
+                				acceptArray[3]++;
+                			}
+                			else if(nextWord.equals("wool"))
+                			{
+                				acceptArray[4]++;
+                			}
+                			else //never happens
+                			{
+                				System.out.println("Error: This should never happen.");
+                			}
+                			
+                			
+                		}
+                		//so we have two arrays with the info          		
+                		
+                		
+                		//then we determine whether the player has the cards
+                		//necessary to complete the trade
+                		if(owner.getNumCards(ResourceCard.BRICK.toString()) >= offerArray[0]
+                		&& owner.getNumCards(ResourceCard.LUMBER.toString()) >= offerArray[1]
+                		&& owner.getNumCards(ResourceCard.ORE.toString()) >= offerArray[2]
+                		&& owner.getNumCards(ResourceCard.WHEAT.toString()) >= offerArray[3]
+                		&& owner.getNumCards(ResourceCard.WOOL.toString()) >= offerArray[4])
+                		{
+                			//create the trade
+                			catanGame.setActiveTrade(offerArray, acceptArray);
+                		}
+                		else
+                		{
+                			sendChatMessage("chat*SERVER: You don't have the resources to " +
+                					"offer that trade");
+                		}
+                		myScan.close();
+                		                 
                     }
-                    }catch (Exception InputMismatchException)
+               
+                	else{
+                		sendChatMessage("chat*SERVER: Invalid trade command");
+                    }
+                	
+                	
+                    /*int andIndex1 = message.indexOf("and");
+                    int andIndex2 = message.indexOf("and", andIndex1 +1);
+                    int forIndex = message.indexOf("for");
+                    
+                    if (forIndex != -1)
                     {
-                        sendChatMessage("chat*SERVER: Invalid command, " +
-                                "you dummy!");
-                   }
-                */
+                        try
+                        {
+                        message = message.substring(6);
+                    //  System.out.println(message);
+                        if (andIndex1 == -1)
+                        {
+                            //single trade
+                            Scanner numberScan = new Scanner(message);
+                            int thisItemNumber = numberScan.nextInt();
+                            String thisItem = message.substring(2, message.indexOf("for")-1);
+                            message = message.substring(message.indexOf("for")+3);
+                            numberScan.close();
+                            numberScan = new Scanner(message);
+                            int thatItemNumber = numberScan.nextInt();
+                            String thatItem = message.substring(3);
+                            //command
+                            System.out.println(thisItemNumber);
+                            System.out.println(thisItem);
+                            System.out.println(thatItemNumber);
+                            System.out.println(thatItem);
+                            
+                            numberScan.close();
+                        }else if (andIndex2 == -1 && andIndex1 < forIndex)
+                        {
+                            //2 for 1 trade
+                        //  System.out.println(message);
+                            Scanner numberScan = new Scanner(message);
+                            int thisItemNumber = numberScan.nextInt();
+                            String thisItem = message.substring(2, message.indexOf("and")-1);
+                            message = message.substring(message.indexOf("and")+4);
+                            //System.out.println(message);
+                            numberScan.close();
+                            numberScan = new Scanner(message);
+                            int andThisItemNumber = numberScan.nextInt();
+                            String andThisItem = message.substring(2, message.indexOf("for")-1);
+                            
+                            message = message.substring(message.indexOf("for")+4);
+                        //  System.out.println(message);
+                            numberScan.close();
+                            numberScan = new Scanner(message);
+                            int thatItemNumber = numberScan.nextInt();
+                            String thatItem = message.substring(2);
+                            //command
+
+
+                            System.out.println(thisItemNumber);
+                            System.out.println(thisItem);
+                            System.out.println(andThisItemNumber);
+                            System.out.println(andThisItem);
+                            System.out.println(thatItemNumber);
+                            System.out.println(thatItem);
+                            
+                            numberScan.close();
+
+                        }else if (andIndex2 == -1 && andIndex1 > forIndex)
+                        {
+                            //1 for 2 trade
+                            //System.out.println(message);
+                            Scanner numberScan = new Scanner(message);
+                            int thisItemNumber = numberScan.nextInt();
+                            String thisItem = message.substring(2 ,message.indexOf("for")-1);
+                            message = message.substring(message.indexOf("for")+4);
+                        //  System.out.println(message);
+                            numberScan.close();
+                            numberScan = new Scanner(message);
+                            int thatItemNumber = numberScan.nextInt();
+                            String thatItem = message.substring(2, message.indexOf("and")-1);
+                            message = message.substring(message.indexOf("and")+4);
+                        //  System.out.println(message);
+                            numberScan.close();
+                            numberScan = new Scanner(message);
+                            int andThatItemNumber = numberScan.nextInt();
+                            String andThatItem = message.substring(2);
+                            //command
+                            
+                            System.out.println(thisItemNumber);
+                            System.out.println(thisItem);
+                            System.out.println(thatItemNumber);
+                            System.out.println(thatItem);
+                            System.out.println(andThatItemNumber);
+                            System.out.println(andThatItem);
+                            numberScan.close();
+
+                        }else
+                        {
+                            //2 for 2 trade 
+                            Scanner numberScan = new Scanner(message);
+                            int thisItemNumber = numberScan.nextInt();
+                            String thisItem = message.substring(2, message.indexOf("and")-1);
+                            message = message.substring(message.indexOf("and")+4);
+                            //System.out.println(message);
+                            numberScan.close();
+                            numberScan = new Scanner(message);
+                            int andThisItemNumber = numberScan.nextInt();
+                            String andThisItem = message.substring(2, message.indexOf("for")-1);
+                            message = message.substring(message.indexOf("for")+4);
+                            //System.out.println(message);
+                            numberScan.close();
+                            numberScan = new Scanner(message);
+                            int thatItemNumber = numberScan.nextInt();
+                            String thatItem = message.substring(2, message.indexOf("and")-1);
+                            message = message.substring(message.indexOf("and")+4);
+                            //System.out.println(message);
+                            numberScan.close();
+                            numberScan = new Scanner(message);
+                            int andThatItemNumber = numberScan.nextInt();
+                            String andThatItem = message.substring(2);
+                            //command
+                            //command
+                            System.out.println(thisItemNumber);
+                            System.out.println(thisItem);
+                            System.out.println(andThisItemNumber);
+                            System.out.println(andThisItem);
+                            System.out.println(thatItemNumber);
+                            System.out.println(thatItem);
+                            System.out.println(andThatItemNumber);
+                            System.out.println(andThatItem);
+                            numberScan.close();
+                        }
+                        }catch (Exception InputMismatchException)
+                        {
+                            sendChatMessage("chat*SERVER: Invalid command, " +
+                                    "you dummy!");
+                       }
+                    */
+            	}
+            	catch(InputMismatchException e)
+            	{
+            		sendChatMessage("chat*SERVER: Invalid chat message");
+            	}
+            	
             }else if(message.indexOf("play") != -1)
             {
                 if(message.indexOf("year of plenty") != -1)
