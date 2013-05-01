@@ -859,11 +859,13 @@ public class ServerMain {
                         isTurn = catanGame.isTurn(username);
                     }
                     
+                    
                     // Make sure it is the player's turn
                     if (isTurn) {
                         parseGameCommand(msg.substring(5));
                     } else {
-                        sendChatMessage("chat*SERVER: Wait your turn!");
+                    	parseTradeAccept(msg.substring(5), username);
+                        
                     }
                 } else if (msg.startsWith("chat*")) { // Chat message received
                     
@@ -979,6 +981,94 @@ public class ServerMain {
                     }
                 }
             }
+        }
+        
+        private void parseTradeAccept(String message, String username) throws Exception
+        {
+        	Player myPlayer = catanGame.getPlayer(username);
+        	if(myPlayer == null)
+        	{
+        		sendChatMessage("The player " + username + " does not exist.");
+        		return;
+        	}
+        	
+        	String acceptString = "^(trade accept)";
+        	Pattern acceptPattern = Pattern.compile(acceptString);
+        	Matcher acceptMatcher = acceptPattern.matcher(message);
+         	if(acceptMatcher.find())
+        	{
+        		
+        		//we have a valid accept command
+        		//we determine whether there is an active offer
+        		//if there isn't, we inform the user
+         		if(!catanGame.hasActiveTrade())
+         		{
+         			sendChatMessage("chat*SERVER: No active trades");
+         		}
+        		
+        		//if there is, then ask whether player
+        		//has resources to complete trade
+         		else if(myPlayer.getNumCards(ResourceCard.BRICK.toString()) >= catanGame.acceptArray[0]
+                	&& myPlayer.getNumCards(ResourceCard.LUMBER.toString()) >= catanGame.acceptArray[1]
+                    && myPlayer.getNumCards(ResourceCard.ORE.toString()) >= catanGame.acceptArray[2]
+                    && myPlayer.getNumCards(ResourceCard.WHEAT.toString()) >= catanGame.acceptArray[3]
+                    && myPlayer.getNumCards(ResourceCard.WOOL.toString()) >= catanGame.acceptArray[4])
+         		{
+         			//if so, we complete the trade as follows:
+            		//remove the cards from offering player's hand
+            		//(use two resCard arrays)
+         			String typeArray[] = {"brick", "lumber", "ore", "wheat", "wool"};
+         			Player owner = catanGame.getPlayer(
+         					catanGame.getPlayerArray()[catanGame.getTurn()].toString());
+            		for(int i = 0; i<catanGame.offerArray.length; ++i)
+            		{
+            			owner.removeCards(typeArray[i], catanGame.offerArray[i]);
+            		}
+         			
+            		//put cards in accepting player's hand
+            		for(int i = 0; i<catanGame.offerArray.length; ++i)
+            		{
+            			myPlayer.addCards(typeArray[i], catanGame.offerArray[i]);
+            		}
+            		
+            		//remove cards from accepting player's hand
+            		for(int i = 0; i<catanGame.acceptArray.length; ++i)
+            		{
+            			myPlayer.removeCards(typeArray[i], catanGame.acceptArray[i]);
+            		}
+            		
+            		//put cards in offering player's hand
+            		for(int i = 0; i<catanGame.acceptArray.length; ++i)
+            		{
+            			owner.addCards(typeArray[i], catanGame.acceptArray[i]);
+            		}
+            		
+            		//announce successful trade
+            		sendChatMessage("chat*SERVER: Trade successful");
+            		//reset trade
+         			catanGame.resetTrade();
+         			
+         			
+         		}
+        		//if not, then we inform the user
+         		else
+         		{
+         			sendChatMessage("chat*SERVER: " + username + " does not have the resources" +
+         					"to complete this trade");
+         			
+         		}
+        		
+        		
+        		
+        		
+        		
+        		
+        	}
+         	else
+         	{
+         		sendChatMessage("chat*SERVER: Wait your turn!");
+         	}
+        	
         }
         
         /**
@@ -1467,62 +1557,123 @@ public class ServerMain {
             	String offerString = 
             			"^trade offer (wool|ore|wheat|brick|lumber)+ for " +
             			"(wool|ore|wheat|brick|lumber)+";
-            	String acceptString = "^(trade accept)";
+            	
             	
             	Pattern offerPattern = Pattern.compile(offerString);
-            	Pattern acceptPattern = Pattern.compile(acceptString);
-            	Matcher acceptMatcher = acceptPattern.matcher(message);
+            	
             	Matcher offerMatcher = offerPattern.matcher(message);
             	
             	if(offerMatcher.find()) {
             		//then we know we have a valid offer syntax
             		//first need to determine the offer and 
             		//place that in an intArray
+            		Scanner myScan = new Scanner(offerString);
+            		//first we consume the first two words
+            		myScan.next();
+            		myScan.next();
+            		String nextWord = myScan.next();
+            		//now we want to see what happens until we hit the "for" string
+            		//this is guaranteed to occur since we already checked with
+            		//regular expressions
+            		
+            		//create an array to store results
+            		//initialize everything to zero
+            		int offerArray[] = new int[5];
+            		for(int i = 0; i<5; ++i)
+            		{
+            			offerArray[i] = 0;
+            		}
+            		
+            		while(nextWord != "for")
+            		{
+            			if(nextWord == "brick")
+            			{
+            				offerArray[0]++;
+            				
+            			}
+            			else if(nextWord == "lumber")
+            			{
+            				offerArray[1]++;
+            			}
+            			else if(nextWord == "ore")
+            			{
+            				offerArray[2]++;            				
+            			}
+            			else if(nextWord == "wheat")
+            			{
+            				offerArray[3]++;
+            			}
+            			else if(nextWord == "wool")
+            			{
+            				offerArray[4]++;
+            			}
+            			else
+            			{
+            				System.out.println("Error: This should never happen.");
+            			}
+            			nextWord = myScan.next();
+            		}
+            		//ok we just scanned for - so now we scan for the other array
+            		int acceptArray[] = new int[5];
+            		for(int i = 0; i<5; ++i)
+            		{
+            			acceptArray[i] = 0;
+            		}
+            		while(myScan.hasNext())
+            		{
+            			nextWord = myScan.next();
+            			if(nextWord == "brick")
+            			{
+            				acceptArray[0]++;
+            				
+            			}
+            			else if(nextWord == "lumber")
+            			{
+            				acceptArray[1]++;
+            			}
+            			else if(nextWord == "ore")
+            			{
+            				acceptArray[2]++;            				
+            			}
+            			else if(nextWord == "wheat")
+            			{
+            				acceptArray[3]++;
+            			}
+            			else if(nextWord == "wool")
+            			{
+            				acceptArray[4]++;
+            			}
+            			else //never happens
+            			{
+            				System.out.println("Error: This should never happen.");
+            			}
+            			
+            			
+            		}
+            		//so we have two arrays with the info          		
+            		
             		
             		//then we determine whether the player has the cards
             		//necessary to complete the trade
-            		
-            		//if so, we make the offer public and announce it
-            		// store it somehow (make an active-trade variable?)
-            		
-            		//if not, we tell the player that he/she doesn't have
-            		//the resources to complete the trade
-            		
-            		//DEBUG
-                    //System.out.println("trade - " + offerMatcher.group());
-                    
+            		if(owner.getNumCards(ResourceCard.BRICK.toString()) >= offerArray[0]
+            		&& owner.getNumCards(ResourceCard.LUMBER.toString()) >= offerArray[1]
+            		&& owner.getNumCards(ResourceCard.ORE.toString()) >= offerArray[2]
+            		&& owner.getNumCards(ResourceCard.WHEAT.toString()) >= offerArray[3]
+            		&& owner.getNumCards(ResourceCard.WOOL.toString()) >= offerArray[4])
+            		{
+            			//create the trade
+            			catanGame.setActiveTrade(offerArray, acceptArray);
+            		}
+            		else
+            		{
+            			sendChatMessage("chat*SERVER: You don't have the resources to " +
+            					"offer that trade");
+            		}
+            		                 
                 }
-            	else if(acceptMatcher.find())
-            	{
-            		
-            		//we have a valid accept command
-            		//we determine whether there is an active offer
-            		//if there isn't, we inform the user
-            		
-            		//if there is, then ask whether player
-            		//has resources to complete trade
-            		
-            		//if not, then we inform the user
-            		
-            		//if so, we complete the trade as follows:
-            		//remove the cards from offering player's hand
-            		//(use two resCard arrays)
-            		
-            		//put cards in accepting player's hand
-            		
-            		//remove cards from accepting player's hand
-            		
-            		
-            		//put cards in offering player's hand
-            		
-            		//announce successful trade
-            		
-            		System.out.println("accept trade - " + acceptMatcher.group());
-            		
-            		
-            	}
+           
             	else{
-                    System.out.println("No match found.");
+            		sendChatMessage("chat*SERVER: Invalid trade command");
                 }
             	
             	

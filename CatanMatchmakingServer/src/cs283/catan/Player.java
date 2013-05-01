@@ -72,6 +72,8 @@ public class Player implements Serializable
 	
 	public String username;
 	
+	
+	
 	public Player(String username, int colorIndex)
 	{
 		this.username = username;

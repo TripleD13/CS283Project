@@ -21,6 +21,61 @@ public class ServerCatanGame implements Serializable
 	//array representing the users in the game
 	private Player[] userArray; //keep users in sorted order
 	
+	
+	
+	public int offerArray[];
+	public int acceptArray[];
+	
+	public void addResCards(String type, int num, Player player)
+	{
+		player.addCards(type, num);
+	}
+	
+	public void removeResCards(String type, int num, Player player)
+	{
+		player.removeCards(type, num);
+	}
+	
+	
+	public void setActiveTrade(int [] offArr, int accArr[])
+	{
+		for(int i = 0; i<offerArray.length; ++i)
+		{
+			offerArray[i] = offArr[i];
+		}
+		for(int i = 0; i<acceptArray.length; ++i)
+		{
+			acceptArray[i] = accArr[i];
+		}
+	}
+	public boolean hasActiveTrade()
+	{
+		boolean isTrade = false;
+		for(int i = 0; i<offerArray.length; ++i)
+		{
+			if(offerArray[i] > 0)
+			{
+				isTrade = true;
+			}
+		}
+		return isTrade;
+	}
+	public void resetTrade()
+	{
+		
+		for(int i = 0; i<5; ++i)
+		{
+			offerArray[i] = 0;
+		}
+		
+		
+		for(int i = 0; i<5; ++i)
+		{
+			acceptArray[i] = 0;
+		}
+		
+	}
+	
 	/**
 	 * Object used to notify threads when the game has been modified
 	 *
@@ -102,6 +157,18 @@ public class ServerCatanGame implements Serializable
 		//	String playerString = "Player " + i;// for debugging
 		//	userArray[i] = new Player(playerString);
 		//}
+		//generate the trade array
+		offerArray = new int[5];
+		for(int i = 0; i<5; ++i)
+		{
+			offerArray[i] = 0;
+		}
+		
+		acceptArray = new int[5];
+		for(int i = 0; i<5; ++i)
+		{
+			acceptArray[i] = 0;
+		}
 		
 		this.userArray = playerArray;
 		
@@ -379,6 +446,16 @@ public class ServerCatanGame implements Serializable
 	    return userArray[turn].getUsername().equals(username);
 	}
 	
+	public Player getPlayer(String username)
+	{
+		for(int i = 0; i<userArray.length; ++i)
+		{
+			if(userArray[i].getUsername().equals(username))
+				return userArray[i];
+		}
+		return null; // if we don't have that user
+	}
+	
 	public boolean advanceTurn(String username)
 	{
 	    boolean advanced = true;
@@ -443,6 +520,7 @@ public class ServerCatanGame implements Serializable
     	        }
 	        }
 	    }
+	    resetTrade();
 	    
 	    return advanced;
 	}
