@@ -693,13 +693,14 @@ public class CatanGUI {
 		frame.getContentPane().add(panel_2, gbc_panel_2);
 		GridBagLayout gbl_panel_2 = new GridBagLayout();
 		gbl_panel_2.columnWidths = new int[]{143, 189, 0};
-		gbl_panel_2.rowHeights = new int[]{32, 43, 22, 0};
+		gbl_panel_2.rowHeights = new int[]{32, 43, 0, 22, 0};
 		gbl_panel_2.columnWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
-		gbl_panel_2.rowWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_panel_2.rowWeights = new double[]{0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
 		panel_2.setLayout(gbl_panel_2);
 		
 		JLabel lblNewLabel_8 = new JLabel("Chat Here!");
 		GridBagConstraints gbc_lblNewLabel_8 = new GridBagConstraints();
+		gbc_lblNewLabel_8.gridwidth = 2;
 		gbc_lblNewLabel_8.anchor = GridBagConstraints.WEST;
 		gbc_lblNewLabel_8.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel_8.gridx = 0;
@@ -730,10 +731,14 @@ public class CatanGUI {
 		    }
 		});
 		GridBagConstraints gbc_sendMessageButton = new GridBagConstraints();
+		gbc_sendMessageButton.gridwidth = 2;
 		gbc_sendMessageButton.anchor = GridBagConstraints.EAST;
-		gbc_sendMessageButton.gridx = 1;
+		gbc_sendMessageButton.gridx = 0;
 		gbc_sendMessageButton.gridy = 2;
 		panel_2.add(sendMessageButton, gbc_sendMessageButton);
+		
+		
+
 		
 		scrollPane_2 = new JScrollPane();
 		scrollPane_2.setMinimumSize(new Dimension(27, 100));
@@ -811,7 +816,7 @@ public class CatanGUI {
 		gbc_endTurnButton.gridy = 0;
 		resourcePanel.add(endTurnButton, gbc_endTurnButton);
 		
-		JLabel lblNewLabel_3 = new JLabel("Sheep");
+		JLabel lblNewLabel_3 = new JLabel("Wool");
 		GridBagConstraints gbc_lblNewLabel_3 = new GridBagConstraints();
 		gbc_lblNewLabel_3.anchor = GridBagConstraints.WEST;
 		gbc_lblNewLabel_3.insets = new Insets(0, 0, 5, 5);
