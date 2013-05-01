@@ -143,6 +143,7 @@ public class ServerCatanGame implements Serializable
 		myBoard = new Board();
 			
 		numUsers = 4;
+		diceRoll = 0;
 		turn = 0;
 		turnNumber = 0; // zero indexed
 		winner = null;
@@ -304,7 +305,7 @@ public class ServerCatanGame implements Serializable
 	 * @return
 	 */
 	public boolean isSettlementPlacingMode() {
-	    return turnNumber < 9;
+	    return turnNumber < 8;
 	}
 	
 	/**
@@ -312,7 +313,7 @@ public class ServerCatanGame implements Serializable
 	 * @return
 	 */
 	public boolean isSecondSettlementPlacing() {
-	    return turnNumber >= numUsers && turnNumber <= numUsers * 2;
+	    return turnNumber >= numUsers && turnNumber < numUsers * 2;
 	}
 	
 	

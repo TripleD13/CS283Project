@@ -300,10 +300,18 @@ public class CatanGUI {
 	 * @playerArray
 	 */
 	public void newRoll(int roll, int currentPlayer, Player playerArray[]) {
-	    JOptionPane.showMessageDialog(frame, 
-	                                  String.format("'%s' rolls a %d!", 
-	                                  playerArray[currentPlayer].getUsername(), 
-	                                  roll));
+	    if (roll > 0) {
+	        JOptionPane.showMessageDialog(frame, 
+	                                 String.format("'%s' rolls a %d!", 
+	                                 playerArray[currentPlayer].getUsername(), 
+	                                 roll));
+	    } else {
+	        JOptionPane.showMessageDialog(frame,
+	                                 String.format("'%s' will now make a " +
+	                                                 "settlement and road " +
+	                                                 "placement!",
+	                                 playerArray[currentPlayer].getUsername()));
+	    }
 	    
 	    // Update the current player's info
 	    for (int i = 0; i < playerArray.length; i++) {

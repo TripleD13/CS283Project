@@ -39,7 +39,7 @@ public class GamePanel {
 				try {
 					board = ImageIO.read(Thread.currentThread()
                             .getContextClassLoader()
-                            .getResourceAsStream("cs283/catan/catanBoard.jpg"));
+                            .getResourceAsStream("cs283/catan/catanBoard.png"));
 					view = new JLabel( new ImageIcon(board));
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -92,7 +92,7 @@ public class GamePanel {
 		        	try {
 						g2d.drawImage(ImageIO.read(Thread.currentThread()
                                 .getContextClassLoader()
-                        .getResourceAsStream("cs283/catan/catanBoard.jpg")),
+                        .getResourceAsStream("cs283/catan/catanBoard.png")),
                                 0, 0, null);
 					} catch (IOException e) {
 						// TODO Auto-generated catch block

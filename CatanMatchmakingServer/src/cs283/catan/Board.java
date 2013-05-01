@@ -537,7 +537,8 @@ public static void main(String args[]) {
 	    return isSettlementAdded;
 	}
 	
-public boolean freeAddSettlement(Coordinate location, Player owner) {
+public boolean freeAddSettlement(Coordinate location, Player owner, 
+                                 boolean addPlacementCards) {
 	boolean isSettlementAdded = false;
 
 	location = location.normalizeCoordinate();
@@ -636,6 +637,12 @@ public boolean freeAddSettlement(Coordinate location, Player owner) {
 				|| location.normalizeCoordinate().equals(threePort7) || location.normalizeCoordinate().equals(threePort8) )
 		{
 			owner.has3To1Port = true;
+		}
+		
+		// Add the cards the player gets when placing a settlement during
+		// the last settlement placing phase
+		if (addPlacementCards) {
+		    owner.addArrayOfCards(getPlacementResourceCards(location));
 		}
 		
 	}
