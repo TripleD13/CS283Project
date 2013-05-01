@@ -1405,6 +1405,7 @@ public class ServerMain {
             						owner.addCards(cardType, 1);
             					}
             					
+            					}
             				}
             			}
             		}
@@ -1807,7 +1808,7 @@ public class ServerMain {
                         sendChatMessage("chat*SERVER: Invalid command, " +
                                 "you dummy!");
                    }
-                */}
+                */
             }else if(message.indexOf("play") != -1)
             {
                 if(message.indexOf("year of plenty") != -1)
