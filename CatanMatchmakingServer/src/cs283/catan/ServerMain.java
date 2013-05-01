@@ -1572,7 +1572,7 @@ public class ServerMain {
                 		//first need to determine the offer and 
                 		//place that in an intArray
                 		
-                		Scanner myScan = new Scanner(offerString);
+                		Scanner myScan = new Scanner(message);
                 		//first we consume the first two words
                 		myScan.next();
                 		myScan.next();
