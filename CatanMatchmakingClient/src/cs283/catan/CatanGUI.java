@@ -45,6 +45,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import javax.swing.JTextField;
+import javax.swing.JScrollBar;
+import java.awt.ScrollPane;
 
 
 public class CatanGUI {
@@ -80,6 +82,8 @@ public class CatanGUI {
     private JButton btnLeaveGame;
     private String username;
     private JTabbedPane tabbedPane;
+    private JPanel panel;
+    private JScrollPane scrollPane_2;
     
 	/**
 	 * Launch the application.
@@ -393,6 +397,7 @@ public class CatanGUI {
 	 */
 	private void initialize() {
 		frame = new JFrame();
+		frame.setPreferredSize(new Dimension(1000, 900));
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		frame.addWindowListener(new WindowAdapter() {
 		    @Override
@@ -403,26 +408,28 @@ public class CatanGUI {
 		        }
 		    }
 		});
-		frame.setMinimumSize(new Dimension(1000, 900));
-		frame.setResizable(false);
+		frame.setMinimumSize(new Dimension(1000, 768));
 		frame.setBounds(100, 100, 450, 300);
 		GridBagLayout gridBagLayout = new GridBagLayout();
-		gridBagLayout.columnWidths = new int[]{650, 233, 0};
-		gridBagLayout.rowHeights = new int[]{0, 580, 80, 50, 115, 0};
+		gridBagLayout.columnWidths = new int[]{500, 233, 0};
+		gridBagLayout.rowHeights = new int[]{350, 45, 100, 0};
 		gridBagLayout.columnWeights = new double[]{1.0, 1.0, Double.MIN_VALUE};
-		gridBagLayout.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gridBagLayout.rowWeights = new double[]{1.0, 0.0, 1.0, Double.MIN_VALUE};
 		frame.getContentPane().setLayout(gridBagLayout);
 		
 		gameAndMatch = new JTabbedPane(JTabbedPane.TOP);
+		gameAndMatch.setOpaque(true);
+		gameAndMatch.setMaximumSize(new Dimension(650, 550));
 		GridBagConstraints gbc_gameAndMatch = new GridBagConstraints();
 		gbc_gameAndMatch.fill = GridBagConstraints.BOTH;
-		gbc_gameAndMatch.gridheight = 2;
 		gbc_gameAndMatch.insets = new Insets(0, 0, 5, 5);
 		gbc_gameAndMatch.gridx = 0;
 		gbc_gameAndMatch.gridy = 0;
 		frame.getContentPane().add(gameAndMatch, gbc_gameAndMatch);
 		
 		JPanel matchmaking = new JPanel();
+		matchmaking.setPreferredSize(new Dimension(650, 350));
+		matchmaking.setMaximumSize(new Dimension(650, 550));
 		gameAndMatch.addTab("Lobby", null, matchmaking, null);
 		gameAndMatch.setEnabledAt(0, true);
 		matchmaking.setLayout(new BoxLayout(matchmaking, BoxLayout.Y_AXIS));
@@ -565,40 +572,59 @@ public class CatanGUI {
 		
 		lobby_table.getTableHeader().setReorderingAllowed(false);
 		
-		JPanel gameplay = new JPanel();
-		gameAndMatch.addTab("Game", null, gameplay, null);
-		gameAndMatch.setEnabledAt(1, false);
-		
 		
 		gamePanel = new GamePanel();
+		
+		JScrollPane gameplay = new JScrollPane();
+		gameplay.setPreferredSize(new Dimension(650, 550));
+		gameplay.setMaximumSize(new Dimension(650, 550));
+		gameAndMatch.addTab("Game", null, gameplay, null);
+		gameAndMatch.setEnabledAt(1, false);
 		gameplay.add(gamePanel.view());
+		
+		panel = new JPanel();
+		panel.setMaximumSize(new Dimension(32767, 550));
+		GridBagConstraints gbc_panel = new GridBagConstraints();
+		gbc_panel.fill = GridBagConstraints.BOTH;
+		gbc_panel.insets = new Insets(0, 0, 5, 0);
+		gbc_panel.gridx = 1;
+		gbc_panel.gridy = 0;
+		frame.getContentPane().add(panel, gbc_panel);
+		GridBagLayout gbl_panel = new GridBagLayout();
+		gbl_panel.columnWidths = new int[]{332, 0};
+		gbl_panel.rowHeights = new int[]{15, 300, 0};
+		gbl_panel.columnWeights = new double[]{1.0, Double.MIN_VALUE};
+		gbl_panel.rowWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
+		panel.setLayout(gbl_panel);
 		
 		JLabel lblNewLabel_7 = new JLabel("Smack-talkin");
 		GridBagConstraints gbc_lblNewLabel_7 = new GridBagConstraints();
 		gbc_lblNewLabel_7.insets = new Insets(0, 0, 5, 0);
-		gbc_lblNewLabel_7.gridx = 1;
+		gbc_lblNewLabel_7.gridx = 0;
 		gbc_lblNewLabel_7.gridy = 0;
-		frame.getContentPane().add(lblNewLabel_7, gbc_lblNewLabel_7);
+		panel.add(lblNewLabel_7, gbc_lblNewLabel_7);
 		
 		JScrollPane scrollPane_1 = new JScrollPane();
+		scrollPane_1.setMaximumSize(new Dimension(32767, 530));
 		GridBagConstraints gbc_scrollPane_1 = new GridBagConstraints();
 		gbc_scrollPane_1.fill = GridBagConstraints.BOTH;
-		gbc_scrollPane_1.insets = new Insets(0, 0, 5, 0);
-		gbc_scrollPane_1.gridx = 1;
+		gbc_scrollPane_1.gridx = 0;
 		gbc_scrollPane_1.gridy = 1;
-		frame.getContentPane().add(scrollPane_1, gbc_scrollPane_1);
+		panel.add(scrollPane_1, gbc_scrollPane_1);
 		
 		chatOutputPane = new JEditorPane();
+		chatOutputPane.setPreferredSize(new Dimension(233, 300));
 		chatOutputPane.setEditable(false);
 		scrollPane_1.setViewportView(chatOutputPane);
 		
 		JPanel commandPanel = new JPanel();
+		commandPanel.setMaximumSize(new Dimension(32767, 45));
 		GridBagConstraints gbc_commandPanel = new GridBagConstraints();
 		gbc_commandPanel.insets = new Insets(0, 0, 5, 5);
 		gbc_commandPanel.anchor = GridBagConstraints.NORTH;
 		gbc_commandPanel.fill = GridBagConstraints.HORIZONTAL;
 		gbc_commandPanel.gridx = 0;
-		gbc_commandPanel.gridy = 2;
+		gbc_commandPanel.gridy = 1;
 		frame.getContentPane().add(commandPanel, gbc_commandPanel);
 		GridBagLayout gbl_commandPanel = new GridBagLayout();
 		gbl_commandPanel.columnWidths = new int[]{0, 0, 0};
@@ -653,12 +679,12 @@ public class CatanGUI {
 		commandPanel.add(sendCommandButton, gbc_sendCommandButton);
 		
 		JPanel panel_2 = new JPanel();
+		panel_2.setMaximumSize(new Dimension(32767, 145));
 		GridBagConstraints gbc_panel_2 = new GridBagConstraints();
 		gbc_panel_2.gridheight = 2;
-		gbc_panel_2.insets = new Insets(0, 0, 5, 0);
 		gbc_panel_2.fill = GridBagConstraints.BOTH;
 		gbc_panel_2.gridx = 1;
-		gbc_panel_2.gridy = 2;
+		gbc_panel_2.gridy = 1;
 		frame.getContentPane().add(panel_2, gbc_panel_2);
 		GridBagLayout gbl_panel_2 = new GridBagLayout();
 		gbl_panel_2.columnWidths = new int[]{143, 189, 0};
@@ -704,14 +730,18 @@ public class CatanGUI {
 		gbc_sendMessageButton.gridy = 2;
 		panel_2.add(sendMessageButton, gbc_sendMessageButton);
 		
+		scrollPane_2 = new JScrollPane();
+		scrollPane_2.setMinimumSize(new Dimension(27, 100));
+		GridBagConstraints gbc_scrollPane_2 = new GridBagConstraints();
+		gbc_scrollPane_2.fill = GridBagConstraints.BOTH;
+		gbc_scrollPane_2.insets = new Insets(0, 0, 0, 5);
+		gbc_scrollPane_2.gridx = 0;
+		gbc_scrollPane_2.gridy = 2;
+		frame.getContentPane().add(scrollPane_2, gbc_scrollPane_2);
+		
 		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-		GridBagConstraints gbc_tabbedPane = new GridBagConstraints();
-		gbc_tabbedPane.gridheight = 2;
-		gbc_tabbedPane.fill = GridBagConstraints.BOTH;
-		gbc_tabbedPane.insets = new Insets(0, 0, 0, 5);
-		gbc_tabbedPane.gridx = 0;
-		gbc_tabbedPane.gridy = 3;
-		frame.getContentPane().add(tabbedPane, gbc_tabbedPane);
+		tabbedPane.setMinimumSize(new Dimension(5, 50));
+		scrollPane_2.setViewportView(tabbedPane);
 		
 		JPanel resourcePanel = new JPanel();
 		tabbedPane.addTab("Resources", null, resourcePanel, null);
