@@ -447,7 +447,8 @@ public static void main(String args[]) {
             // If performing a road check, make sure the player has a road
             // adjacent to the settlement location
             if (checkRoads && safeToAdd) {
-                safeToAdd = roadSet.get(owner).containsKey(location);
+                safeToAdd = roadSet.get(owner.getUsername())
+                                   .containsKey(location);
             }
             
             // Add the settlement if there are not settlements directly adjacent
