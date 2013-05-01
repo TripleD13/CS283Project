@@ -53,7 +53,8 @@ public class GamePanel {
 				addroad = false;
 				pnum = 0;
 				g2d = board.createGraphics();
-				view.setPreferredSize(new Dimension(525, 578));
+				view.setPreferredSize(new Dimension(525, 550));
+				view.setMaximumSize(new Dimension(525, 550));
 				g2d.dispose();
 			}
 			
