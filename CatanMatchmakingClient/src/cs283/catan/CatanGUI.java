@@ -84,6 +84,7 @@ public class CatanGUI {
     private JTabbedPane tabbedPane;
     private JPanel panel;
     private JScrollPane scrollPane_2;
+    private JPanel panel_3;
     
 	/**
 	 * Launch the application.
@@ -580,7 +581,11 @@ public class CatanGUI {
 		gameplay.setMaximumSize(new Dimension(650, 550));
 		gameAndMatch.addTab("Game", null, gameplay, null);
 		gameAndMatch.setEnabledAt(1, false);
-		gameplay.add(gamePanel.view());
+		//gameplay.add(gamePanel.view());
+		
+		panel_3 = new JPanel();
+		gameplay.setViewportView(panel_3);
+		panel_3.add(gamePanel.view());
 		
 		panel = new JPanel();
 		panel.setMaximumSize(new Dimension(32767, 550));
