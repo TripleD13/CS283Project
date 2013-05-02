@@ -1158,6 +1158,8 @@ return isSettlementAdded;
 
 	public String tradeport(int tradeNumber, String resourceOne,
 			String resourceTwo, Player player) {
+		resourceOne = resourceOne.toUpperCase();
+		resourceTwo = resourceTwo.toUpperCase();
 		if (tradeNumber == 3)
 		{
 			if (player.has3To1Port)
