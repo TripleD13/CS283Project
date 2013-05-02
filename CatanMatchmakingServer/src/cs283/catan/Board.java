@@ -979,8 +979,9 @@ return isSettlementAdded;
 	        
 	        // Average the coordinates
 	        for (Coordinate coord : robberTile.getNormalizedCoordinates()) {
-	            p.x += coord.x;
-	            p.y += coord.y;
+	            Point pixCoord = getPixel(coord);
+	            p.x += pixCoord.x;
+	            p.y += pixCoord.y;
 	        }
 	        
 	        p.x /= 6;
