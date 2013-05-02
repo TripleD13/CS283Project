@@ -1366,7 +1366,7 @@ public class ServerMain {
                          		{
                          			if (a.toString().equals(message))
                          			{
-                         				if(a.getNumCards() == 0)
+                         				if(a.getNumCards() != 0)
                          				{
                                        	 owner.robberMode = false;
                          				}else
@@ -1417,6 +1417,8 @@ public class ServerMain {
                          }
                     
                 }
+            	
+            	owner.robberMode = false;
             }else if (owner.stealMode)
             {
             	
