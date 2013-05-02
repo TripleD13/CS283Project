@@ -843,6 +843,7 @@ public class ServerMain {
             
             // Send the first roll
             sendRollMessage(catanGame.getDiceRoll(), catanGame.getTurn());
+           
             
             while (currentMode == UserMode.GameMode) {
                 // Receive a message
@@ -1358,9 +1359,56 @@ public class ServerMain {
                          playerSet = board.moveRobber(coordinate1, coordinate2);
                          if (playerSet != null)
                          {
-                        	 owner.robberMode = false;
-                        	 owner.stealMode = true;
-                         }
+                        	 if (message.indexOf("steal") != -1)
+                         	{
+                         		message = message.substring(message.indexOf("steal")+6);
+                         		for(Player a: playerSet)
+                         		{
+                         			if (a.toString().equals(message))
+                         			{
+                         				if(a.getNumCards() == 0)
+                         				{
+                                       	 owner.robberMode = false;
+                         				}else
+                         				{
+                         					boolean notStolen = true;
+                         					while (notStolen)
+                         					{
+                         					Random randomCard = new Random();
+                         					int card = randomCard.nextInt(4);
+                         					String cardType = null;
+                         					if (card == 0)
+                         					{
+                         						cardType = new String("BRICK");
+
+                         					}else if (card == 1)
+                         					{
+                         						cardType = new String("WOOL");
+                         					}else if (card == 1)
+                         					{
+                         						cardType = new String("LUMBER");
+                         					}
+                         					else if (card == 1)
+                         					{
+                         						cardType = new String("ORE");
+                         					}
+                         					else 
+                         					{
+                         						cardType = new String("WHEAT");
+
+                         					}
+                         					notStolen = !a.removeCards(cardType, 1);
+                         					if (!notStolen)
+                         					{
+                         						owner.addCards(cardType, 1);
+                         					}
+                         					
+                         					}
+                         				}
+                         			}
+                         		}
+                         	}
+                        }
                          
                          }catch (Exception InputMismatchException)
                          {
@@ -1371,55 +1419,6 @@ public class ServerMain {
                 }
             }else if (owner.stealMode)
             {
-            	if (message.indexOf("steal") != -1)
-            	{
-            		message = message.substring(6);
-            		for(Player a: playerSet)
-            		{
-            			if (a.toString().equals(message))
-            			{
-            				if(a.getNumCards() == 0)
-            				{
-            					owner.stealMode = false;
-            				}else
-            				{
-            					boolean notStolen = true;
-            					while (notStolen)
-            					{
-            					Random randomCard = new Random();
-            					int card = randomCard.nextInt(4);
-            					String cardType = null;
-            					if (card == 0)
-            					{
-            						cardType = new String("BRICK");
-
-            					}else if (card == 1)
-            					{
-            						cardType = new String("WOOL");
-            					}else if (card == 1)
-            					{
-            						cardType = new String("LUMBER");
-            					}
-            					else if (card == 1)
-            					{
-            						cardType = new String("ORE");
-            					}
-            					else 
-            					{
-            						cardType = new String("WHEAT");
-
-            					}
-            					notStolen = !a.removeCards(cardType, 1);
-            					if (!notStolen)
-            					{
-            						owner.addCards(cardType, 1);
-            					}
-            					
-            					}
-            				}
-            			}
-            		}
-            	}
             	
             }else if (message.indexOf("buy") != -1)	
             {
