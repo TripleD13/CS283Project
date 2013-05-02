@@ -173,6 +173,7 @@ public class Player implements Serializable
 	
 	public boolean addCards(String type, int number)
 	{
+		type = type.toUpperCase();
 		if (type.equals("ORE"))
 		{
 			resCards[ResourceCard.ORE.getIndex()] = 
@@ -202,6 +203,7 @@ public class Player implements Serializable
 	
 	public boolean removeCards(String type, int number)
 	{
+		type = type.toUpperCase();
 		if (type.equals("ORE"))
 		{
 			if (resCards[ResourceCard.ORE.getIndex()] <= number)
