@@ -1574,7 +1574,7 @@ public class ServerMain {
                 	
                 	Pattern offerPattern = Pattern.compile(offerString);
                 	
-                	Matcher offerMatcher = offerPattern.matcher(message);
+                	Matcher offerMatcher = 	offerPattern.matcher(message);
                 	
                 	if(offerMatcher.find()) {
                 		

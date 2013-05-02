@@ -206,7 +206,7 @@ public class Player implements Serializable
 		type = type.toUpperCase();
 		if (type.equals("ORE"))
 		{
-			if (resCards[ResourceCard.ORE.getIndex()] <= number)
+			if (resCards[ResourceCard.ORE.getIndex()] >= number)
 			{
 				resCards[ResourceCard.ORE.getIndex()] = 
 				                 resCards[ResourceCard.ORE.getIndex()] - number;
@@ -214,7 +214,7 @@ public class Player implements Serializable
 			}
 		}else if (type.equals("WOOL"))
 		{
-			if (resCards[ResourceCard.WOOL.getIndex()] <= number)
+			if (resCards[ResourceCard.WOOL.getIndex()] >= number)
 			{
 				resCards[ResourceCard.WOOL.getIndex()] = 
 				                resCards[ResourceCard.WOOL.getIndex()] - number;
@@ -222,7 +222,7 @@ public class Player implements Serializable
 			}
 		}else if (type.equals("WHEAT"))
 		{
-			if (resCards[ResourceCard.WHEAT.getIndex()] <= number)
+			if (resCards[ResourceCard.WHEAT.getIndex()] >= number)
 			{
 				resCards[ResourceCard.WHEAT.getIndex()] = 
 				               resCards[ResourceCard.WHEAT.getIndex()] - number;
@@ -230,7 +230,7 @@ public class Player implements Serializable
 			}
 		}else if (type.equals("LUMBER"))
 		{
-			if (resCards[ResourceCard.LUMBER.getIndex()] <= number)
+			if (resCards[ResourceCard.LUMBER.getIndex()] >= number)
 			{
 				resCards[ResourceCard.LUMBER.getIndex()] = 
 				              resCards[ResourceCard.LUMBER.getIndex()] - number;
@@ -238,7 +238,7 @@ public class Player implements Serializable
 			}
 		}else if (type.equals("BRICK"))
 		{
-			if (resCards[ResourceCard.BRICK.getIndex()] <= number)
+			if (resCards[ResourceCard.BRICK.getIndex()] >= number)
 			{
 				resCards[ResourceCard.BRICK.getIndex()] = 
 				               resCards[ResourceCard.BRICK.getIndex()] - number;
