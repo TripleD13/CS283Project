@@ -45,20 +45,20 @@ buy road # # # , # # #
 
 buy devcard
 
-robber # #
-
 steal player
 
-tradepoint # resource to resource
+tradepoint # <resource> to <resource>
 
-play knight (robber command next) (steal command next)
+play knight (steal command next)
 
 play year of plenty (resource next) (resource next)
 
 play road builder (buy road command next) (buy road command next)
 
-play monopoly resource
+play monopoly <resource>
 
-
+Catan Rules
+===========
+Too lengthy to explain here. For more information, see http://www.catan.com/service/game-rules
 
 
