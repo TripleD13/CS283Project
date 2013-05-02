@@ -488,8 +488,24 @@ public class ClientMain {
                             public void run() {
                                 gui.newRoll(rollNumber, playerNumber, 
                                             playerArray);
+                                
+                                for (Player player : playerArray) {
+                                    if (player.isVictorious()) {
+                                        JOptionPane.showMessageDialog(
+                                                gui.getFrame(),
+                                                player.getUsername()
+                                             + "won the game! Good bye!");
+                                        break;
+                                    }
+                                }
                             }
                         });
+                        
+                        for (Player player : playerArray) {
+                            if (player.isVictorious()) {
+                                break;
+                            }
+                        }
                         
                     } else {
                         System.out.println("Server response: " + message);

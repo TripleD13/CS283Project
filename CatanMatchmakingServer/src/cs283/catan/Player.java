@@ -72,7 +72,7 @@ public class Player implements Serializable
 	
 	public String username;
 	
-	
+	private boolean victory = false;
 	
 	public Player(String username, int colorIndex)
 	{
@@ -95,6 +95,14 @@ public class Player implements Serializable
 	public int getVictoryPoints() {
 	    return this.permanentPoints + this.longestRoadPoints 
 	           + this.largestArmyPoints;
+	}
+	
+	public boolean isVictorious() {
+	    return this.victory;
+	}
+	
+	public void setVictorious() {
+	    this.victory = true;
 	}
 	
 	/**

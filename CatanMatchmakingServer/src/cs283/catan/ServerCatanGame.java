@@ -512,6 +512,7 @@ public class ServerCatanGame implements Serializable
     	            
     	            if (player.getVictoryPoints() >= 10) {
     	                winner = player;
+    	                player.setVictorious();
     	                victory = true;
     	            }
     	        }
