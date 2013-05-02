@@ -435,6 +435,9 @@ public class ClientMain {
                             public void run() {
                                 gui.drawBoard(game);
                                 
+                                System.out.println("Victory? " + 
+                                                   game.isVictory());
+                                
                                 if (game.isVictory()) {
                                     JOptionPane.showMessageDialog(
                                             gui.getFrame(),
