@@ -1415,7 +1415,7 @@ public class ServerMain {
                              sendChatMessage("chat*SERVER: Invalid command, " +
                                               "you dummy!");
                          }
-                    
+                    isGameChanged = true;
                 }
             	
             	owner.robberMode = false;
