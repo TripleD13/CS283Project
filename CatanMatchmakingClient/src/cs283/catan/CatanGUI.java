@@ -242,6 +242,8 @@ public class CatanGUI {
 	public void drawBoard(ServerCatanGame game) {
 	    Board board = game.getBoard();
 	    
+   
+	    
 	    // Draw all of the settlements
 	    List<Settlement> settlements = board.getSettlementList();
 	    
@@ -270,6 +272,10 @@ public class CatanGUI {
 	                          road.getOwner());
 	    }
 	    
+
+	    // Draw the robber
+	    gamePanel.drawrobber(board.getRobberLocation());
+	    	    
 	    // Update the counts for the cards
 	    Player playerArray[] = game.getPlayerArray();
 	    for (int i = 0; i < playerArray.length; i++) {
@@ -292,6 +298,8 @@ public class CatanGUI {
 	    if (largestArmyOwner == null) {
 	        largestArmyOwner = "N/A";
 	    }
+	    
+
 	    
 	    largestArmyField.setText(largestArmyOwner);
 	    

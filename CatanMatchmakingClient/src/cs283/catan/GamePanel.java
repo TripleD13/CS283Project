@@ -123,7 +123,7 @@ public class GamePanel {
 				}
 		        else if(drawrobber){
 					g2d.setColor(Color.black);
-					Rectangle Robber = new Rectangle(robberpt.x, robberpt.y, 10, 10);
+					Rectangle Robber = new Rectangle(robberpt.x-5, robberpt.y-5, 10, 10);
 					g2d.draw(Robber);
 					g2d.fill(Robber);
 					drawrobber=false;
