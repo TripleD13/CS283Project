@@ -985,89 +985,99 @@ public class ServerMain {
         
         private void parseTradeAccept(String message, String username) throws Exception
         {
-        	Player myPlayer = catanGame.getPlayer(username);
-        	if(myPlayer == null)
+        	try
         	{
-        		sendChatMessage("The player " + username + " does not exist.");
-        		return;
+        		Player myPlayer = catanGame.getPlayer(username);
+            	if(myPlayer == null)
+            	{
+            		sendChatMessage("The player " + username + " does not exist.");
+            		return;
+            	}
+            	
+            	String acceptString = "^(trade accept)";
+            	Pattern acceptPattern = Pattern.compile(acceptString);
+            	Matcher acceptMatcher = acceptPattern.matcher(message);
+             	if(acceptMatcher.find())
+            	{
+            		
+            		//we have a valid accept command
+            		//we determine whether there is an active offer
+            		//if there isn't, we inform the user
+             		if(!catanGame.hasActiveTrade())
+             		{
+             			sendChatMessage("chat*SERVER: No active trades");
+             		}
+            		
+            		//if there is, then ask whether player
+            		//has resources to complete trade
+             		else if(myPlayer.getNumCards(ResourceCard.BRICK.toString()) >= catanGame.acceptArray[0]
+                    	&& myPlayer.getNumCards(ResourceCard.LUMBER.toString()) >= catanGame.acceptArray[1]
+                        && myPlayer.getNumCards(ResourceCard.ORE.toString()) >= catanGame.acceptArray[2]
+                        && myPlayer.getNumCards(ResourceCard.WHEAT.toString()) >= catanGame.acceptArray[3]
+                        && myPlayer.getNumCards(ResourceCard.WOOL.toString()) >= catanGame.acceptArray[4])
+             		{
+             			//if so, we complete the trade as follows:
+                		//remove the cards from offering player's hand
+                		//(use two resCard arrays)
+             			String typeArray[] = {"brick", "lumber", "ore", "wheat", "wool"};
+             			Player owner = catanGame.getPlayer(
+             					catanGame.getPlayerArray()[catanGame.getTurn()].toString());
+                		for(int i = 0; i<catanGame.offerArray.length; ++i)
+                		{
+                			owner.removeCards(typeArray[i], catanGame.offerArray[i]);
+                		}
+             			
+                		//put cards in accepting player's hand
+                		for(int i = 0; i<catanGame.offerArray.length; ++i)
+                		{
+                			myPlayer.addCards(typeArray[i], catanGame.offerArray[i]);
+                		}
+                		
+                		//remove cards from accepting player's hand
+                		for(int i = 0; i<catanGame.acceptArray.length; ++i)
+                		{
+                			myPlayer.removeCards(typeArray[i], catanGame.acceptArray[i]);
+                		}
+                		
+                		//put cards in offering player's hand
+                		for(int i = 0; i<catanGame.acceptArray.length; ++i)
+                		{
+                			owner.addCards(typeArray[i], catanGame.acceptArray[i]);
+                		}
+                		
+                		//announce successful trade
+                		sendChatMessage("chat*SERVER: Trade successful");
+                		//reset trade
+             			catanGame.resetTrade();
+             			synchronized (catanGame.gameChangedNotifier) {
+                            catanGame.gameChangedNotifier.notifyAll();
+                        }
+             			
+             		}
+            		//if not, then we inform the user
+             		else
+             		{
+             			sendChatMessage("chat*SERVER: " + username + " does not have the resources" +
+             					"to complete this trade");
+             			
+             		}
+            		
+            		
+            		
+            		
+            		
+            		
+            	}
+             	else
+             	{
+             		sendChatMessage("chat*SERVER: Wait your turn!");
+             	}
+        	}
+        	catch(Exception e)
+        	{
+        		System.out.println("Exception (parseTradeAccept): " + e.toString());
         	}
         	
-        	String acceptString = "^(trade accept)";
-        	Pattern acceptPattern = Pattern.compile(acceptString);
-        	Matcher acceptMatcher = acceptPattern.matcher(message);
-         	if(acceptMatcher.find())
-        	{
-        		
-        		//we have a valid accept command
-        		//we determine whether there is an active offer
-        		//if there isn't, we inform the user
-         		if(!catanGame.hasActiveTrade())
-         		{
-         			sendChatMessage("chat*SERVER: No active trades");
-         		}
-        		
-        		//if there is, then ask whether player
-        		//has resources to complete trade
-         		else if(myPlayer.getNumCards(ResourceCard.BRICK.toString()) >= catanGame.acceptArray[0]
-                	&& myPlayer.getNumCards(ResourceCard.LUMBER.toString()) >= catanGame.acceptArray[1]
-                    && myPlayer.getNumCards(ResourceCard.ORE.toString()) >= catanGame.acceptArray[2]
-                    && myPlayer.getNumCards(ResourceCard.WHEAT.toString()) >= catanGame.acceptArray[3]
-                    && myPlayer.getNumCards(ResourceCard.WOOL.toString()) >= catanGame.acceptArray[4])
-         		{
-         			//if so, we complete the trade as follows:
-            		//remove the cards from offering player's hand
-            		//(use two resCard arrays)
-         			String typeArray[] = {"brick", "lumber", "ore", "wheat", "wool"};
-         			Player owner = catanGame.getPlayer(
-         					catanGame.getPlayerArray()[catanGame.getTurn()].toString());
-            		for(int i = 0; i<catanGame.offerArray.length; ++i)
-            		{
-            			owner.removeCards(typeArray[i], catanGame.offerArray[i]);
-            		}
-         			
-            		//put cards in accepting player's hand
-            		for(int i = 0; i<catanGame.offerArray.length; ++i)
-            		{
-            			myPlayer.addCards(typeArray[i], catanGame.offerArray[i]);
-            		}
-            		
-            		//remove cards from accepting player's hand
-            		for(int i = 0; i<catanGame.acceptArray.length; ++i)
-            		{
-            			myPlayer.removeCards(typeArray[i], catanGame.acceptArray[i]);
-            		}
-            		
-            		//put cards in offering player's hand
-            		for(int i = 0; i<catanGame.acceptArray.length; ++i)
-            		{
-            			owner.addCards(typeArray[i], catanGame.acceptArray[i]);
-            		}
-            		
-            		//announce successful trade
-            		sendChatMessage("chat*SERVER: Trade successful");
-            		//reset trade
-         			catanGame.resetTrade();
-         			
-         			
-         		}
-        		//if not, then we inform the user
-         		else
-         		{
-         			sendChatMessage("chat*SERVER: " + username + " does not have the resources" +
-         					"to complete this trade");
-         			
-         		}
-        		
-        		
-        		
-        		
-        		
-        		
-        	}
-         	else
-         	{
-         		sendChatMessage("chat*SERVER: Wait your turn!");
-         	}
         	
         }
         
