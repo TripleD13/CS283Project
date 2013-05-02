@@ -442,7 +442,7 @@ public class ClientMain {
                                     JOptionPane.showMessageDialog(
                                             gui.getFrame(),
                                             game.getWinner().toString()
-                                         + "won the game! Good bye!");
+                                         + " won the game! Good bye!");
                                 }
                             }
                         });
@@ -494,17 +494,24 @@ public class ClientMain {
                                         JOptionPane.showMessageDialog(
                                                 gui.getFrame(),
                                                 player.getUsername()
-                                             + "won the game! Good bye!");
+                                             + " won the game! Good bye!");
                                         break;
                                     }
                                 }
                             }
                         });
                         
+                        boolean gameFinished = false;
+                        
                         for (Player player : playerArray) {
                             if (player.isVictorious()) {
+                                gameFinished = true;
                                 break;
                             }
+                        }
+                        
+                        if (gameFinished) {
+                            break;
                         }
                         
                     } else {
