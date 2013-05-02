@@ -442,7 +442,7 @@ public class ClientMain {
                                     JOptionPane.showMessageDialog(
                                             gui.getFrame(),
                                             game.getWinner().toString()
-                                         + "won the game! Good bye!");
+                                         + " won the game! Good bye!");
                                 }
                             }
                         });
@@ -488,8 +488,31 @@ public class ClientMain {
                             public void run() {
                                 gui.newRoll(rollNumber, playerNumber, 
                                             playerArray);
+                                
+                                for (Player player : playerArray) {
+                                    if (player.isVictorious()) {
+                                        JOptionPane.showMessageDialog(
+                                                gui.getFrame(),
+                                                player.getUsername()
+                                             + " won the game! Good bye!");
+                                        break;
+                                    }
+                                }
                             }
                         });
+                        
+                        boolean gameFinished = false;
+                        
+                        for (Player player : playerArray) {
+                            if (player.isVictorious()) {
+                                gameFinished = true;
+                                break;
+                            }
+                        }
+                        
+                        if (gameFinished) {
+                            break;
+                        }
                         
                     } else {
                         System.out.println("Server response: " + message);
