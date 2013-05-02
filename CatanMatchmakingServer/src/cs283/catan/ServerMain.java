@@ -1879,7 +1879,7 @@ public class ServerMain {
             	        if (devCard.getDevCardType() == 
             	            DevelopmentCard.DevCardType.MONOPOLY) {
             	            
-            	            if (message.equals("WOOL"))
+            	            if (resourceToMonopolize.equals("WOOL"))
                         	{
             	            	int bonusResources = 0;
             	        		for(int i=0; i<4; i++){
@@ -1890,7 +1890,7 @@ public class ServerMain {
             	        		}
             	            owner.devCards.remove(devCard);
             	            monopolized = true;
-                        	}else if(message.equals("BRICK"))
+                        	}else if(resourceToMonopolize.equals("BRICK"))
                         	{         
                         		int bonusResources = 0;
             	        		for(int i=0; i<4; i++){
@@ -1901,7 +1901,7 @@ public class ServerMain {
             	        		}
                         	owner.devCards.remove(devCard);
             	            monopolized = true;
-                        	}else if(message.equals("LUMBER"))
+                        	}else if(resourceToMonopolize.equals("LUMBER"))
                         	{         
                         		int bonusResources = 0;
             	        		for(int i=0; i<4; i++){
@@ -1912,7 +1912,7 @@ public class ServerMain {
             	        		}
                         	owner.devCards.remove(devCard);
             	            monopolized = true;
-                        	}else if(message.equals("WHEAT"))
+                        	}else if(resourceToMonopolize.equals("WHEAT"))
                         	{          
                         		int bonusResources = 0;
             	        		for(int i=0; i<4; i++){
@@ -1923,7 +1923,7 @@ public class ServerMain {
             	        		}
                         	owner.devCards.remove(devCard);
             	            monopolized = true;
-                        	}else if(message.equals("ORE"))
+                        	}else if(resourceToMonopolize.equals("ORE"))
                         	{
                         		int bonusResources = 0;
             	        		for(int i=0; i<4; i++){
