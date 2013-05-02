@@ -518,6 +518,10 @@ public class ServerCatanGame implements Serializable
     	        
     	        if (!isSettlementPlacingMode()) {
     	            rollDice();
+    	            if (getDiceRoll() == 7)
+    	            {
+    	            	userArray[turn].robberMode = true;
+    	            }
     	        }
 	        }
 	    }
