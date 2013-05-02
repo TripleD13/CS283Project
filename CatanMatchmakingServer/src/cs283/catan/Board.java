@@ -971,8 +971,23 @@ return isSettlementAdded;
 	 * @return a point with the location of the robber.
 	 */
 	public Point getRobberLocation() {
-	    Coordinate robberLocation = robber.getLocation();
-	    return new Point(robberLocation.x, robberLocation.y);
+	    Point p = new Point(0, 0);
+	    
+	    Tile robberTile = tileSet.get(robber.getLocation());
+	    
+	    if (robberTile != null) {
+	        
+	        // Average the coordinates
+	        for (Coordinate coord : robberTile.getNormalizedCoordinates()) {
+	            p.x += coord.x;
+	            p.y += coord.y;
+	        }
+	        
+	        p.x /= 6;
+	        p.y /= 6;
+	    }
+	    
+	    return p;
 	}
 	
 	/**
