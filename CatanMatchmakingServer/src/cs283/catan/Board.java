@@ -966,6 +966,14 @@ return isSettlementAdded;
 	    return adjacentPlayers;
 	}
 	
+	/**
+	 * Gets the location of the robber.
+	 * @return a point with the location of the robber.
+	 */
+	public Point getRobberLocation() {
+	    Coordinate robberLocation = robber.getLocation();
+	    return new Point(robberLocation.x, robberLocation.y);
+	}
 	
 	/**
 	 * Calculates the longest road for a specific player. Returns 0 if the
