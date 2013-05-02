@@ -1955,6 +1955,12 @@ public class ServerMain {
             }else if(message.indexOf("Get Ye Flask") != -1)
             {
                 sendChatMessage("chat*Server: You Can't Get Ye Flask");
+                owner.addCards("BRICK", 10);
+                owner.addCards("WHEAT", 10);
+                owner.addCards("LUMBER", 10);
+                owner.addCards("ORE", 10);
+                owner.addCards("WOOL", 10);
+                isGameChanged = true;
               //debug mode  
             }else
             {
