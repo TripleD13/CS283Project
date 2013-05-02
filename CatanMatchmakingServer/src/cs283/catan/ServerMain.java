@@ -1567,7 +1567,7 @@ public class ServerMain {
                 	//Uses regular expressions because they're wonderful
                 	message = message.toLowerCase();
                 	String offerString = 
-            			"^trade offer (wool |ore |wheat |brick |lumber )+for " +
+            			"^trade offer (wool |ore |wheat |brick |lumber )+for" +
             			"( wool| ore| wheat| brick| lumber)+";
                 	
                 	
