@@ -1256,7 +1256,7 @@ return isSettlementAdded;
 			{
 				return new String ("chat* Server: spell your resources correctly");
 			}
-		}else if (tradeNumber >= 4)
+		}else if (tradeNumber == 4)
 		{
 			if (player.removeCards(resourceOne, 4))
 			{
