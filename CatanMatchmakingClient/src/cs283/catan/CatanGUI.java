@@ -332,10 +332,6 @@ public class CatanGUI {
 	            // Update the counts for the cards
 	            updateCardCount(playerArray[i]);
 	            
-	            // Update the victory point counts
-               victoryPointTotalField.setText(String
-                                   .valueOf(playerArray[i].getVictoryPoints()));
-	            
 	            break;
 	        }
 	    }
@@ -391,6 +387,10 @@ public class CatanGUI {
 	    knightField.setText(String.valueOf(knightCount));
 	    victoryField.setText(String.valueOf(victoryCount));
 	    roadBuildField.setText(String.valueOf(roadBuildCount));
+	    
+	    // Update the victory point counts
+        victoryPointTotalField.setText(String
+                            .valueOf(player.getVictoryPoints()));
 	}
 	
 	/**

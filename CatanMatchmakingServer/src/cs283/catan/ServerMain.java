@@ -686,7 +686,7 @@ public class ServerMain {
             while (currentMode == UserMode.LobbyMode) {
                 // Receive command from the client
                 String msg = (String) objInputStream.readObject();
-                printServerMsg("Messaged received.");
+                printServerMsg("Message received.");
                 System.out.println("\n=========RECEIVED MESSAGE=========");
                 System.out.println(msg);
                 System.out.println("==================================\n");
@@ -848,7 +848,7 @@ public class ServerMain {
                 // Receive a message
                 String msg = (String) objInputStream.readObject();
                 
-                printServerMsg("Messaged received.");
+                printServerMsg("Message received.");
                 System.out.println("\n=========RECEIVED MESSAGE=========");
                 System.out.println(msg);
                 System.out.println("==================================\n");
@@ -1568,8 +1568,8 @@ public class ServerMain {
                 	//Uses regular expressions because they're wonderful
                 	message = message.toLowerCase();
                 	String offerString = 
-                			"^trade offer (wool|ore|wheat|brick|lumber)+ for " +
-                			"(wool|ore|wheat|brick|lumber)+";
+            			"^trade offer (wool |ore |wheat |brick |lumber )+for " +
+            			"( wool| ore| wheat| brick| lumber)+";
                 	
                 	
                 	Pattern offerPattern = Pattern.compile(offerString);
